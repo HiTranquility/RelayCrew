@@ -17,8 +17,10 @@ Preview:
 
 Chạy lại bằng `npm run check`, `npm test`, `npm run build`. Native smoke: `node scripts/smoke.mjs /absolute/path/to/your/code-executable`. Tạo HTML demo: `npm run preview`.
 
-0.3 bổ sung tests cho nhiều quota windows, file source có giới hạn đọc, account thực trong status bar, pin account cho task và múi giờ hệ thống. GitHub Actions được cấu hình cho Windows/Linux; chưa có remote CI run trong repo GitHub ở phiên này.
+0.3 bổ sung tests cho nhiều quota windows, file source có giới hạn đọc, account thực trong status bar, pin account cho task và múi giờ hệ thống. GitHub Actions đã chạy thành công cho Windows/Linux trên commit phát hành 0.3.1: [CI run](https://github.com/HiTranquility/RelayCrew/actions/runs/38869969638).
 
-0.3.1 tổ chức source thành `core`, `host`, `adapters`, `storage`, `ui`; chuyển hợp đồng backlog về core, cập nhật imports của tests/preview và giữ nguyên entry point cùng các ID `aiTeam.*`. Source được đưa vào clone `HiTranquility/RelayCrew`; chưa commit hoặc push. Các kiểm tra được chạy lại từ thư mục mới.
+0.3.1 tổ chức source thành `core`, `host`, `adapters`, `storage`, `ui`; chuyển hợp đồng backlog về core, cập nhật imports của tests/preview và giữ nguyên entry point cùng các ID `aiTeam.*`. Source được đưa vào clone `HiTranquility/RelayCrew` và push lên `main`, commit `c2b3107`, tag `v0.3.1`. Các kiểm tra được chạy lại từ thư mục mới.
 
-Giữ riêng VSIX gốc 0.1.0/0.2.0/0.3.0 cùng source khôi phục từ source map; bản 0.3.1 có source snapshot gồm tests/scripts/lockfile. Mỗi bản có notes, metadata và SHA-256; `npm run releases:verify` kiểm tra toàn bộ. Thêm hai tests kiểm tra archive bị thay đổi và từ chối tag không khớp package version. Release workflow chỉ publish khi tag được push; chưa tạo tag hoặc GitHub release trong phiên này.
+Giữ riêng VSIX gốc 0.1.0/0.2.0/0.3.0 cùng source khôi phục từ source map; bản 0.3.1 có source snapshot gồm tests/scripts/lockfile. Mỗi bản có notes, metadata và SHA-256; `npm run releases:verify` kiểm tra toàn bộ. Thêm hai tests kiểm tra archive bị thay đổi và từ chối tag không khớp package version.
+
+[Release workflow](https://github.com/HiTranquility/RelayCrew/actions/runs/38869970855) đã chạy thành công và tạo [GitHub prerelease 0.3.1](https://github.com/HiTranquility/RelayCrew/releases/tag/v0.3.1) với VSIX và SHA256SUMS. Notes/source trong archive giữ nguyên bản chụp trước khi publish; trạng thái trong các bản chụp phản ánh thời điểm lưu. Chưa publish lên Marketplace.

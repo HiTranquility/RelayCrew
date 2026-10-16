@@ -35,7 +35,7 @@ The preview uses **demo data**, not live accounts or provider usage. The [assign
 
 ### Install a local VSIX
 
-Build a package from this repository, or use a VSIX supplied with a release:
+Download the VSIX from [RelayCrew 0.3.1 prerelease](https://github.com/HiTranquility/RelayCrew/releases/tag/v0.3.1), or build a package from this repository:
 
 ```sh
 git clone https://github.com/HiTranquility/RelayCrew.git
