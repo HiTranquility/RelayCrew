@@ -10,6 +10,25 @@ export function resolveLanguage(preference: unknown, displayLanguage = 'en'): La
 // English source messages are the fallback. Translate presentation, never stored
 // status codes, model IDs, account labels, prompts or provider responses.
 export const vietnamese: Record<string, string> = {
+"Layout and shortcuts":"Bố cục và phím tắt",
+"Drag the dividers, use their arrow keys, or enter sizes below. Double-click a divider to reset it.":"Kéo thanh chia, dùng phím mũi tên hoặc nhập kích thước bên dưới. Nhấp đúp để đặt lại.",
+"Session list width (px)":"Chiều rộng danh sách phiên (px)",
+"Composer share (%)":"Tỷ lệ ô nhập (%)",
+"Text size (%)":"Cỡ chữ (%)",
+"Density":"Mật độ",
+"Comfortable":"Thoải mái",
+"Compact":"Gọn",
+"Content width":"Chiều rộng nội dung",
+"Fill editor":"Đầy khung",
+"Reading width":"Khung đọc",
+"Reset layout":"Đặt lại bố cục",
+"Customize VS Code shortcuts":"Tùy chỉnh phím tắt VS Code",
+"Layout changes are local to this workspace and never change task permissions.":"Bố cục lưu riêng cho workspace, không thay đổi quyền tác vụ.",
+"Switch page":"Chuyển trang",
+"Focus composer":"Đặt con trỏ vào ô nhập",
+"Submit the focused form":"Gửi form đang chọn",
+"Close controls; keep the draft":"Đóng điều khiển; giữ bản nháp",
+
   'Markdown examples':'Mẫu Markdown',
   'Copy a bundled guide, edit it, then import it for a role or workflow. Samples do not run automatically.':'Sao chép mẫu, chỉnh nội dung rồi nhập cho vai trò hoặc luồng làm việc. Mẫu không tự chạy.',
   'API connection failed. Verify endpoint, server and API key.':'Kết nối API thất bại. Kiểm tra endpoint, máy chủ và khóa API.',

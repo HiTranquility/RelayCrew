@@ -2,7 +2,7 @@
   "name": "ai-team-workbench",
   "displayName": "RelayCrew",
   "description": "%description%",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "publisher": "local-ai-team",
   "license": "MIT",
   "engines": {
@@ -279,7 +279,7 @@
           "default": [
             {
               "id": "codex-main",
-              "label": "Codex · Main",
+              "label": "Codex \u00b7 Main",
               "provider": "codex",
               "executable": "codex",
               "model": "",
@@ -290,7 +290,7 @@
             },
             {
               "id": "claude-main",
-              "label": "Claude · Main",
+              "label": "Claude \u00b7 Main",
               "provider": "claude",
               "executable": "claude",
               "model": "",
@@ -301,7 +301,7 @@
             },
             {
               "id": "gemini-main",
-              "label": "Gemini · Main",
+              "label": "Gemini \u00b7 Main",
               "provider": "gemini",
               "executable": "gemini",
               "model": "",
