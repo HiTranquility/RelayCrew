@@ -1,0 +1,9 @@
+node_modules/
+dist/
+out/
+*.vsix
+!releases/**/*.vsix
+release-assets/
+.env*
+*.log
+.vscode-test/

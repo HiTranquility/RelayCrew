@@ -1,0 +1,15 @@
+node_modules/**
+src/**
+test/**
+scripts/**
+.vscode/**
+.gitignore
+tsconfig.json
+package-lock.json
+*.vsix
+out/**
+.github/**
+.gitattributes
+releases/**
+release-assets/**
+CHANGELOG.md

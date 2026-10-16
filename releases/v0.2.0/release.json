@@ -1,0 +1,34 @@
+{
+  "version": "0.2.0",
+  "extensionId": "local-ai-team.ai-team-workbench",
+  "displayName": "AI Team Workbench",
+  "artifact": {
+    "file": "ai-team-workbench-0.2.0.vsix",
+    "sha256": "e550020280b7d090f85389cbd0102de10af6e3a2582ed6bdc85e8f642174fbd4",
+    "bytes": 463435
+  },
+  "source": {
+    "file": "ai-team-workbench-0.2.0-source-recovered.zip",
+    "sha256": "2062ce151e7ce39e932c2deea048faf08cce14cb37b04f12881e7360b1fa8ce5",
+    "bytes": 51451,
+    "kind": "recovered-from-packaged-source-map",
+    "includesTests": false,
+    "includesLockfile": false,
+    "includesGitHistory": false,
+    "recoveredFiles": [
+      "src/extension.ts",
+      "src/domain.ts",
+      "src/engine.ts",
+      "src/runner.ts",
+      "src/messaging-hub.ts",
+      "src/messaging.ts",
+      "src/json-store.ts",
+      "src/connection-ui.ts",
+      "src/board.ts",
+      "src/flow-editor.ts",
+      "src/utilization.ts",
+      "src/backup.ts"
+    ]
+  },
+  "provenance": "Original local VSIX preserved byte for byte; recovered source is partial and is not an original Git commit."
+}

@@ -1,0 +1,73 @@
+# RelayCrew architecture
+
+RelayCrew runs on each user's machine. GitHub stars/downloads increase the number of independent installations, not traffic to a shared RelayCrew backend. The extension does not proxy AI credentials through a project server.
+
+```mermaid
+flowchart LR
+  UI[VS Code board / status bar] --> Host[Extension composition]
+  Config[User settings + workspace state] --> Host
+  Host --> Engine[Job engine]
+  Quota[Quota sources] --> Policy[Routing policy]
+  Policy --> Engine
+  Engine --> Runner[CLI adapters]
+  Runner --> Providers[Installed Codex / Claude / Gemini]
+  Engine --> Store[Atomic JSON + backups]
+  Host <--> Chat[Telegram / Zalo adapters]
+```
+
+## Source boundaries
+
+`src/extension.ts` is the stable VS Code entry point. `src/host/extension-host.ts` composes the application: it owns activation, configuration, commands, lifecycle and periodic dispatch. Keep orchestration rules in `src/core/`, integration details in `src/adapters/`, durable state and source snapshots in `src/storage/`, and rendering/dialogs in `src/ui/`.
+
+The dependency direction is toward `core`: the engine and its types do not import the host, UI, storage or adapters. In particular, backlog contracts live in `core/domain.ts`, so dispatch policy can run without loading a view. The host supplies the engine's execution/persistence hooks and connects UI events to actions.
+
+| Change | Start here |
+|---|---|
+| Task lifecycle, role routing, validation, backlog policy | `src/core/` |
+| CLI flags, output parsing, cancellation, secret redaction | `src/adapters/cli/` |
+| A new supported quota source | `src/adapters/quota/` |
+| Telegram/Zalo inbound and outbound transport | `src/adapters/messaging/` |
+| State persistence or source snapshot behavior | `src/storage/` |
+| Board, flow controls or connection dialogs | `src/ui/` |
+| VS Code commands, configuration or lifecycle wiring | `src/host/` |
+
+This remains one extension package. Separate services or a monorepo are not required for the current local execution model. Folder names do not imply that closed-editor scheduling, parallel agents or live provider quota discovery have been implemented.
+
+## Configuration boundaries
+
+| Data | Location | Share with repository? |
+|---|---|---|
+| CLI executables, personal account profiles, rotation pool, edit/retry controls | VS Code User Settings (`application` scope) | No |
+| Task flow, role/model overrides, task pins, queue, pause, schedules and backlog | Per-workspace extension storage | No |
+| Provider API keys, bot tokens, OA credentials | VS Code SecretStorage | No |
+| Quota snapshots | Manual input or absolute local `quotaFile`; normalized into workspace state | No |
+| Tests, example configuration, architecture and CI | Repository | Yes, fake values only |
+
+The current task snapshot freezes role assignments and model overrides. Explicit task switches pin the new profile for that role, bypassing automatic rotation for that role on that task. Switching a running task first pauses and terminates its CLI process; it does not swap credentials beneath a live process. Completed steps retain their actual profile/model history. A resumed step may already contain partial edits and must inspect existing changes.
+
+## Quota observations
+
+`QuotaSource` reads data; `QuotaService` normalizes it; routing decides whether to run. The default source reads a bounded local JSON file. Manual snapshots remain supported. No undocumented subscription endpoint is queried.
+
+An observation can include multiple windows, for example a 5-hour window and a weekly window. The effective percentage is the maximum reported percentage, so a weekly limit cannot be hidden by an available short window. Missing/invalid/stale observations remain unknown. If any reported window crosses its reset time without a new observation, the observation needs refreshing.
+
+The status bar uses the profile actually recorded on the running step, including round-robin and task pins. When idle, it summarizes the maximum known usage across profiles and counts unknown profiles. Clicking it opens account inspection, manual quota update and task-switch actions.
+
+The file source can later be replaced/extended with an official provider integration through the same interface. Such an adapter needs documented authentication, freshness, cancellation, rate-limit behavior and tests. A 5-hour quota, weekly quota, context window and API billing budget are distinct concepts; the UI must not invent a conversion between them.
+
+## Concurrency and persistence
+
+One job runs per workspace runner. Account credentials are supplied to a new subprocess for each step. Workspace/PID locks prevent the common duplicate-window case; they do not coordinate machines or different VS Code profiles/workspace identities. Keep one active workspace per checkout and one poller per Telegram bot.
+
+State is written atomically with previous-value backups. Recovery of older state pauses dispatch rather than replaying potentially completed work. Source snapshots run before editable steps; Git-ignored data, live databases and submodules require explicit separate handling. See [operations](OPERATIONS.md).
+
+This is an early release, not a hosted multi-tenant service. Cross-workspace account leases, worktree isolation, durable database migrations and a daemon for closed-editor execution remain future work. A shared service should only be introduced for a concrete shared-state requirement, with its own authenticated protocol and ownership rules.
+
+## Open-source release practices
+
+- Keep public configuration portable; never ship a developer's absolute home path or auth material as defaults.
+- Preserve command/settings/extension identities when rebranding; migrate before changing persisted identifiers.
+- Test on Windows and Linux, and test provider capabilities with fixtures rather than live paid accounts in CI.
+- Publish artifacts only from reviewed releases. The included CI builds artifacts and does not publish Marketplace releases or message users.
+
+VS Code references: [configuration scopes](https://code.visualstudio.com/api/references/contribution-points#contributes.configuration), [StatusBarItem](https://code.visualstudio.com/api/references/vscode-api#StatusBarItem).

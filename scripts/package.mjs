@@ -1,0 +1,12 @@
+import { spawnSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
+import { dirname, join } from 'node:path';
+const require=createRequire(import.meta.url);
+const manifest=JSON.parse(readFileSync(new URL('../package.json',import.meta.url),'utf8'));
+const vscePackage=require.resolve('@vscode/vsce/package.json');
+const metadata=JSON.parse(readFileSync(vscePackage,'utf8'));
+const cli=join(dirname(vscePackage),metadata.bin.vsce);
+const result=spawnSync(process.execPath,[cli,'package','--out',`relaycrew-${manifest.version}.vsix`],{stdio:'inherit',windowsHide:true});
+if(result.error)console.error(result.error.message);
+process.exitCode=result.status??1;

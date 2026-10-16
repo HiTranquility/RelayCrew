@@ -1,0 +1,35 @@
+{
+  "version": "0.3.0",
+  "extensionId": "local-ai-team.ai-team-workbench",
+  "displayName": "RelayCrew",
+  "artifact": {
+    "file": "relaycrew-0.3.0.vsix",
+    "sha256": "a7748f36e75618a7427c5031f472192ccdb310c8322b23cdfb3af1c488eaeb28",
+    "bytes": 474516
+  },
+  "source": {
+    "file": "relaycrew-0.3.0-source-recovered.zip",
+    "sha256": "2cb2c906906f95f186173a9c717423d229863c16c8da485d7246667f1d076dff",
+    "bytes": 54802,
+    "kind": "recovered-from-packaged-source-map",
+    "includesTests": false,
+    "includesLockfile": false,
+    "includesGitHistory": false,
+    "recoveredFiles": [
+      "src/extension.ts",
+      "src/domain.ts",
+      "src/engine.ts",
+      "src/runner.ts",
+      "src/messaging-hub.ts",
+      "src/messaging.ts",
+      "src/json-store.ts",
+      "src/connection-ui.ts",
+      "src/board.ts",
+      "src/flow-editor.ts",
+      "src/utilization.ts",
+      "src/backup.ts",
+      "src/quota-service.ts"
+    ]
+  },
+  "provenance": "Original local VSIX preserved byte for byte; recovered source is partial and is not an original Git commit."
+}

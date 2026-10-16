@@ -1,0 +1,26 @@
+{
+  "version": "0.1.0",
+  "extensionId": "local-ai-team.ai-team-workbench",
+  "displayName": "AI Team Workbench",
+  "artifact": {
+    "file": "ai-team-workbench-0.1.0.vsix",
+    "sha256": "9e068755a63b2e094eae1cfbc236c09fb1decfe6a281fa197e4dcf4246e44983",
+    "bytes": 250944
+  },
+  "source": {
+    "file": "ai-team-workbench-0.1.0-source-recovered.zip",
+    "sha256": "dbd2e8c5ff1eef15d8ed2ba76de5130ee12ee4bedaf2478565ddf50433f80837",
+    "bytes": 20426,
+    "kind": "recovered-from-packaged-source-map",
+    "includesTests": false,
+    "includesLockfile": false,
+    "includesGitHistory": false,
+    "recoveredFiles": [
+      "src/extension.ts",
+      "src/domain.ts",
+      "src/engine.ts",
+      "src/runner.ts"
+    ]
+  },
+  "provenance": "Original local VSIX preserved byte for byte; recovered source is partial and is not an original Git commit."
+}
