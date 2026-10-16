@@ -13,3 +13,5 @@ out/**
 releases/**
 release-assets/**
 CHANGELOG.md
+.ui-smoke/**
+docs/previews/**

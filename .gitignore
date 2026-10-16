@@ -7,3 +7,4 @@ release-assets/
 .env*
 *.log
 .vscode-test/
+.ui-smoke/

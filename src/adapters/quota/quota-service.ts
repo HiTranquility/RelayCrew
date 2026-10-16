@@ -2,6 +2,7 @@ import { open } from 'node:fs/promises';
 import { isAbsolute } from 'node:path';
 import { fresh, parseQuota } from '../../core/domain';
 import type { Job, Profile, Quota } from '../../core/domain';
+import { translator, type Language } from '../../core/i18n';
 
 /** Implementations normalize quota data; only the routing policy can choose an account. */
 export interface QuotaSource { readonly id:string; supports(profile:Profile):boolean; read(profile:Profile):Promise<Quota|undefined> }
@@ -32,18 +33,20 @@ export class QuotaService {
     return errors;
   }
 }
-export function quotaSummary(q:Quota|undefined,now=Date.now()):string{
-  if(!q)return 'quota unknown';if(!fresh(q,now))return 'stale / reset · refresh required';
+export function quotaSummary(q:Quota|undefined,now=Date.now(),language:Language='en'):string{
+  const t=translator(language);
+  if(!q)return t('quota unknown');if(!fresh(q,now))return t('stale / reset · refresh required');
   const windows=q.windows?.map(w=>`${w.label}: ${w.usedPercent}%`).join(' · ');
-  return `${q.usedPercent}% used${windows?' · '+windows:''} · ${q.source}`;
+  return `${t('{0}% used',q.usedPercent)}${windows?' · '+windows:''} · ${q.source}`;
 }
-export function usageStatus(profiles:Profile[],jobs:Job[],quotas:Record<string,Quota>,threshold:number,now=Date.now()):{text:string;tooltip:string;warning:boolean}{
+export function usageStatus(profiles:Profile[],jobs:Job[],quotas:Record<string,Quota>,threshold:number,now=Date.now(),language:Language='en'):{text:string;tooltip:string;warning:boolean}{
+  const t=translator(language);
   const step=jobs.find(j=>j.status==='running')?.steps.find(s=>s.status==='running');
   const active=step?.profileId,profile=profiles.find(p=>p.id===active),snapshot=active?quotas[active]:undefined;
   const current=profiles.map(p=>quotas[p.id]).filter(q=>fresh(q,now));
   const unknown=profiles.length-current.length;
-  const text=active?`$(pulse) ${profile?.label??active}: ${fresh(snapshot,now)?snapshot.usedPercent+'%':'unknown'}`
-    :`$(dashboard) Quota: ${current.length?Math.max(...current.map(q=>q.usedPercent))+'% max':'unknown'}${unknown?' · '+unknown+' unknown':''}`;
-  const tooltip=profiles.map(p=>`${p.label} [${p.id}] · ${p.model||'CLI default'}\n${quotaSummary(quotas[p.id],now)}\nReset: ${quotas[p.id]?.resetsAt??'unknown'}${quotas[p.id]?.windows?.map(w=>`\n${w.label} reset: ${w.resetsAt??'unknown'}`).join('')??''}`).join('\n\n')+'\n\nClick to inspect quota or switch the account assigned to a task.';
+  const text=active?`$(pulse) ${profile?.label??active}: ${fresh(snapshot,now)?snapshot.usedPercent+'%':t('unknown')}`
+    :`$(dashboard) ${t('Quota: {0}',current.length?t('{0}% max',Math.max(...current.map(q=>q.usedPercent))):t('unknown'))}${unknown?' · '+t('{0} unknown',unknown):''}`;
+  const tooltip=profiles.map(p=>`${p.label} [${p.id}] · ${p.model||t('CLI default')}\n${quotaSummary(quotas[p.id],now,language)}\n${t('Reset')}: ${quotas[p.id]?.resetsAt??t('unknown')}${quotas[p.id]?.windows?.map(w=>`\n${w.label} · ${t('Reset')}: ${w.resetsAt??t('unknown')}`).join('')??''}`).join('\n\n')+'\n\n'+t('Click to inspect quota or switch the account assigned to a task.');
   return{text,tooltip,warning:current.some(q=>q.usedPercent>=threshold)};
 }

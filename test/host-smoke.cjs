@@ -10,16 +10,19 @@ exports.run = async function () {
     const commands = await vscode.commands.getCommands(true);
     for (const id of ['aiTeam.newTask', 'aiTeam.switch', 'aiTeam.schedule', 'aiTeam.quota', 'aiTeam.cancel', 'aiTeam.report', 'aiTeam.board', 'aiTeam.flow', 'aiTeam.connections', 'aiTeam.reply', 'aiTeam.resume', 'aiTeam.backlog', 'aiTeam.utilization']) assert.ok(commands.includes(id), id);
     for(const item of ext.packageJSON.contributes.commands)assert.ok(commands.includes(item.command),item.command);
+    const configuration=vscode.workspace.getConfiguration('aiTeam');
+    await configuration.update('language','en',vscode.ConfigurationTarget.Global);
     await vscode.commands.executeCommand('aiTeam.logs');
     await vscode.commands.executeCommand('aiTeam.dashboard.focus');
     await vscode.commands.executeCommand('aiTeam.board');
     await vscode.commands.executeCommand('aiTeam.flow');
-    let panels=[];
-    const deadline=Date.now()+5000;
-    while(Date.now()<deadline){panels=vscode.window.tabGroups.all.flatMap(g=>g.tabs).filter(t=>t.input instanceof vscode.TabInputWebview);if(panels.some(t=>t.label.includes('Bảng phân công'))&&panels.some(t=>t.label.includes('Setup flow')))break;await new Promise(resolve=>setTimeout(resolve,50));}
-    assert.ok(panels.some(t=>t.label.includes('Bảng phân công')),'Assignment board opened');
-    assert.ok(panels.some(t=>t.label.includes('Setup flow')),'Flow editor opened');
-    await fs.writeFile(process.env.AI_TEAM_SMOKE_RESULT, JSON.stringify({ passed: true, extension: ext.id, commands: commands.filter(x => x.startsWith('aiTeam.')) }, null, 2));
+    const checkPanels=async(board,flow)=>{let panels=[];const deadline=Date.now()+5000;while(Date.now()<deadline){panels=vscode.window.tabGroups.all.flatMap(g=>g.tabs).filter(t=>t.input instanceof vscode.TabInputWebview);if(panels.some(t=>t.label.includes(board))&&panels.some(t=>t.label.includes(flow)))return;await new Promise(resolve=>setTimeout(resolve,50));}assert.fail('Missing localized board/flow panels: '+board+' / '+flow);};
+    await checkPanels('Assignment board','Setup flow');
+    await configuration.update('language','vi',vscode.ConfigurationTarget.Global);
+    await checkPanels('Bảng phân công','Thiết lập luồng');
+    await vscode.commands.executeCommand('aiTeam.setup');await vscode.commands.executeCommand('aiTeam.dailyPlan');await vscode.commands.executeCommand('aiTeam.projects');
+    assert.equal(vscode.workspace.getConfiguration('aiTeam').get('language'),'vi');
+    await fs.writeFile(process.env.AI_TEAM_SMOKE_RESULT, JSON.stringify({ passed: true, extension: ext.id, languages:['en','vi'], commands: commands.filter(x => x.startsWith('aiTeam.')) }, null, 2));
   } catch (e) {
     await fs.writeFile(process.env.AI_TEAM_SMOKE_RESULT, JSON.stringify({ passed: false, error: String(e), stack: e.stack }));
     throw e;

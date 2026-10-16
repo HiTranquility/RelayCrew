@@ -61,7 +61,7 @@ One job runs per workspace runner. Account credentials are supplied to a new sub
 
 State is written atomically with previous-value backups. Recovery of older state pauses dispatch rather than replaying potentially completed work. Source snapshots run before editable steps; Git-ignored data, live databases and submodules require explicit separate handling. See [operations](OPERATIONS.md).
 
-This is an early release, not a hosted multi-tenant service. Cross-workspace account leases, worktree isolation, durable database migrations and a daemon for closed-editor execution remain future work. A shared service should only be introduced for a concrete shared-state requirement, with its own authenticated protocol and ownership rules.
+This is an early release, not a hosted multi-tenant service. Cross-workspace account leases, concurrent worktree execution, durable database migrations and a daemon for closed-editor execution remain future work. A shared service should only be introduced for a concrete shared-state requirement, with its own authenticated protocol and ownership rules.
 
 ## Open-source release practices
 
@@ -71,3 +71,11 @@ This is an early release, not a hosted multi-tenant service. Cross-workspace acc
 - Publish artifacts only from reviewed releases. The included CI builds artifacts and does not publish Marketplace releases or message users.
 
 VS Code references: [configuration scopes](https://code.visualstudio.com/api/references/contribution-points#contributes.configuration), [StatusBarItem](https://code.visualstudio.com/api/references/vscode-api#StatusBarItem).
+
+## 0.4 presentation and task policy
+
+`core/i18n.ts` translates presentation using English source keys and Vietnamese entries; stored status codes, prompts and model/profile IDs remain stable. Package NLS labels follow the VS Code display locale independently of the runtime preference. `ui/setup-panel.ts` emits a numeric allowlist validated in `core/settings.ts`; account setup uses native dialogs and SecretStorage.
+
+Management snapshots pin one primary account per task. Supporting coordinator steps carry their own account IDs and read-only roles; only the non-coordinator Lead step can finalize. Daily policy is pure in `core/daily-plan.ts`; `host/daily-controller.ts` supplies native dialogs and dispatch. Exclusions and fresh-quota gates apply before every daily call. Decision records persist with state. Maintenance is finite per account/category/day.
+
+`core/projects.ts` derives project groups from persisted source/execution folders. `storage/worktrees.ts` prepares retained, validated Git checkouts before provider execution through the engine hook. New tasks capture isolation/desktop-open settings. The desktop boundary is a documented deep link, not a database connection or two-way app-server session; see [Projects](PROJECTS.md).

@@ -1,5 +1,7 @@
 # RelayCrew
 
+**English** · [Tiếng Việt](README.vi.md)
+
 **Coordinate your AI coding team from VS Code.**
 
 RelayCrew connects installed Codex, Claude Code and Gemini CLIs into a small, observable workflow. Assign Dev, Audit, Repair and Lead roles, inspect what each agent receives and returns, schedule work, and pause the team whenever you need to.
@@ -8,12 +10,17 @@ RelayCrew connects installed Codex, Claude Code and Gemini CLIs into a small, ob
 
 ## Preview
 
-![Workflow setup with demonstration profiles](docs/previews/flow.png)
+![Workflow setup with demonstration profiles](https://raw.githubusercontent.com/HiTranquility/RelayCrew/main/docs/previews/flow.png)
 
 The preview uses **demo data**, not live accounts or provider usage. The [assignment board preview](docs/previews/board.png) shows task controls, profile selection and public activity traces.
 
 ## Features
 
+- **English / Vietnamese:** change the live UI language in Setup; Command Palette and Settings labels follow the VS Code display language.
+- **Native VS Code layout:** theme-aware tabs, keyboard navigation, account dialogs and validated inline settings.
+- **Projects board:** group tasks by source project, create an optional Git worktree per new task, see the active account, and prepare Codex desktop chats for task folders.
+- **Daily quota tasklist:** include/exclude accounts, set a usage target and task budget, record owner decisions, and perform bounded independent maintenance.
+- **Primary manager:** select one final decision maker and up to four supporting coordinators, including separate accounts of the same provider.
 - **Small visual flows:** Dev → Audit → Lead, with an optional Repair stage. Choose an account profile and model/reasoning override for each role.
 - **Live supervision:** actual running profile/model, public CLI events, prompts, responses, audit findings and lead decisions. Private model reasoning is not exposed.
 - **Limits at a glance:** a persistent status-bar item with account usage, freshness, reset times and multiple quota windows. Click it to inspect accounts, update a snapshot or switch a task.
@@ -35,14 +42,14 @@ The preview uses **demo data**, not live accounts or provider usage. The [assign
 
 ### Install a local VSIX
 
-Download the VSIX from [RelayCrew 0.3.1 prerelease](https://github.com/HiTranquility/RelayCrew/releases/tag/v0.3.1), or build a package from this repository:
+Download the VSIX from [RelayCrew 0.4.0 prerelease](https://github.com/HiTranquility/RelayCrew/releases/tag/v0.4.0), or build a package from this repository:
 
 ```sh
 git clone https://github.com/HiTranquility/RelayCrew.git
 cd RelayCrew
 npm ci
 npm run package
-code --install-extension relaycrew-0.3.1.vsix
+code --install-extension relaycrew-0.4.0.vsix
 ```
 
 You can also use **Extensions → … → Install from VSIX…**. This repository does not automatically publish to the VS Code Marketplace.
@@ -71,18 +78,50 @@ RelayCrew/
 
 Build output goes into `dist/`; local packages are named `relaycrew-<version>.vsix`. Dependencies, build output and root-level VSIX files are excluded from Git; explicitly archived packages in `releases/` are retained. Personal configuration, credentials and runtime data belong in VS Code settings/storage, outside this source tree. See [architecture](docs/ARCHITECTURE.md) and [contributing](CONTRIBUTING.md) before extending a module.
 
-Versions **0.1.0, 0.2.0, 0.3.0 and 0.3.1** have separate [release archives](releases/README.md), source provenance, notes and SHA-256 checksums. See the [changelog](CHANGELOG.md) for changes. Run `npm run releases:verify` to check retained assets. The [release workflow](.github/workflows/release.yml) publishes a GitHub prerelease when a matching source tag is pushed; preparing these files does not publish anything by itself.
+Versions **0.1.0, 0.2.0, 0.3.0, 0.3.1 and 0.4.0** have separate [release archives](releases/README.md), source provenance, notes and SHA-256 checksums. See the [changelog](CHANGELOG.md) for changes. Run `npm run releases:verify` to check retained assets. The [release workflow](.github/workflows/release.yml) publishes a GitHub prerelease when a matching source tag is pushed; preparing these files does not publish anything by itself.
 
 ### Configure your first team
 
 1. Open a project folder and the **RelayCrew** sidebar.
-2. Run **RelayCrew: Configure Profiles**. Set executable paths if a CLI is not on VS Code's PATH; set clear account labels and exact model IDs supported by that account.
-3. Open **RelayCrew: Setup Team Flow** and choose a three- or four-stage flow. Empty model/reasoning overrides inherit the profile configuration.
+2. Open the board’s **Setup** tab, then **Configure profiles**. Set executable paths if a CLI is not on VS Code's PATH; set clear account labels and exact model IDs supported by that account.
+3. Open **RelayCrew: Setup Team Flow**, choose a three- or four-stage flow, select the **Primary manager** and optional supporting coordinators. Empty model/reasoning overrides inherit the profile configuration.
 4. Open **RelayCrew: Open Assignment Board** and submit a small task with acceptance criteria.
 5. Editable work is **off by default**. Enable **Allow Edits** when ready; Dev/Repair use provider-native edit permission modes. Audit/Lead stay in read-only/plan mode.
 6. Use **Pause immediately**, **Resume queue**, or **Cancel task** from the board/sidebar. Reports and account details are available without opening raw CLI logs.
 
 Tasks automatically advance through their configured stages while the queue is not paused. Pausing stops the active CLI tree, preserves existing file changes, and leaves the step resumable. Resuming may retry a partially completed step; the agent is instructed to inspect existing changes first.
+
+## Language and configuration
+
+Open **Assignment board → Setup** for language, profiles, flow, messaging, routing, timeouts, quota thresholds, backup limits and execution toggles. Numeric fields are validated before saving. **All VS Code settings** exposes advanced options; raw JSON is optional.
+
+`aiTeam.language` accepts `auto` (default), `en` or `vi`. The board, flow, dialogs, status summaries and local reports change immediately. VS Code contributes Command Palette/Settings labels through `package.nls.json` and `package.nls.vi.json`, so those labels follow the editor’s display language. Prompts, agent responses, model IDs and account labels remain exactly as supplied. Provider diagnostics can remain in their original language.
+
+For two accounts of the same provider, use different profile IDs and authenticate isolated CLI environments. The profile editor can add environment variables/config-directory paths and secret environment **names**; store actual secret values with **Store Secret**. Merely giving the same logged-in CLI two different labels does not switch accounts. Provider-specific authentication and exact model IDs remain the owner’s responsibility.
+
+## Management and daily quota
+
+Choose the final decision maker in **Setup Team Flow → Primary manager**. Supporting coordinators run read-only review steps and report to that manager. They cannot mark a task approved. The primary is pinned: automatic fallback and round robin cannot silently transfer final authority. To replace it, explicitly switch the Lead account on a paused task. Existing tasks retain their original team snapshot.
+
+In **Daily quota tasklist**:
+
+1. Add useful tasks and assign an account to each.
+2. Start/configure the plan, select allowed accounts, a quota target (1–100%) and a maximum of 1–200 tasks. Uncheck any account/model you want to preserve.
+3. Refresh quota sources. Every daily step requires a fresh available observation; unknown usage pauses dispatch. Exclusions also apply to managers/coordinators. An excluded or exhausted primary leaves final approval waiting.
+4. Leave **Independent maintenance** enabled for bounded code review, UI/UX, hotkey, conventions and CI/CD reviews. Each category runs at most once per account per day; it does not loop just to consume tokens. If useful work ends, the plan can stop below the quota target.
+5. Important decisions should produce the agent’s `needs_owner` envelope. The extension records the question and pauses that task; reply through the board or a configured messaging channel. Independent maintenance must not implement a blocked decision. Recognizing semantic importance depends on the agent following the protocol.
+
+The plan stops at midnight in its configured timezone or its dispatch budget. The final budgeted task can finish; midnight pauses active daily work. Provider quota windows keep their own actual reset times—they are not assumed to reset daily. A new day requires starting a plan again. Earlier-day/other-project tasks are not automatically replayed. The start wizard can explicitly carry selected unfinished tasks from the same project/included accounts into the new day; these count against the new budget and retain their owner questions. The budget counts tasks, including their review stages; it is not an exact token or currency cap. A request already in flight may cross the configured usage target.
+
+Daily tasks default to read-only. New editable daily tasks require **both** the daily edit toggle and global **Allow Edits**. Turning edits off pauses active daily work; turning them back on does not grant write permission to previously read-only tasks. Failed/interrupted work requires review before further work for that account. Use **Pause immediately** to stop all work, or **Stop daily plan** to pause only daily dispatch. Restart the plan after stopping to continue its unfinished tasks.
+
+## Projects and Codex desktop
+
+The **Projects** tab groups durable task history by exact working folder and shows open workspace roots even before they have tasks. Nested worktrees remain distinct. It displays active profiles/models, task status, reports and a **New task in project** button. Multi-root workspaces remain within one sequential RelayCrew runner.
+
+**Open project chat in Codex** uses the [documented desktop deep link](https://learn.chatgpt.com/docs/reference/commands) with an encoded absolute `path`. The desktop app must be installed. The link prepares a new chat for the folder; it does not submit prompts, switch the desktop account, synchronize RelayCrew transcripts, or create sidebar Projects automatically. Enable **Create a separate Git worktree for each new task** (`aiTeam.isolateTasks`) to create a branch/checkout before any provider call. It starts from committed HEAD and requires a clean source checkout; RelayCrew does not commit or stash owner changes. Task folders live in workspace extension storage outside the source repo. All stages of the task share its checkout; the board groups it under the original project and shows the task branch/folder. Results are never merged or removed automatically. Preserve extension storage while these checkouts are needed. Nested projects retain their relative path; submodules/dependencies may need separate setup.
+
+Enable **Prepare a Codex desktop chat for each new task** (`aiTeam.openTasksInCodex`) to open a workspace chat once when a new task starts. Both options default off and are captured for new tasks; existing tasks keep their mode. RelayCrew continues its own CLI workflow. No public API for automatically creating desktop sidebar project groups was identified, so that part remains unimplemented. See [the integration boundary](docs/PROJECTS.md).
 
 ## Account profiles
 
@@ -191,7 +230,7 @@ Each installation runs locally. More GitHub stars do not require a shared backen
 
 - This is an early release; it has not been validated against every CLI version, model, operating system or subscription plan.
 - No automatic provider sign-in, verified account identity, native subscription-quota discovery, token-price calculator, or global model ranking.
-- No execution while VS Code is closed, cross-machine scheduler, arbitrary workflow graph, concurrent repair worktrees, or automatic GitHub issue publication.
+- No execution while VS Code is closed, cross-machine scheduler, arbitrary workflow graph, concurrent agents/worktree execution, or automatic GitHub issue publication.
 - One runner per workspace identity. Different workspaces/profiles/machines can still target the same checkout/account; avoid overlapping writers and Telegram pollers.
 - Private prompts, transcripts and backups stay in local storage but are sensitive. Do not attach raw workspace storage or auth data to GitHub issues.
 - Provider-native permission modes still apply. RelayCrew is not an independent sandbox, and pause/cancel does not undo completed commands.
@@ -213,7 +252,7 @@ F5 launches the Extension Development Host. Optional native smoke testing accept
 node scripts/smoke.mjs /absolute/path/to/your/code-executable
 ```
 
-Tests use fake CLIs/transports and a local signed webhook; they do not require paid provider calls or real messaging credentials. GitHub Actions is configured to check and package on Windows and Linux. Remote CI results are available only after the workflow actually runs in your repository.
+Tests use fake CLIs/transports and a local signed webhook; they do not require paid provider calls or real messaging credentials. GitHub Actions is configured to check and package on Windows and Linux. See [validation](docs/VALIDATION.md) for the checks performed and remaining live integration tests. Optional browser QA: install Playwright independently, then run `npm run test:ui` after generating previews; `RELAYCREW_PLAYWRIGHT_MODULE` and `RELAYCREW_BROWSER_EXECUTABLE` accept local tool paths.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for issue reports and contribution boundaries. Maintainers should review changes, run CI and create releases deliberately; no included workflow publishes to the Marketplace or creates external messages.
 

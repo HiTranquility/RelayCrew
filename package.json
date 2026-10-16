@@ -1,8 +1,8 @@
 {
   "name": "ai-team-workbench",
   "displayName": "RelayCrew",
-  "description": "Visual AI coding teams with live supervision, account routing, quotas, schedules and two-way messaging.",
-  "version": "0.3.1",
+  "description": "%description%",
+  "version": "0.4.0",
   "publisher": "local-ai-team",
   "license": "MIT",
   "engines": {
@@ -26,6 +26,7 @@
     "check": "tsc --noEmit",
     "build": "node scripts/build.mjs",
     "test": "tsx --test test/*.test.ts",
+    "test:ui": "node scripts/ui-smoke.mjs",
     "vscode:prepublish": "npm run check && npm run build",
     "package": "node scripts/package.mjs",
     "preview": "tsx scripts/preview.ts",
@@ -49,99 +50,136 @@
     "commands": [
       {
         "command": "aiTeam.newTask",
-        "title": "RelayCrew: New Task"
+        "title": "%command.newTask%",
+        "icon": "$(add)"
       },
       {
         "command": "aiTeam.schedule",
-        "title": "RelayCrew: Schedule Task or Reminder"
+        "title": "%command.schedule%"
       },
       {
         "command": "aiTeam.switch",
-        "title": "RelayCrew: Select Role / Switch Account"
+        "title": "%command.switch%"
       },
       {
         "command": "aiTeam.profiles",
-        "title": "RelayCrew: Configure Profiles"
+        "title": "%command.profiles%"
       },
       {
         "command": "aiTeam.secret",
-        "title": "RelayCrew: Store Profile Secret"
+        "title": "%command.secret%"
       },
       {
         "command": "aiTeam.quota",
-        "title": "RelayCrew: Update Quota"
+        "title": "%command.quota%"
       },
       {
         "command": "aiTeam.report",
-        "title": "RelayCrew: Open Task Report"
+        "title": "%command.report%"
       },
       {
         "command": "aiTeam.cancel",
-        "title": "RelayCrew: Cancel Task"
+        "title": "%command.cancel%"
       },
       {
         "command": "aiTeam.pauseSchedule",
-        "title": "RelayCrew: Pause / Resume Schedule"
+        "title": "%command.pauseSchedule%"
       },
       {
         "command": "aiTeam.logs",
-        "title": "RelayCrew: Show Logs"
+        "title": "%command.logs%"
       },
       {
         "command": "aiTeam.settings",
-        "title": "RelayCrew: Settings"
+        "title": "%command.settings%"
       },
       {
         "command": "aiTeam.connections",
-        "title": "RelayCrew: Messaging Connections"
+        "title": "%command.connections%"
       },
       {
         "command": "aiTeam.board",
-        "title": "RelayCrew: Open Assignment Board"
+        "title": "%command.board%",
+        "icon": "$(preview)"
       },
       {
         "command": "aiTeam.reply",
-        "title": "RelayCrew: Reply to Agent"
+        "title": "%command.reply%"
       },
       {
         "command": "aiTeam.backlog",
-        "title": "RelayCrew: Add Backlog Item"
+        "title": "%command.backlog%"
       },
       {
         "command": "aiTeam.utilization",
-        "title": "RelayCrew: Start / Stop Quota Utilization"
+        "title": "%command.utilization%"
       },
       {
         "command": "aiTeam.flow",
-        "title": "RelayCrew: Setup Team Flow"
+        "title": "%command.flow%"
       },
       {
         "command": "aiTeam.accountDetails",
-        "title": "RelayCrew: Account Details"
+        "title": "%command.accountDetails%"
       },
       {
         "command": "aiTeam.resume",
-        "title": "RelayCrew: Resume Quota-Paused Task"
+        "title": "%command.resume%"
       },
       {
         "command": "aiTeam.backups",
-        "title": "RelayCrew: Browse Backups"
+        "title": "%command.backups%"
       },
       {
         "command": "aiTeam.pauseQueue",
-        "title": "RelayCrew: Pause / Resume Queue"
+        "title": "%command.pauseQueue%"
       },
       {
         "command": "aiTeam.routing",
-        "title": "RelayCrew: Configure Rotation / Routing"
+        "title": "%command.routing%"
       },
       {
         "command": "aiTeam.accountMenu",
-        "title": "RelayCrew: Accounts & Limits"
+        "title": "%command.accountMenu%"
       },
       {
         "command": "aiTeam.refreshQuota",
-        "title": "RelayCrew: Refresh Quota Sources"
+        "title": "%command.refreshQuota%"
+      },
+      {
+        "command": "aiTeam.language",
+        "title": "%command.language%"
+      },
+      {
+        "command": "aiTeam.setup",
+        "title": "%command.setup%",
+        "icon": "$(settings-gear)"
+      },
+      {
+        "command": "aiTeam.dailyPlan",
+        "title": "%command.dailyPlan%"
+      },
+      {
+        "command": "aiTeam.dailyStart",
+        "title": "%command.dailyStart%"
+      },
+      {
+        "command": "aiTeam.dailyStop",
+        "title": "%command.dailyStop%"
+      },
+      {
+        "command": "aiTeam.dailyTask",
+        "title": "%command.dailyTask%"
+      },
+      {
+        "command": "aiTeam.shortcuts",
+        "title": "%command.shortcuts%",
+        "icon": "$(keyboard)"
+      },
+      {
+        "command": "aiTeam.projects",
+        "title": "%command.projects%",
+        "icon": "$(project)"
       }
     ],
     "viewsContainers": {
@@ -157,7 +195,7 @@
       "aiTeam": [
         {
           "id": "aiTeam.dashboard",
-          "name": "Team Workbench"
+          "name": "%view.dashboard%"
         }
       ]
     },
@@ -166,12 +204,17 @@
         {
           "command": "aiTeam.newTask",
           "when": "view == aiTeam.dashboard",
-          "group": "navigation"
+          "group": "navigation@1"
         },
         {
-          "command": "aiTeam.switch",
+          "command": "aiTeam.setup",
           "when": "view == aiTeam.dashboard",
-          "group": "navigation"
+          "group": "navigation@2"
+        },
+        {
+          "command": "aiTeam.board",
+          "when": "view == aiTeam.dashboard",
+          "group": "navigation@3"
         }
       ]
     },
@@ -258,53 +301,56 @@
               },
               "quotaFile": {
                 "type": "string",
-                "description": "Absolute path to normalized quota JSON written by your integration."
+                "description": "%profile.quotaFile%"
               }
             },
             "additionalProperties": false
           },
-          "description": "Personal CLI/account profiles. Use SecretStorage for tokens. Empty model uses CLI default."
+          "description": "%setting.profiles%"
         },
         "aiTeam.autoSwitch": {
           "type": "boolean",
           "scope": "application",
           "default": false,
-          "description": "Before a step, use another same-provider profile if the selected profile has a fresh exhausted quota. Never retry a failed step automatically."
+          "description": "%setting.autoSwitch%"
         },
         "aiTeam.quotaThreshold": {
           "type": "number",
           "minimum": 1,
           "maximum": 100,
-          "default": 95
+          "default": 95,
+          "description": "%setting.quotaThreshold%"
         },
         "aiTeam.maxChildTasks": {
           "type": "integer",
           "minimum": 0,
           "maximum": 20,
-          "default": 4
+          "default": 4,
+          "description": "%setting.maxChildTasks%"
         },
         "aiTeam.timeoutMinutes": {
           "type": "integer",
           "minimum": 1,
           "maximum": 180,
-          "default": 30
+          "default": 30,
+          "description": "%setting.timeoutMinutes%"
         },
         "aiTeam.allowEdits": {
           "type": "boolean",
           "scope": "application",
           "default": false,
-          "description": "Allow implementation and repair steps to edit files with provider-native permission modes. Audit and final review stay in plan/read-only mode. Gemini needs its own tool permission configuration."
+          "description": "%setting.allowEdits%"
         },
         "aiTeam.timezone": {
           "type": "string",
           "default": "",
-          "description": "IANA timezone for new schedules. Empty uses the system timezone; saved schedules retain theirs."
+          "description": "%setting.timezone%"
         },
         "aiTeam.resumeAfterQuota": {
           "type": "boolean",
           "scope": "application",
           "default": false,
-          "description": "Resume paused steps only when fresh quota data confirms capacity. Failed CLI steps are not retried."
+          "description": "%setting.resumeAfterQuota%"
         },
         "aiTeam.routingMode": {
           "type": "string",
@@ -314,7 +360,7 @@
             "roundRobin"
           ],
           "default": "selected",
-          "description": "Round robin opts into the explicit per-role pool, including its model/provider changes."
+          "description": "%setting.routingMode%"
         },
         "aiTeam.rotationPools": {
           "type": "object",
@@ -331,26 +377,27 @@
               "type": "string"
             }
           },
-          "description": "Allowed profile IDs in turn order per role. Fresh available quota is required."
+          "description": "%setting.rotationPools%"
         },
         "aiTeam.resumeProviderLimited": {
           "type": "boolean",
           "scope": "application",
           "default": false,
-          "description": "Opt in to retry a provider-limited step after a new available quota snapshot. The previous attempt may have edited files. Requires resumeAfterQuota for automatic continuation."
+          "description": "%setting.resumeProviderLimited%"
         },
         "aiTeam.backupBeforeEdits": {
           "type": "boolean",
           "scope": "application",
           "default": true,
-          "description": "Before each editable Dev/Repair step, snapshot Git tracked + non-ignored files and explicit extra paths into local VS Code storage."
+          "description": "%setting.backupBeforeEdits%"
         },
         "aiTeam.backupMaxMB": {
           "type": "integer",
           "scope": "application",
           "default": 100,
           "minimum": 1,
-          "maximum": 1024
+          "maximum": 1024,
+          "description": "%setting.backupMaxMB%"
         },
         "aiTeam.backupStorageMB": {
           "type": "integer",
@@ -358,7 +405,7 @@
           "default": 2048,
           "minimum": 1,
           "maximum": 102400,
-          "description": "Source snapshots are kept. At this cap editable work is blocked until you manage backups or raise the cap."
+          "description": "%setting.backupStorageMB%"
         },
         "aiTeam.backupExtraPaths": {
           "type": "array",
@@ -367,7 +414,7 @@
           "items": {
             "type": "string"
           },
-          "description": "Additional relative files/directories inside the task workspace, for ignored runtime data. Snapshots of active databases are file copies, not transaction-consistent database backups."
+          "description": "%setting.backupExtraPaths%"
         },
         "aiTeam.quotaRefreshSeconds": {
           "type": "integer",
@@ -375,7 +422,30 @@
           "minimum": 15,
           "maximum": 3600,
           "default": 30,
-          "description": "Quota-source refresh interval while VS Code is open. The scheduler checks this interval every 15 seconds."
+          "description": "%setting.quotaRefreshSeconds%"
+        },
+        "aiTeam.language": {
+          "type": "string",
+          "scope": "application",
+          "enum": [
+            "auto",
+            "en",
+            "vi"
+          ],
+          "default": "auto",
+          "description": "%setting.language%"
+        },
+        "aiTeam.isolateTasks": {
+          "type": "boolean",
+          "default": false,
+          "scope": "application",
+          "description": "%config.isolateTasks%"
+        },
+        "aiTeam.openTasksInCodex": {
+          "type": "boolean",
+          "default": false,
+          "scope": "application",
+          "description": "%config.openTasksInCodex%"
         }
       }
     }

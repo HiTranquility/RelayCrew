@@ -24,3 +24,14 @@ Chạy lại bằng `npm run check`, `npm test`, `npm run build`. Native smoke: 
 Giữ riêng VSIX gốc 0.1.0/0.2.0/0.3.0 cùng source khôi phục từ source map; bản 0.3.1 có source snapshot gồm tests/scripts/lockfile. Mỗi bản có notes, metadata và SHA-256; `npm run releases:verify` kiểm tra toàn bộ. Thêm hai tests kiểm tra archive bị thay đổi và từ chối tag không khớp package version.
 
 [Release workflow](https://github.com/HiTranquility/RelayCrew/actions/runs/38869970855) đã chạy thành công và tạo [GitHub prerelease 0.3.1](https://github.com/HiTranquility/RelayCrew/releases/tag/v0.3.1) với VSIX và SHA256SUMS. Notes/source trong archive giữ nguyên bản chụp trước khi publish; trạng thái trong các bản chụp phản ánh thời điểm lưu. Chưa publish lên Marketplace.
+
+## 0.4.0 validation
+
+- Strict TypeScript and production bundle checks.
+- 64 automated tests: existing transport/state/quota coverage plus daily exclusions/budgets/decisions, primary/coordinator authority, bilingual message/NLS coverage, numeric settings, project paths/deep-link encoding and real temporary Git worktrees.
+- Worktree tests create actual isolated checkouts, verify source preservation, repeated preparation/recovery, nested folders, dirty-source rejection, branch validation and provider-call suppression on preparation failure. All Git repositories/accounts used here are local test fixtures.
+- Optional browser QA with Playwright/Edge checks English/Vietnamese, dark/light themes, tab/keyboard navigation, drafts surviving refresh, settings messages, account exclusion and management selection, Projects actions and narrow Setup layout. Screenshots in `previews/` use demo data.
+- Native VS Code smoke checks activation, all contributed commands, live English/Vietnamese board/flow title changes and Setup/Daily/Projects commands in an isolated editor profile.
+- `npm audit --audit-level=high`: no reported vulnerabilities at the local check time.
+
+Provider authentication, real paid model calls, live Telegram/Zalo delivery and desktop deep-link handoff into the installed app have not been exercised. Deep-link construction follows official documentation; it is not evidence of automatic desktop sidebar project creation. No such public API was identified. Browser QA tests rendering and messages, not the real VS Code webview sandbox. Native smoke checks the extension host separately. Remote CI status is reported only after push/run completion.

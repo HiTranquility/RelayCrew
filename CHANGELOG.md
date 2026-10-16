@@ -2,6 +2,16 @@
 
 Versions before 1.0 are early releases. See [release archives](releases/README.md) for exact packages, hashes and source provenance.
 
+## 0.4.0 — 2026-10-16
+
+- Add English/Vietnamese runtime UI, manifest localization and a Vietnamese README.
+- Rework the board into native theme-aware Tasks, Accounts, Setup, Daily and Projects tabs; add keyboard navigation, persistent drafts and validated settings.
+- Edit profile options, environment variables and secret names through native dialogs.
+- Add an explicit primary manager and read-only supporting coordinators; preserve final authority across quota fallback and account switches.
+- Add opt-in daily account selection/exclusion, quota and task budgets, durable owner decision logs, and bounded independent review/maintenance.
+- Group tasks by source project, optionally create retained Git worktrees per new task, and prepare Codex desktop chats through its documented workspace deep link.
+- Add daily/management/localization/project tests, bilingual browser QA and native VS Code language smoke checks.
+
 ## 0.3.1 — 2026-10-16
 
 - Organize source into core, host, adapters, storage and UI; keep shared backlog contracts independent of rendering.

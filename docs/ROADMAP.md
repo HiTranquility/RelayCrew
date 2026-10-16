@@ -24,7 +24,7 @@ Setup flow 3/4 node, board quan sát/live transcript công khai, input/output, i
 
 ## Tiếp theo · Worktrees và agent tree
 
-- Mỗi run/work item sửa code trong Git worktree riêng; checkpoint đầu/cuối, kiểm tra branch và trạng thái dirty.
+- 0.4 đã có worktree riêng opt-in cho từng task từ HEAD sạch, giữ checkout/branch và mở chat Codex theo folder. Tiếp theo: checkpoint/diff chi tiết, tích hợp/cleanup có kiểm soát và connector desktop hai chiều; tự tạo nhóm sidebar Codex chưa có API công khai được xác minh.
 - Gemini worker có thể nhận nhiều việc độc lập đồng thời theo quota/cost/concurrency budget.
 - Claude review evidence và đề xuất quyết định; Codex tổng hợp tech lead; user là product owner và xem diff/issue/report.
 - Native child agents phải khai báo budget và gửi sự kiện có parent ID về orchestrator. Không để mỗi CLI tự nhân cây không giới hạn.

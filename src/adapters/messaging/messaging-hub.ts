@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import { api, chunks, deliver, deliveryFailure, MessagingError, telegramIncoming, zaloIncoming } from './messaging';
 import type { Connection, Delivery, Incoming } from './messaging';
 import { JsonStore } from '../../storage/json-store';
+import { statusLabel, translator, type Language } from '../../core/i18n';
 
 interface InboxItem extends Incoming { status: 'queued' | 'running' | 'done' | 'failed'; response?: string }
 interface HubState {
@@ -15,6 +16,7 @@ export interface SecretStore { get(key: string): Thenable<string | undefined> | 
 interface HubHooks {
   receive: (message: Incoming, connection: Connection, history: { user: string; assistant: string }[], signal: AbortSignal) => Promise<string>;
   changed: () => void; log: (text: string) => void;
+  language?: () => Language;
 }
 export class MessagingHub {
   private state: HubState = { version: 1, connections: [], outbox: [], inbox: [], history: {} };
@@ -45,12 +47,14 @@ export class MessagingHub {
     return hub;
   }
   connections(): Connection[] { return structuredClone(this.state.connections); }
-  summary(): string {
-    return this.state.connections.map(c => `${c.channel}: ${c.enabled ? c.inbound ? 'two-way' : 'notify' : 'off'} · ${this.transportStatus[c.channel] ?? 'idle'}`).join('\n') || 'No channels connected';
+  summary(language: Language = 'en'): string {
+    const t = translator(language);
+    return this.state.connections.map(c => `${c.channel}: ${t(c.enabled ? c.inbound ? 'two-way' : 'notify' : 'off')} · ${this.transportStatus[c.channel] ?? statusLabel('idle', language)}`).join('\n') || t('No channels connected');
   }
   deliveries(): Delivery[] { return structuredClone(this.state.outbox); }
-  chatTranscript(): string {
-    return this.state.inbox.slice(-30).map(i => `${i.receivedAt} · ${i.channel} · ${i.status}\nOwner ${i.sender} → agent: ${i.text}\nAgent → owner: ${i.response ?? '(waiting)'}`).join('\n\n');
+  chatTranscript(language: Language = 'en'): string {
+    const t = translator(language);
+    return this.state.inbox.slice(-30).map(i => `${i.receivedAt} · ${i.channel} · ${statusLabel(i.status, language)}\n${t('Owner {0} → agent', i.sender)}: ${i.text}\n${t('Agent → owner')}: ${i.response ?? t('(waiting)')}`).join('\n\n');
   }
   private secretKey(channel: string, kind = 'token'): string { return `${this.key}:${channel}:${kind}`; }
   private save(): Promise<void> {
@@ -82,10 +86,11 @@ export class MessagingHub {
     await this.secrets.delete(this.secretKey(channel)); await this.secrets.delete(this.secretKey(channel, 'webhook'));
     await this.save(); await this.start();
   }
-  async test(channel: string): Promise<void> {
+  async test(channel: string, language: Language = 'en'): Promise<void> {
+    const t = translator(language);
     const c = this.state.connections.find(c => c.channel === channel && c.enabled);
     if (!c) throw new Error('Connect channel first.');
-    await this.queue(`test:${randomUUID()}`, `AI Team connected. ${c.inbound ? 'Two-way chat enabled. Send /help.' : 'Notifications enabled.'}`, c);
+    await this.queue(`test:${randomUUID()}`, t('RelayCrew connected. {0}', t(c.inbound ? 'Two-way chat enabled. Send /help.' : 'Notifications enabled.')), c);
     await this.flush();
   }
   async broadcast(id: string, text: string): Promise<void> {
@@ -122,7 +127,7 @@ export class MessagingHub {
           this.state.history[c.channel] = history.slice(-8);
           await this.queue(`reply:${item.id}`, response, c);
         } catch {
-          item.status = 'failed'; item.response = 'Request could not be completed. Check AI Team logs locally. Use /status before retrying a task.';
+          item.status = 'failed'; item.response = translator(this.hooks.language?.() ?? 'en')('Request could not be completed. Check RelayCrew logs locally. Use /status before retrying a task.');
           await this.queue(`reply:${item.id}`, item.response, c);
         }
         await this.save();

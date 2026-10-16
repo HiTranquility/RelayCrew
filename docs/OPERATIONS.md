@@ -75,3 +75,21 @@ Không tạo prompt giả để tiêu token. Không thể cam kết dùng hết 
 Workspace storage do VS Code quản lý, không phải backup ngoài máy. Xóa VS Code user data/workspace storage hoặc hỏng ổ đĩa vẫn mất dữ liệu; có thể copy thư mục storage sang nơi backup của bạn khi workspace đóng.
 
 Luồng này tạo checkpoints để quan sát/phục hồi file; chưa có worktree isolation, merge tự động hoặc backup toàn bộ hệ thống. Tránh chạy hai workspace khác nhau cùng sửa một checkout.
+
+## Bổ sung 0.4: cấu hình, quản lý và kế hoạch ngày
+
+Bảng dùng tab **Tác vụ / Tài khoản và quota / Thiết lập / Tasklist ngày / Dự án**, theo màu theme của VS Code. Chọn Anh/Việt ngay trong bảng; tên lệnh native theo display language VS Code. Form numeric chỉ lưu các key được cho phép; bản nháp và tab đang xem được giữ khi bảng refresh.
+
+Flow chọn một quản lý chính, tối đa bốn điều phối viên phụ. Account phụ chỉ báo cáo read-only; chỉ bước Lead chính mới duyệt cuối. Primary được pin, không tự chuyển quyền khi hết quota. Đổi primary/account của bước dở sau khi pause; nếu account muốn chọn còn là điều phối viên chưa xong, đổi điều phối viên đó trước để giữ vai trò riêng.
+
+Kế hoạch ngày chọn account, ngưỡng quota và số task. Mọi bước cần quota mới, không dùng account bị loại (kể cả primary). Nhật ký quyết định giữ câu hỏi/câu trả lời khi agent dùng envelope needs_owner. Nhận diện ý nghĩa quyết định vẫn phụ thuộc agent. Maintenance độc lập gồm review, UI/UX, hotkeys, conventions, CI/CD, mỗi loại tối đa một lần/account/ngày. Không tự giải quyết quyết định đang chờ và không gọi yêu cầu rỗng khi hết việc.
+
+Hết ngày theo múi giờ thì pause việc ngày; hết lượt thì task cuối được hoàn tất. Không giả định quota nhà cung cấp reset mỗi ngày. Plan tắt cần bật lại để tiếp tục; task ngày cũ/khác project không tự chạy lại. Wizard cho chọn chủ động task dở cùng project/account để chuyển sang ngày mới trong budget, giữ câu hỏi và quyền task cũ. Mặc định read-only; task mới chỉ được sửa khi bật cả quyền ngày và quyền global. Task lỗi/interrupted/needs_attention chặn việc tiếp của account cho đến khi owner xem lại.
+
+## Bổ sung 0.4: thư mục tác vụ
+
+Trong **Dự án** hoặc **Thiết lập**, bật tạo Git worktree cho task mới. Git 2.31+ cần có trong PATH. Source phải sạch và đã commit; folder/branch được tạo từ HEAD trong extension workspace storage. Task và schedule/backlog/daily được tạo sau khi bật đều chụp mode mới; task cũ giữ nguyên. Mỗi task dùng một checkout cho mọi bước; task khác không tự kế thừa thay đổi chưa merge.
+
+Không tự merge/xóa worktree. Đường dẫn, branch và base commit được lưu, hiển thị trong bảng/timeline. Git worktree metadata vẫn liên kết repo gốc: giữ cả repo gốc lẫn extension storage cho đến khi tích hợp xong. Worktree không nằm trong quota dung lượng source-backup; theo dõi disk và dọn bằng Git sau khi kiểm tra thay đổi. Bản thân worktree không phải bản sao lưu độc lập.
+
+Tùy chọn mở chat Codex tự động chỉ chuẩn bị chat tại folder một lần lúc bắt đầu task. Không tự gửi prompt, không chuyển account desktop, không đồng bộ session CLI và chưa tự tạo nhóm Projects ở sidebar Codex. Nút mở thủ công có thể thử lại. Xem [PROJECTS.md](PROJECTS.md).

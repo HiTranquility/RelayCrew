@@ -3,6 +3,15 @@ import { CronExpressionParser } from 'cron-parser';
 export type Provider = 'codex' | 'claude' | 'gemini';
 export type Role = 'builder' | 'auditor' | 'worker' | 'lead';
 export type RoleOverrides = Partial<Record<Role, { model?: string; effort?: string }>>;
+export interface Management { primaryProfileId: string; coordinatorIds: string[] }
+export function validateManagement(value: unknown, profiles: Profile[]): Management {
+  const m = value as Management, ids = new Set(profiles.map(p => p.id));
+  if (!m || !ids.has(m.primaryProfileId) || !Array.isArray(m.coordinatorIds) || m.coordinatorIds.length > 4
+    || new Set(m.coordinatorIds).size !== m.coordinatorIds.length || m.coordinatorIds.some(id => id === m.primaryProfileId || !ids.has(id))) {
+    throw new Error('Choose one primary manager and up to four different supporting coordinators.');
+  }
+  return { primaryProfileId: m.primaryProfileId, coordinatorIds: [...m.coordinatorIds] };
+}
 export const fullFlow: Role[] = ['builder', 'auditor', 'worker', 'lead'];
 export function validateFlow(value: unknown): Role[] {
   if (!Array.isArray(value) || !['builder,auditor,lead', 'builder,auditor,worker,lead'].includes(value.join(','))) throw new Error('Choose Dev → Audit → Lead, with optional Repair before Lead.');
@@ -29,6 +38,7 @@ export interface Step {
   limitRetries?: number;
   backupPath?: string;
   timeoutAt?: string; phase?: 'backing_up' | 'cli';
+  coordinatorProfileId?: string;
 }
 export interface Job {
   id: string; prompt: string; cwd: string; createdAt: string;
@@ -41,6 +51,15 @@ export interface Job {
   limitDetectedAt?: string; blockedProfileId?: string;
   timeline?: { at: string; from: string; to: string; kind: string; text: string }[];
   profilePins?: Partial<Record<Role,string>>;
+  management?: Management;
+  dailyItemId?: string;
+  readOnly?: boolean;
+  isolationMode?: 'shared' | 'worktree';
+  sourceCwd?: string;
+  worktree?: { path: string; repository: string; branch: string; baseCommit: string };
+  openInCodex?: boolean;
+  codexLinkAttemptedAt?: string;
+  codexLinkError?: string;
 }
 
 export function ownerQuestion(raw: string): string | undefined {
@@ -64,6 +83,7 @@ export interface Schedule {
   id: string; title: string; kind: 'reminder' | 'task'; prompt: string; cwd: string;
   roles: Record<Role, string>; nextAt: string; cron?: string; timezone: string; enabled: boolean;
   flow?: Role[]; overrides?: RoleOverrides;
+  management?: Management;
 }
 
 export function validateProfiles(value: unknown): Profile[] {
@@ -121,9 +141,20 @@ export function assignTaskProfile(job:Job,role:Role,profileId:string,profiles:Pr
   if(!profiles.some(p=>p.id===profileId))throw new Error('Choose an existing account profile.');
   if(!(job.flow??fullFlow).includes(role))throw new Error('This role is not in the task flow.');
   if(job.steps.some(s=>s.role===role)&&job.steps.filter(s=>s.role===role).every(s=>s.status==='done'))throw new Error('This role already finished. Its account history is preserved.');
+  if(role==='lead'&&job.steps.some(s=>s.coordinatorProfileId===profileId&&s.status!=='done'))throw new Error('Reassign the unfinished coordinator before making that account the primary manager.');
   job.roles[role]=profileId;(job.profilePins??={})[role]=profileId;
+  if(role==='lead'&&job.management){job.management.primaryProfileId=profileId;job.management.coordinatorIds=job.management.coordinatorIds.filter(id=>id!==profileId);}
   if(job.overrides)delete job.overrides[role];
   (job.timeline??=[]).push({at:new Date().toISOString(),from:'owner',to:role,kind:'account_switch',text:`Use profile ${profileId} for remaining work; completed steps retain their recorded profile.`});
+}
+export function assignCoordinatorProfile(job: Job, index: number, profileId: string, profiles: Profile[]): void {
+  const step=job.steps[index];
+  if(!['queued','waiting_quota','waiting_owner'].includes(job.status)||job.steps.some(s=>s.status==='running'))throw new Error('Pause the running task before changing its account.');
+  if(!step?.coordinatorProfileId||step.status==='done'||!profiles.some(p=>p.id===profileId))throw new Error('Choose an unfinished coordinator step and an existing account.');
+  if(job.management?.primaryProfileId===profileId||job.steps.some((s,i)=>i!==index&&s.coordinatorProfileId===profileId))throw new Error('Coordinator accounts must be distinct from the primary manager and other coordinators.');
+  const previous=step.coordinatorProfileId;step.coordinatorProfileId=profileId;
+  if(job.management)job.management.coordinatorIds=job.management.coordinatorIds.map(id=>id===previous?profileId:id);
+  (job.timeline??=[]).push({at:new Date().toISOString(),from:'owner',to:'coordinator',kind:'account_switch',text:`Use profile ${profileId} for the unfinished coordinator step. Primary manager authority is unchanged.`});
 }
 export function routeProfile(id: string, profiles: Profile[], quotas: Record<string, Quota>, auto: boolean, threshold: number, now = Date.now()): Profile {
   const selected = profiles.find(p => p.id === id);
