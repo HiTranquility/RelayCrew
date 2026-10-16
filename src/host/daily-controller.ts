@@ -20,6 +20,26 @@ interface Hooks {
 }
 export class DailyController {
   constructor(private hooks: Hooks) {}
+  async configure(raw:unknown,roots:string[]):Promise<void>{
+    const value=raw as Record<string,unknown>,h=this.hooks;
+    if(!value||Array.isArray(value)||Object.keys(value).some(k=>!['cwd','timezone','runs','target'].includes(k))||typeof value.cwd!=='string'||!roots.includes(value.cwd)||typeof value.timezone!=='string')throw new Error('Invalid daily plan settings.');
+    const ids=h.profiles().filter(p=>h.plan.accounts[p.id]===true).map(p=>p.id),timezone=resolveTimezone(value.timezone),runs=Number(value.runs),target=Number(value.target);
+    if(!ids.length)throw new Error('Select at least one account in the daily quota table.');
+    // Validate a copy before pausing or mutating the durable plan.
+    const next=structuredClone(h.plan);startDailyPlan(next,value.cwd,timezone,ids,runs,target);
+    h.pauseActive();Object.assign(h.plan,next);this.tick();await h.save();h.changed();h.start();
+  }
+  async addInline(raw:unknown):Promise<void>{
+    const value=raw as Record<string,unknown>,h=this.hooks;
+    if(!value||Array.isArray(value)||Object.keys(value).some(k=>!['profileId','prompt'].includes(k))||typeof value.prompt!=='string'||!value.prompt.trim()||value.prompt.length>16000||!h.profiles().some(p=>p.id===value.profileId))throw new Error('Choose an account and enter a useful daily task.');
+    const timezone=resolveTimezone(h.timezone());h.plan.items.push({id:randomUUID(),day:dayKey(timezone),profileId:value.profileId as string,prompt:value.prompt.trim(),category:'task'});await h.save();h.changed();h.start();
+  }
+  async moveItem(id:unknown,direction:unknown):Promise<void>{
+    const h=this.hooks,items=h.plan.items,index=items.findIndex(i=>i.id===id&&!i.jobId&&i.category==='task');
+    if(index<0||![-1,1].includes(direction as number))throw new Error('Only unstarted daily tasks can be reordered.');
+    let target=index+(direction as number);while(target>=0&&target<items.length&&(items[target].jobId||items[target].category!=='task'))target+=direction as number;
+    if(target>=0&&target<items.length)[items[index],items[target]]=[items[target],items[index]];await h.save();h.changed();
+  }
   async startPlan(): Promise<void> {
     const h = this.hooks, p = h.plan, t = translator(h.language()), all = h.profiles();
     const accounts = await vscode.window.showQuickPick(all.map(profile => ({ label: profile.label, description: `${profile.id} · ${profile.model || t('CLI default')}`, id: profile.id, picked: p.accounts[profile.id] ?? true })), { title: t('Accounts allowed to use daily quota'), canPickMany: true, placeHolder: t('Uncheck weaker models or accounts you want to preserve.') });

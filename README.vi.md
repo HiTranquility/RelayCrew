@@ -19,7 +19,10 @@ RelayCrew kết nối các CLI Codex, Claude Code và Gemini đã cài trên má
 - **Đổi tên vai trò và file .md riêng:** bấm bút cạnh vai trò để sửa prompt, đổi tên và đính kèm hướng dẫn. Tác vụ mới lưu bản chụp.
 - **Mẫu đầu vào/phản hồi:** có mẫu theo vai trò, cho sửa trước khi chạy, xem trước không gọi AI, khôi phục và lưu bản chụp theo task.
 - **Trò chuyện hoặc giao việc nhóm:** chat dùng một account chỉ đọc; giao việc chạy pipeline. Enter gửi, Shift+Enter xuống dòng; có chọn Ctrl+Enter. Câu chào không chạy kiểm định repo. Xem [hướng dẫn console](docs/CONSOLE.md).
-- **Tổng quan mới:** thẻ vai trò/account, quota đã quan sát, việc cần xử lý và trao đổi gần nhất. Tác vụ có tìm kiếm, bộ lọc và các bước đã ghi nhận.
+- **Bảng nhiệm vụ:** giao nhiều task vào hàng đợi; xem sơ đồ luồng, phân công agent, tài liệu và checklist nghiệm thu riêng với tiến độ các bước.
+- **Tổng quan thực tế:** ưu tiên quyết định/lỗi cần bạn xử lý, việc đang chạy, hàng đợi, quota cần cập nhật và lịch sắp tới.
+- **Local / Cloud / bên thứ ba:** CLI vẫn là mặc định. API tương thích hỗ trợ chat/review chỉ đọc, stream, dò danh mục mô hình và khóa lưu SecretStorage; có mẫu Ollama/LM Studio.
+- **Lịch và quota:** Timeline / Board / Table, form lịch và kế hoạch ngày ngay trong trang; xem lý do từng account được chạy hay phải chờ, đổi thứ tự việc chưa bắt đầu.
 - **Tác vụ:** phân công Dev → Audit → Repair (tùy chọn) → Quản lý chính; xem tiến độ, input, phản hồi công khai, báo cáo và trao đổi giữa các bước.
 - **Tài khoản và quota:** account/model thực đang chạy, phần trăm sử dụng, các cửa sổ giới hạn, thời điểm reset và số token nếu nguồn cung cấp. Có nút đổi account theo task.
 - **Thiết lập:** giao diện theo theme VS Code, form tài khoản, luồng/model, luân phiên, quota, Markdown và kết nối ngay trong bảng; có nút Lưu và lỗi tại chỗ. Các lệnh cấu hình thường dùng mở cùng bảng thay vì popup.
@@ -33,14 +36,14 @@ RelayCrew kết nối các CLI Codex, Claude Code và Gemini đã cài trên má
 
 Yêu cầu VS Code **1.96 trở lên**, workspace local đã tin cậy; CLI cần dùng đã cài và đăng nhập riêng. Git cần có trong PATH để sao lưu source và tạo worktree. Build từ source dùng Node.js **22** và npm.
 
-Tải VSIX tại [RelayCrew 0.8.0 prerelease](https://github.com/HiTranquility/RelayCrew/releases/tag/v0.8.0), rồi chọn **Extensions → … → Install from VSIX…**. Hoặc:
+Tải VSIX tại [RelayCrew 0.9.0 prerelease](https://github.com/HiTranquility/RelayCrew/releases/tag/v0.9.0), rồi chọn **Extensions → … → Install from VSIX…**. Hoặc:
 
 ```sh
 git clone https://github.com/HiTranquility/RelayCrew.git
 cd RelayCrew
 npm ci
 npm run package
-code --install-extension relaycrew-0.8.0.vsix
+code --install-extension relaycrew-0.9.0.vsix
 ```
 
 1. Mở folder dự án trong VS Code và sidebar **RelayCrew**.
@@ -49,7 +52,7 @@ code --install-extension relaycrew-0.8.0.vsix
 4. Giao một task nhỏ có tiêu chí hoàn thành rõ ràng. **Cho phép sửa file** mặc định tắt; bật khi muốn Dev/Repair chỉnh code. Audit/điều phối/quản lý vẫn chạy read-only/plan.
 5. Dùng **Tạm dừng ngay**, **Tiếp tục hàng đợi**, **Dừng tác vụ**, **Báo cáo** hoặc **Trả lời agent** ngay trên bảng.
 
-Extension chưa phát hành lên VS Code Marketplace. Các bản **0.1.0 / 0.2.0 / 0.3.0 / 0.3.1 / 0.4.0 / 0.5.0 / 0.6.0 / 0.7.0 / 0.8.0** được giữ riêng trong [release archives](releases/README.md), có ghi nguồn gốc source và SHA-256; không ghi đè bản cũ.
+Extension chưa phát hành lên VS Code Marketplace. Các bản **0.1.0 / 0.2.0 / 0.3.0 / 0.3.1 / 0.4.0 / 0.5.0 / 0.6.0 / 0.7.0 / 0.8.0 / 0.9.0** được giữ riêng trong [release archives](releases/README.md), có ghi nguồn gốc source và SHA-256; không ghi đè bản cũ.
 
 ## Tiếng Anh / Tiếng Việt
 
@@ -137,3 +140,5 @@ Hiện mỗi workspace chạy tuần tự; chưa có agent song song, app-server
 Vào **Tài khoản và quota → Thêm tài khoản** để nhập CLI/model, tìm CLI đã cài, chọn thư mục đăng nhập riêng và gán vai trò trực tiếp. **Thiết lập → Kết nối CLI thật & chạy thử** lưu cấu hình và chạy Dev → Audit → manager chỉ đọc bằng tài khoản đã đăng nhập.
 
 **Nhập luồng từ Markdown** đọc file hướng dẫn, kèm khối cấu hình nếu muốn đặt tài khoản/model/manager không cần chọn từng node. Xem [hướng dẫn](docs/QUICKSTART.md) và [file mẫu](docs/workflow.example.md). Console hỗ trợ chọn/kéo thả file, Ctrl+V dán ảnh, sao chép câu trả lời/báo cáo và ẩn/hiện các vùng. [Giới hạn file và lưu trữ](docs/CONSOLE.md).
+
+Xem [hướng dẫn điều phối Anh/Việt](docs/OPERATIONS.md) để theo dõi hội thoại agent, nghiệm thu task, thiết lập lịch và Local/Cloud. Engine hiện chạy lần lượt; phần trăm là tiến độ bước, khung lịch là dự kiến.

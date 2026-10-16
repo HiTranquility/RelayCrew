@@ -77,6 +77,7 @@ export function dailyDecision(plan: DailyPlan, jobs: Job[], profiles: Profile[],
     : { action: 'stop', reason: 'Daily plan day or run budget ended.' };
   if (paused || jobs.some(job => job.status === 'running' || job.status === 'queued' && dailyCanRun(plan, job, now))) return { action: 'wait', reason: 'Waiting for the active queue.' };
   const eligible = profiles.filter(profile => {
+    if(plan.allowEdits&&profile.transport==='http')return false;
     try { dailyProfile(plan, profile.id, profiles, quotas, jobs, now); }
     catch { return false; }
     return !plan.items.some(item => item.day === plan.day && item.profileId === profile.id && jobs.some(job => job.id === item.jobId && ['failed', 'interrupted', 'needs_attention'].includes(job.status)));
@@ -86,7 +87,7 @@ export function dailyDecision(plan: DailyPlan, jobs: Job[], profiles: Profile[],
   for (const item of plan.items.filter(item => !item.jobId && item.category === 'task')) {
     if (eligible.some(profile => profile.id === item.profileId) && !plan.items.some(other => other.profileId === item.profileId && jobs.some(job => job.id === other.jobId && job.status === 'waiting_owner'))) return { action: 'run', item, generated: false };
   }
-  if (plan.fallback) for (const category of maintenanceCategories) for (const profile of eligible) {
+  if (plan.fallback) for (const category of maintenanceCategories) for (const profile of eligible.filter(p=>p.transport!=='http')) {
     const id = `${plan.day}:${profile.id}:${category}`;
     if (!plan.items.some(item => item.id === id)) return { action: 'run', generated: true, item: { id, day: plan.day, profileId: profile.id, category, prompt: maintenancePrompts[category] } };
   }

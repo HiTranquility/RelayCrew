@@ -2,7 +2,7 @@ import { renderPromptTemplates } from './prompt-template-panel';
 import type { Profile } from '../core/domain';
 import { renderTeamSetup, renderWorkflowSetup } from './team-setup';
 import { renderConnections } from './connections-panel';
-import { roleLabel, translator, type Language } from '../core/i18n';
+import { translator, type Language } from '../core/i18n';
 import { numericSettings } from '../core/settings';
 import type { BoardOptions } from './board';
 import { escapeHtml as h } from './html';

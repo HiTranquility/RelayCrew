@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { answerOwner, assignCoordinatorProfile, assignTaskProfile, validateManagement, type Job, type Profile, type Role } from '../src/core/domain';
+import { answerOwner, assignCoordinatorProfile, assignTaskProfile, validateManagement, type Profile, type Role } from '../src/core/domain';
 import { Engine, newJob, type EngineHooks } from '../src/core/engine';
 import { carryDailyTasks, dailyCanRun, dailyDecision, dailyProfile, dailyPrompt, emptyDailyPlan, makeDailyJob, startDailyPlan, syncDecisions } from '../src/core/daily-plan';
 

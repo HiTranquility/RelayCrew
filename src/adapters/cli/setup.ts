@@ -3,12 +3,13 @@ import { homedir } from 'node:os';
 import type { Profile, Provider } from '../../core/domain';
 import { findLocalCli,cliVersion } from './local-cli';
 
-export interface CliStatus {installed:boolean;authenticated:'yes'|'no'|'unknown';executable?:string;version?:string;checkedAt:string;message:string}
+export interface CliStatus {models?:string[];installed:boolean;authenticated:'yes'|'no'|'unknown';executable?:string;version?:string;checkedAt:string;message:string}
 export function installPlan(provider:Provider,platform=process.platform):{command:string;docs:string} {
+  if(provider==='compatible')throw new Error('HTTP profiles use an endpoint and optional API key, not a CLI installer.');
   if(provider==='claude')return {command:platform==='win32'?'winget install --id Anthropic.ClaudeCode --exact':platform==='darwin'?'brew install --cask claude-code':'curl -fsSL https://claude.ai/install.sh | bash',docs:'https://code.claude.com/docs/en/setup'};
   return {command:(platform==='win32'?'npm.cmd':'npm')+' install -g '+(provider==='codex'?'@openai/codex':'@google/gemini-cli'),docs:provider==='codex'?'https://learn.chatgpt.com/docs/cli':'https://geminicli.com/docs/get-started/installation/'};
 }
-export function loginArguments(provider:Provider):string[]{return provider==='codex'?['login']:provider==='claude'?['auth','login']:[];}
+export function loginArguments(provider:Provider):string[]{if(provider==='compatible')throw new Error('Configure an API key in Accounts.');return provider==='codex'?['login']:provider==='claude'?['auth','login']:[];}
 export function quotedCommand(executable:string,args:string[],platform=process.platform):string {
   const quote=(value:string)=>"'"+value.replace(/'/g,platform==='win32'?"''":"'\\''")+"'";
   return (platform==='win32'?'& ':'')+[executable,...args].map(quote).join(' ');

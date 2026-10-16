@@ -1,13 +1,22 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, readdir, rm, writeFile,rename } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
-import { JsonStore } from '../src/storage/json-store';
+import { JsonStore,replaceStateFile } from '../src/storage/json-store';
 import { inside, listBackups, snapshotWorkspace } from '../src/storage/backup';
 const exec=promisify(execFile);
+
+test('transient file locks retry atomic replacement without deleting the old state; permanent errors preserve both files',async()=>{
+  const dir=await mkdtemp(join(tmpdir(),'relaycrew-lock-')),file=join(dir,'state.json'),temp=join(dir,'pending.tmp');
+  try{await writeFile(file,'old');await writeFile(temp,'new');let attempts=0;
+    await replaceStateFile(temp,file,async(a,b)=>{attempts++;assert.equal(await readFile(file,'utf8'),'old');if(attempts<3)throw Object.assign(new Error('locked'),{code:'EPERM'});await rename(a,b);});
+    assert.equal(attempts,3);assert.equal(await readFile(file,'utf8'),'new');await writeFile(temp,'newer');
+    await assert.rejects(replaceStateFile(temp,file,async()=>{throw Object.assign(new Error('disk error'),{code:'EIO'});}),/disk error/);assert.equal(await readFile(file,'utf8'),'new');assert.equal(await readFile(temp,'utf8'),'newer');
+  }finally{await rm(dir,{recursive:true,force:true});}
+});
 test('atomic persistence serializes writes, retains previous state, and recovers malformed primary without deleting it',async()=>{
   const dir=await mkdtemp(join(tmpdir(),'team-store-'));const file=join(dir,'state.json');const recovered:string[]=[];
   const valid=(x:any):x is {n:number}=>typeof x?.n==='number';

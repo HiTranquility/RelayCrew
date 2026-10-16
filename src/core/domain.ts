@@ -3,7 +3,7 @@ import { CronExpressionParser } from 'cron-parser';
 import type { Attachment } from '../storage/attachments';
 import type { WorkflowDocument } from './workflow';
 
-export type Provider = 'codex' | 'claude' | 'gemini';
+export type Provider = 'codex' | 'claude' | 'gemini' | 'compatible';
 export type Role = 'builder' | 'auditor' | 'worker' | 'lead';
 export type RoleOverrides = Partial<Record<Role, { model?: string; effort?: string }>>;
 export interface Management { primaryProfileId: string; coordinatorIds: string[] }
@@ -22,10 +22,18 @@ export function validateFlow(value: unknown): Role[] {
 }
 export interface Profile {
   id: string; label: string; provider: Provider; executable: string;
+  hosting?: 'cloud' | 'local'; transport?: 'cli' | 'http'; endpoint?: string;
   modelPolicy?:'flagship'|'cli'|'custom'; quotaCeiling?:number;
   model?: string; effort?: string; env?: Record<string, string>; secretEnv?: string[]; quotaFile?: string;
 }
 export function profileModelPolicy(profile:Profile):'flagship'|'cli'|'custom' {return profile.modelPolicy??(profile.model?'custom':'flagship');}
+export function validateEndpoint(value:unknown,hosting:'cloud'|'local'):string {
+  if(typeof value!=='string'||value.length>500||/[\s\x00-\x1f]/.test(value))throw new Error('Enter a valid API base URL.');
+  let url:URL;try{url=new URL(value);}catch{throw new Error('Enter a valid API base URL.');}
+  const loopback=['localhost','127.0.0.1','[::1]'].includes(url.hostname);
+  if(url.username||url.password||url.search||url.hash||!['https:','http:'].includes(url.protocol)||(url.protocol==='http:'&&!(hosting==='local'&&loopback))||(hosting==='local'&&!loopback))throw new Error('Local endpoints must use loopback; cloud endpoints require HTTPS without credentials or query parameters.');
+  return url.href.replace(/\/+$/,'');
+}
 export interface Quota {
   usedPercent: number; observedAt: string; resetsAt?: string; source: string;
   limitTokens?: number; remainingTokens?: number;
@@ -37,6 +45,7 @@ export interface Issue { title: string; body: string; severity: 'bug' | 'improve
 export interface ChildTask { title: string; instructions: string }
 export interface Audit { summary: string; issues: Issue[]; tasks: ChildTask[] }
 export interface Step {
+  transport?:'cli'|'http';hosting?:'cloud'|'local';endpoint?:string;
   role: Role; title: string; prompt: string; profileId?: string; model?: string; effort?: string; response?: string;
   status: 'pending' | 'running' | 'done' | 'failed' | 'waiting_owner'; error?: string;
   request?: string; startedAt?: string; finishedAt?: string; attempts?: number;
@@ -47,6 +56,7 @@ export interface Step {
   modelSource?:'custom'|'alias'|'catalog'|'cli-default';
 }
 export interface Job {
+  acceptance?: {id:string;text:string;checked:boolean;checkedAt?:string}[];
   kind?:'chat';
   chatHistory?:{role:'user'|'assistant';text:string}[];
   id: string; prompt: string; cwd: string; createdAt: string;
@@ -98,6 +108,7 @@ export interface Schedule {
   roles: Record<Role, string>; nextAt: string; cron?: string; timezone: string; enabled: boolean;
   flow?: Role[]; overrides?: RoleOverrides;
   management?: Management;
+  durationMinutes?:number; acceptance?:Job['acceptance'];
 }
 
 export function validateProfiles(value: unknown): Profile[] {
@@ -105,11 +116,17 @@ export function validateProfiles(value: unknown): Profile[] {
   const ids = new Set<string>();
   for (const p of value) {
     if (!p || typeof p !== 'object' || !/^[a-zA-Z0-9_-]+$/.test(p.id) || ids.has(p.id)
-      || !['codex', 'claude', 'gemini'].includes(p.provider)
+      || !['codex', 'claude', 'gemini', 'compatible'].includes(p.provider)
       || typeof p.label !== 'string' || !p.label || typeof p.executable !== 'string' || !p.executable) {
       throw new Error('Each profile needs a unique id, label, provider and executable.');
     }
     ids.add(p.id);
+    if(p.hosting!==undefined&&!['cloud','local'].includes(p.hosting))throw new Error('Invalid hosting location.');
+    if(p.transport!==undefined&&!['cli','http'].includes(p.transport))throw new Error('Invalid transport.');
+    if(p.provider==='compatible'){
+      if(p.transport!=='http')throw new Error('Compatible providers require the HTTP adapter.');
+      validateEndpoint(p.endpoint,p.hosting??'cloud');
+    }else if(p.transport==='http'||p.hosting==='local')throw new Error('Use a compatible HTTP profile for local or third-party models.');
     if(p.modelPolicy!==undefined&&!['flagship','cli','custom'].includes(p.modelPolicy))throw new Error('Invalid model policy.');
     if(p.quotaCeiling!==undefined&&(!Number.isFinite(p.quotaCeiling)||p.quotaCeiling<1||p.quotaCeiling>100))throw new Error('Account quota ceiling must be between 1 and 100.');
     for (const key of ['model', 'effort', 'quotaFile']) {
@@ -179,6 +196,7 @@ export function routeProfile(id: string, profiles: Profile[], quotas: Record<str
   if (!fresh(q, now) || q.usedPercent < Math.min(threshold,selected.quotaCeiling??100)) return selected;
   if (auto) {
     const fallback = profiles.find(p => p.id !== id && p.provider === selected.provider
+      && (p.transport??'cli')===(selected.transport??'cli') && (p.hosting??'cloud')===(selected.hosting??'cloud') && p.endpoint===selected.endpoint
       && p.modelPolicy === selected.modelPolicy && p.model === selected.model && p.effort === selected.effort
       && fresh(quotas[p.id], now) && quotas[p.id].usedPercent < Math.min(threshold,p.quotaCeiling??100));
     if (fallback) return fallback;

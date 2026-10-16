@@ -2,7 +2,7 @@
   "name": "ai-team-workbench",
   "displayName": "RelayCrew",
   "description": "%description%",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "publisher": "local-ai-team",
   "license": "MIT",
   "engines": {
@@ -326,7 +326,8 @@
                 "enum": [
                   "codex",
                   "claude",
-                  "gemini"
+                  "gemini",
+                  "compatible"
                 ]
               },
               "executable": {
@@ -368,6 +369,26 @@
                 "minimum": 1,
                 "maximum": 100,
                 "description": "%profile.quotaCeiling%"
+              },
+              "hosting": {
+                "type": "string",
+                "enum": [
+                  "cloud",
+                  "local"
+                ],
+                "description": "%profile.hosting%"
+              },
+              "transport": {
+                "type": "string",
+                "enum": [
+                  "cli",
+                  "http"
+                ],
+                "description": "%profile.transport%"
+              },
+              "endpoint": {
+                "type": "string",
+                "description": "%profile.endpoint%"
               }
             },
             "additionalProperties": false

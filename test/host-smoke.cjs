@@ -1,6 +1,8 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs/promises');
 const vscode = require('vscode');
+const {createServer}=require('node:http');
+const path=require('node:path');
 exports.run = async function () {
   try {
     const ext = vscode.extensions.getExtension('local-ai-team.ai-team-workbench');
@@ -21,13 +23,23 @@ exports.run = async function () {
     await checkBoard('Assignment board');
     const oldPick=vscode.window.showQuickPick,oldInput=vscode.window.showInputBox;let popups=0;
     vscode.window.showQuickPick=async()=>{popups++;throw new Error('Configuration opened a QuickPick');};vscode.window.showInputBox=async()=>{popups++;throw new Error('Configuration opened an input popup');};
-    try{for(const id of ['aiTeam.connectCli','aiTeam.profiles','aiTeam.flow','aiTeam.routing','aiTeam.quota','aiTeam.switch','aiTeam.connections','aiTeam.secret','aiTeam.accountMenu','aiTeam.language'])await vscode.commands.executeCommand(id);}finally{vscode.window.showQuickPick=oldPick;vscode.window.showInputBox=oldInput;}
+    try{for(const id of ['aiTeam.connectCli','aiTeam.profiles','aiTeam.flow','aiTeam.routing','aiTeam.quota','aiTeam.switch','aiTeam.connections','aiTeam.secret','aiTeam.accountMenu','aiTeam.language','aiTeam.schedule','aiTeam.dailyStart','aiTeam.dailyTask'])await vscode.commands.executeCommand(id);}finally{vscode.window.showQuickPick=oldPick;vscode.window.showInputBox=oldInput;}
     assert.equal(popups,0,'Routine configuration must not open native input dialogs');
+    let apiCalls=0;const api=createServer(async(req,res)=>{res.setHeader('Content-Type','application/json');if(req.url==='/v1/models')res.end(JSON.stringify({data:[{id:'local-smoke-model'}]}));else if(req.url==='/v1/chat/completions'){apiCalls++;let body='';for await(const chunk of req)body+=chunk;const payload=JSON.parse(body);assert.equal(payload.model,'local-smoke-model');assert.equal(payload.tools,undefined);res.end(JSON.stringify({choices:[{message:{content:'Xin chào!'}}]}));}else{res.writeHead(404);res.end();}});
+    await new Promise(resolve=>api.listen(0,'127.0.0.1',resolve));
+    try{
+      await configuration.update('profiles',[{id:'http-smoke',label:'Local smoke',provider:'compatible',transport:'http',hosting:'local',endpoint:`http://127.0.0.1:${api.address().port}/v1`,executable:'http',modelPolicy:'flagship'}],vscode.ConfigurationTarget.Global);
+      const connection=await vscode.commands.executeCommand('aiTeam.checkConnection','http-smoke');assert.deepEqual(connection.models,['local-smoke-model']);assert.equal(connection.authenticated,'unknown');
+      const result=await vscode.commands.executeCommand('aiTeam.chat','hello','http-smoke');assert.ok(result?.jobId,'Local API chat queued');let job;const until=Date.now()+15000;
+      while(Date.now()<until){for(const directory of await fs.readdir(process.env.AI_TEAM_SMOKE_STATE)){try{const state=JSON.parse(await fs.readFile(path.join(process.env.AI_TEAM_SMOKE_STATE,directory,ext.id,'state.json'),'utf8'));job=state.jobs.find(j=>j.id===result.jobId);}catch{}}
+        if(job&&!['queued','running'].includes(job.status))break;await new Promise(resolve=>setTimeout(resolve,100));}
+      assert.equal(job?.status,'completed',job?.error);assert.equal(job.steps.length,1);assert.equal(job.steps[0].transport,'http');assert.equal(job.steps[0].model,'local-smoke-model');assert.equal(job.steps[0].response,'Xin chào!');assert.equal(apiCalls,1);
+    }finally{api.closeAllConnections();await new Promise(resolve=>api.close(resolve));}
     await configuration.update('language','vi',vscode.ConfigurationTarget.Global);
     await checkBoard('Bảng phân công');
     await vscode.commands.executeCommand('aiTeam.setup');await vscode.commands.executeCommand('aiTeam.dailyPlan');await vscode.commands.executeCommand('aiTeam.projects');
     assert.equal(vscode.workspace.getConfiguration('aiTeam').get('language'),'vi');
-    await fs.writeFile(process.env.AI_TEAM_SMOKE_RESULT, JSON.stringify({ passed: true, extension: ext.id, languages:['en','vi'], commands: commands.filter(x => x.startsWith('aiTeam.')) }, null, 2));
+    await fs.writeFile(process.env.AI_TEAM_SMOKE_RESULT, JSON.stringify({ passed: true, extension: ext.id,version:ext.packageJSON.version, languages:['en','vi'],httpIntegration:{chatCalls:apiCalls,readOnly:true}, commands: commands.filter(x => x.startsWith('aiTeam.')) }, null, 2));
   } catch (e) {
     await fs.writeFile(process.env.AI_TEAM_SMOKE_RESULT, JSON.stringify({ passed: false, error: String(e), stack: e.stack }));
     throw e;

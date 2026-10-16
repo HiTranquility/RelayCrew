@@ -59,3 +59,9 @@ Agent cần quyết định sẽ hiện câu hỏi và nút **Trả lời tại 
 Các lệnh: `/new nội dung`, `/reply nội dung`, `/pause`, `/resume`, `/stop`, `/status`. Lệnh không hỗ trợ sẽ báo lỗi. Retry dùng cùng ID để tránh tạo việc/trả lời trùng. Báo cáo chứa đầy đủ request/response; console chỉ giữ cửa sổ sự kiện gần nhất có giới hạn dung lượng. Mỗi workspace vẫn chạy tuần tự.
 
 Tab **Tổng quan** có thẻ vai trò/account, quota đã quan sát, việc cần xử lý và trao đổi gần nhất. Tab **Tác vụ** có tìm kiếm, bộ lọc và các bước được ghi nhận, không bịa phần trăm tiến độ hoặc ETA.
+
+## 0.9: public conversation and acceptance
+
+Team conversation now stays visible in the live session, separate from expandable technical events. Public JSON audit/manager results become readable sections; exact messages remain available. Team task submissions can include a Definition of Done, one criterion per line. Task cards show phase progress separately from owner acceptance and expose saved context and flow. See the bilingual [operations guide](OPERATIONS.md).
+
+Hội thoại công khai hiện trực tiếp trong phiên; JSON Audit/Manager được trình bày dễ đọc. Task đội có checklist nghiệm thu riêng, lưu cùng task và đưa vào prompt. Nhiều task có thể xếp hàng; engine hiện chạy lần lượt. Không hiển thị suy luận riêng tư hoặc tự đoán phần trăm code/giờ hoàn tất.

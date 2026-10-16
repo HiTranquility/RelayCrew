@@ -2,6 +2,15 @@ import { randomUUID } from 'node:crypto';
 import { copyFile, mkdir, readFile, readdir, rename, unlink, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 
+// Windows readers/indexers can briefly lock the destination. Keep the old
+// state intact while retrying the same atomic replacement; never unlink it.
+export async function replaceStateFile(temp:string,file:string,replace:typeof rename=rename):Promise<void>{
+  for(let attempt=0;;attempt++)try{await replace(temp,file);return;}catch(error:any){
+    if(!['EPERM','EACCES','EBUSY'].includes(error.code)||attempt>=6)throw error;
+    await new Promise(resolve=>setTimeout(resolve,25*2**attempt));
+  }
+}
+
 /** Same-directory atomic replacement, with validated recovery and previous-value backups. */
 export class JsonStore<T> {
   private pending = Promise.resolve();
@@ -38,7 +47,7 @@ export class JsonStore<T> {
       await mkdir(dirname(this.file), { recursive: true }); await mkdir(this.backups, { recursive: true });
       try { await copyFile(this.file, join(this.backups, `${Date.now()}-${randomUUID()}.json`)); } catch (e: any) { if (e.code !== 'ENOENT') throw e; }
       const temp = `${this.file}.${randomUUID()}.tmp`;
-      await writeFile(temp, text, { encoding: 'utf8', flush: true }); await rename(temp, this.file); this.last = text;
+      await writeFile(temp, text, { encoding: 'utf8', flush: true }); await replaceStateFile(temp, this.file); this.last = text;
       const names = (await readdir(this.backups)).filter(n => /^\d+-[a-f0-9-]+\.json$/.test(n)).sort().reverse();
       for (const name of names.slice(50)) await unlink(join(this.backups, name));
     });

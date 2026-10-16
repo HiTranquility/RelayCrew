@@ -6,6 +6,7 @@ import { delimiter, isAbsolute, join } from 'node:path';
 import type { Provider } from '../../core/domain';
 
 export async function findLocalCli(provider:Provider,preferred?:string):Promise<string|undefined>{
+  if(provider==='compatible')return;
   const suffixes=process.platform==='win32'?['.exe','.cmd','.bat','']:[''];
   const candidates:string[]=[];
   if(preferred&&isAbsolute(preferred))candidates.push(preferred);

@@ -1,5 +1,15 @@
 # Validation · 16/10/2026
 
+## 0.9.0 — 2026-10-17
+
+- Strict TypeScript check and 112 automated tests pass locally on Windows. New tests use real loopback HTTP servers for catalog discovery, optional/ambiguous model selection, streaming UTF-8/SSE, split-secret masking, HTTP 429, cancellation, interrupted streams, redirect rejection, unsupported tools and actual engine completion/wait states.
+- Planner tests cover explicit timezone offsets, cron recurrence, estimated windows, disabled schedules, phase counts before dynamic repair creation, acceptance persistence/deduplication and selected older sessions beyond the recent-session window. Daily tests keep generated repository maintenance on CLI accounts and API work read-only with supplied context.
+- Browser QA passes English/Vietnamese, light/dark: schedule Timeline/Board/Table and draft recovery, inline daily settings/items, task acceptance/conversation, Local API forms/presets, existing account/role/template controls, attachments and responsive Console/Setup/Tasks/Schedules/Daily layouts. Preview images are demonstration data.
+- The actual isolated VS Code Extension Development Host passes activation, all contributed commands, common configuration without input popups, EN/VI board localization, API catalog check and one successful read-only local HTTP chat. It uses a temporary fixture server and isolated VS Code user/extensions directories, not an installed Ollama/LM Studio model or paid cloud request.
+- A transient Windows destination-file lock observed during native testing is handled with bounded retry of the same atomic rename. Tests verify that the old state is preserved while locked and that permanent disk errors preserve both primary and pending data. Native HTTP smoke passed again after the repair.
+- Previous live CLI evidence is recorded in the 0.8/0.6 entries below. No additional paid Codex/Claude/Gemini call, real local-model inference, interactive login or Telegram/Zalo delivery was performed for this release.
+
+
 ## 0.8.0
 
 99 automated tests cover the prior suite plus chat parsing/lifecycle/context, preflight failures before job creation, readable replies, Claude streaming deduplication, fixed install/login plans, shell argument quoting, honest authentication status, and role name/Markdown validation and isolation.

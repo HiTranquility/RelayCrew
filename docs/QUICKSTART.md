@@ -43,3 +43,7 @@ Console có nút ẩn/hiện danh sách phiên và ô nhập. Menu **⋯** bật
 ## Optional live integration test
 
 After `npm run build`, run `scripts/live-trial.mjs` with absolute paths to VS Code and an authenticated Codex executable. Set `RELAYCREW_LIVE_TEST=1` explicitly. It opens an isolated VS Code user profile, uses the normal extension command/engine, makes three real CLI calls with the current CLI login, checks completion/public output, and writes results under the system temporary directory. It does not run in CI or `npm test`. The trial project is the current RelayCrew repository; no source edits are enabled.
+
+## 0.9: local/cloud, task acceptance and planning
+
+Use [the operations guide](OPERATIONS.md) for local/third-party HTTP setup, explicit context and API keys, public agent conversation, Definition of Done, schedule views and useful daily quota dispatch. Native CLI stays the primary editing path.

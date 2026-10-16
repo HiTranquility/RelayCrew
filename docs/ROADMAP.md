@@ -1,5 +1,12 @@
 # Product roadmap
 
+## 0.9 · Implemented
+
+Public agent conversations and readable results; multi-task observation, per-task flows/context and separate owner acceptance; actionable overview; inline schedule Timeline/Board/Table; daily dispatch explanations/priorities; Local/Cloud compatible HTTP profiles with read-only explicit-context streaming. CLI remains the editing path. See [operations](OPERATIONS.md).
+
+Các mục lịch sử bên dưới ghi định hướng ở thời điểm trước. Background daemon, native subagent tree/concurrency, verified account identity và integration riêng cho GitHub vẫn là việc tương lai; số phiên bản trong các đề xuất cũ không có nghĩa tính năng đó đã phát hành.
+
+
 ## 0.3 · Public repository preparation
 
 README tiếng Anh, MIT copyright HiTranquility, contribution guide, architecture/configuration boundaries, Windows/Linux CI definition và tên hiển thị RelayCrew. Giữ command/settings/extension IDs để tương thích bản local. Tách quota source, hỗ trợ nhiều windows, status bar theo account thực, switch task có pause/pin, timezone hệ thống và packaging portable. Chưa publish GitHub/Marketplace trong phiên phát triển.

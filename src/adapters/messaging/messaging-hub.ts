@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { createServer, type Server } from 'node:http';
-import { mkdir, open, readFile, rename, unlink, writeFile } from 'node:fs/promises';
+import { mkdir, open, readFile, unlink } from 'node:fs/promises';
 import { join } from 'node:path';
 import { api, chunks, deliver, deliveryFailure, MessagingError, telegramIncoming, zaloIncoming } from './messaging';
 import type { Connection, Delivery, Incoming } from './messaging';
@@ -32,7 +32,7 @@ export class MessagingHub {
   private readonly key: string;
   private store: JsonStore<HubState>;
   private recovered=false;
-  private constructor(private dir: string, private globalDir: string, private secrets: SecretStore, private hooks: HubHooks) {
+  private constructor(dir: string, private globalDir: string, private secrets: SecretStore, private hooks: HubHooks) {
     this.key = 'aiTeam:messaging:' + createHash('sha256').update(dir.toLowerCase()).digest('hex').slice(0, 24);
     this.store = new JsonStore<HubState>(join(dir,'messaging.json'),(v: any): v is HubState => !!v && v.version===1 && Array.isArray(v.connections) && Array.isArray(v.inbox) && Array.isArray(v.outbox) && !!v.history, path=>{this.recovered=true;hooks.log(`Messaging state recovered from ${path}; pending commands/deliveries require inspection.`);});
   }

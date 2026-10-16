@@ -10,6 +10,7 @@ import type { AttachmentContent } from '../../storage/attachments';
 
 export interface Invocation { args: string[]; stdin: string }
 export function invocation(p: Profile, prompt: string, edits: boolean, output: string, images:string[]=[]): Invocation {
+  if(p.provider==='compatible')throw new Error('HTTP profiles cannot use CLI invocation.');
   let args: string[];
   if (p.provider === 'codex') {
     args = ['exec', '--json', '--color', 'never', '--sandbox', edits ? 'workspace-write' : 'read-only', '--output-last-message', output];

@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "ES2022", "module": "NodeNext", "moduleResolution": "NodeNext", "strict": true,
+    "target": "ES2022", "module": "NodeNext", "moduleResolution": "NodeNext", "strict": true, "noUnusedLocals": true,
     "esModuleInterop": true, "skipLibCheck": true, "outDir": "out", "types": ["node", "vscode"]
   },
   "include": ["src/**/*.ts", "test/**/*.ts"]

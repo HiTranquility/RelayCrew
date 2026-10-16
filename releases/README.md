@@ -13,6 +13,7 @@ Keep each version in its own immutable directory. Never replace an existing VSIX
 | [0.6.0](v0.6.0/NOTES.md) | `relaycrew-0.6.0.vsix` | Real CLI setup, inline accounts, Markdown workflows, attachments and panel controls |
 | [0.7.0](v0.7.0/NOTES.md) | `relaycrew-0.7.0.vsix` | Inline team/routing/quota/messaging configuration and primary-manager emphasis |
 | [0.8.0](v0.8.0/NOTES.md) | `relaycrew-0.8.0.vsix` | Chat, keyboard controls, CLI onboarding and named roles with Markdown guides |
+| [0.9.0](v0.9.0/NOTES.md) | `relaycrew-0.9.0.vsix` | Observable tasks, acceptance, schedule planning and Local/Cloud HTTP adapters |
 
 Each directory contains the exact VSIX, a source ZIP, `release.json`, `SHA256SUMS` and release notes. Run `npm run releases:verify` to verify every archived asset. These archives are retained in Git but excluded from the installed extension package. The original 0.1/0.2 package names are preserved; their display name was AI Team Workbench.
 
@@ -20,7 +21,7 @@ The older source ZIPs contain only original `src/` files recovered from `sources
 
 ## GitHub release process
 
-The local archives do not mean releases have already been published to GitHub. Current source is 0.8.0; do not point older tags at this source. GitHub's automatic source ZIP for such a tag would misrepresent those versions.
+The local archives do not mean releases have already been published to GitHub. Current source is 0.9.0; do not point older tags at this source. GitHub's automatic source ZIP for such a tag would misrepresent those versions.
 
 For a new source release:
 
@@ -29,9 +30,9 @@ For a new source release:
 3. Create an annotated tag matching the manifest, then push the commit and tag. For the current source:
 
    ```sh
-   git tag -a v0.8.0 -m "RelayCrew 0.8.0"
+   git tag -a v0.9.0 -m "RelayCrew 0.9.0"
    git push origin main
-   git push origin v0.8.0
+   git push origin v0.9.0
    ```
 
 4. The release workflow checks/tests the tagged source, verifies retained archives, builds a fresh VSIX, checks the tag/version match and publishes a GitHub **prerelease** with the VSIX and its SHA-256 checksum. It never publishes to the VS Code Marketplace. A duplicate release fails rather than replacing existing assets.

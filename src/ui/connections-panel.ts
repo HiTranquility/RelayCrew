@@ -1,4 +1,3 @@
-import type { Connection } from '../adapters/messaging/messaging';
 import type { BoardOptions } from './board';
 import { translator, type Language } from '../core/i18n';
 import { escapeHtml as h } from './html';

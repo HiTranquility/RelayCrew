@@ -2,6 +2,20 @@
 
 Versions before 1.0 are early releases. See [release archives](releases/README.md) for exact packages, hashes and source provenance.
 
+## 0.9.0 — 2026-10-17
+
+- Remove obsolete rendering helpers/imports and enforce TypeScript noUnusedLocals.
+
+- Surface readable public agent conversations, handoffs, audit findings and manager decisions in Live Session.
+- Add multi-task mission cards with per-task flows, agent assignments, saved context, owner acceptance checklists and honest recorded-phase progress.
+- Turn Overview into an actionable decision/queue/quota/schedule inbox.
+- Add inline schedule planning with Timeline, Board and Table, timezone recurrence, estimated windows and fresh per-occurrence acceptance snapshots.
+- Add inline daily plan/task editing, priority controls, dispatch preview and per-account eligibility explanations.
+- Add Local/Cloud compatible HTTP profiles, Ollama/LM Studio presets, catalog discovery, optional model pins, SecretStorage API keys, explicit-context attachments and read-only streaming. Keep CLI as the default and required for repository editing/tools.
+- Preserve transport/location boundaries during automatic fallback and record each dispatched connection. Reject redirects, unsafe endpoint URLs, editable API turns and truncated/unsupported responses.
+- Retry transient Windows state-file locks while preserving atomic replacement and the previous state.
+- Extend real local-HTTP, planner, persistence, bilingual browser and native VS Code host validation; retain all previous archives.
+
 ## 0.8.0 — 2026-10-17
 
 - Add one-account read-only chat and greeting routing; keep coding pipelines explicit. Show readable replies with expandable technical activity.

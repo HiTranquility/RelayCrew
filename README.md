@@ -16,24 +16,29 @@ The preview uses **demo data**, not live accounts or provider usage. The [assign
 
 ## Features
 
+See the bilingual [operations guide](docs/OPERATIONS.md) for task acceptance, public agent conversations, timeline planning and Local/Cloud connections.
+
+
 - **CLI onboarding:** visible Install CLI, Sign in and Check connection controls on every saved account. Install/login run in dedicated terminals; authentication is completed by you.
 - **Real accounts and workflows:** add/edit profiles inline, detect CLI paths, assign team roles, open isolated login terminals, and run a real read-only trial. Import a Markdown guide with optional account/model configuration. See [quick start](docs/QUICKSTART.md) and the [workflow example](docs/workflow.example.md).
 - **Optional model IDs and usage controls:** automatic CLI catalog/provider flagship aliases, optional custom pins, reasoning levels and per-account quota ceilings. See [models and templates](docs/MODELS-AND-TEMPLATES.md).
 - **Editable roles and prompts:** rename roles, attach a role-specific Markdown guide, edit input/output templates and preview locally. Pencil buttons on role cards and flow nodes open the editor directly; task snapshots retain names/guides.
 - **Attachments & clipboard:** pick/drop PNG/JPEG or UTF-8 text/code, paste clipboard images, and copy answers/reports. Draft snapshots survive reloads; limits and provider transport are documented in [console usage](docs/CONSOLE.md).
 - **Chat or team task:** chat uses one read-only account, while team tasks run the configured pipeline. Enter sends, Shift+Enter adds a line; Ctrl+Enter and a configurable send preference are supported. Greetings avoid unnecessary audits. See [console usage](docs/CONSOLE.md).
-- **Overview:** role/account cards, observed quota, current work and recent handoffs; task search, filters and compact step rails.
+- **Task mission board:** queue multiple tasks, track recorded phase progress and separate owner Definition of Done, inspect flow diagrams, assignments and saved documents.
+- **Operational overview:** decisions/failures to resolve, current work, serial queue, missing quota observations and next scheduled window.
+- **Local / Cloud / third party:** native CLI remains primary; compatible HTTP endpoints support read-only streaming chat/review with explicit context, catalog discovery and SecretStorage API keys. Ollama/LM Studio presets are included.
 - **English / Vietnamese:** change the live UI language in Setup; Command Palette and Settings labels follow the VS Code display language.
 - **Inline configuration:** theme-aware forms for accounts, team/model choices, routing, Markdown guides, quota, account switching and messaging, with Save actions and errors in the board. Common configuration commands open the same board instead of popup wizards.
 - **Projects board:** group tasks by source project, create an optional Git worktree per new task, see the active account, and prepare Codex desktop chats for task folders.
-- **Daily quota tasklist:** include/exclude accounts, set a usage target and task budget, record owner decisions, and perform bounded independent maintenance.
+- **Daily quota tasklist:** inline budget/target setup, account eligibility explanations, next dispatch preview, reorderable unstarted tasks, owner decisions and bounded independent maintenance.
 - **Primary manager:** an accent card, selected role button and final flow node identify the final decision maker. Add up to four supporting coordinators, including separate accounts of the same provider.
 - **Small visual flows:** Dev → Audit → Lead, with an optional Repair stage. Choose an account profile and model/reasoning override for each role.
 - **Live supervision:** actual running profile/model, public CLI events, prompts, responses, audit findings and lead decisions. Private model reasoning is not exposed.
 - **Limits at a glance:** a persistent status-bar item with account usage, freshness, reset times and multiple quota windows. Click it to inspect accounts, update a snapshot or switch a task.
 - **Explicit account switching:** queued and waiting tasks can be reassigned. Running tasks are paused first; a manual task selection is pinned so automatic rotation does not override it.
 - **Quota-aware routing:** selected profiles, compatible-account fallback or an explicit round-robin pool. Unknown/stale quota is not treated as free capacity for automatic rotation.
-- **Scheduling:** one-time and timezone-aware recurring tasks/reminders while VS Code is open.
+- **Schedule planner:** inline one-time/recurring tasks and reminders, Timeline / Board / Table views, estimated windows, timezones and per-occurrence acceptance snapshots while VS Code is open.
 - **Two-way messaging:** Telegram long polling and signed Zalo OA webhooks. Ask questions, submit tasks, inspect status, cancel work and answer an agent's clarification request.
 - **Useful backlog mode:** dispatch real backlog items within a time/run budget and available quota. No dummy requests to burn tokens.
 - **Persistence and backups:** durable queue/pause state, previous JSON state versions, local reports and source snapshots before editable steps.
@@ -43,20 +48,20 @@ The preview uses **demo data**, not live accounts or provider usage. The [assign
 ### Requirements
 
 - VS Code **1.96 or later**, on a local trusted workspace.
-- The CLI(s) assigned to your flow, installed and authenticated separately. You do not need all three providers if your flow uses fewer.
+- The CLI(s) assigned to your flow, installed and authenticated separately. For HTTP-only read-only chat, a running compatible endpoint replaces this requirement. You do not need all three providers if your flow uses fewer.
 - A Git working directory for the default source backup before editable work.
 - Node.js **22** and npm when building from source.
 
 ### Install a local VSIX
 
-Download the VSIX from [RelayCrew 0.8.0 prerelease](https://github.com/HiTranquility/RelayCrew/releases/tag/v0.8.0), or build a package from this repository:
+Download the VSIX from [RelayCrew 0.9.0 prerelease](https://github.com/HiTranquility/RelayCrew/releases/tag/v0.9.0), or build a package from this repository:
 
 ```sh
 git clone https://github.com/HiTranquility/RelayCrew.git
 cd RelayCrew
 npm ci
 npm run package
-code --install-extension relaycrew-0.8.0.vsix
+code --install-extension relaycrew-0.9.0.vsix
 ```
 
 You can also use **Extensions → … → Install from VSIX…**. This repository does not automatically publish to the VS Code Marketplace.
@@ -85,7 +90,7 @@ RelayCrew/
 
 Build output goes into `dist/`; local packages are named `relaycrew-<version>.vsix`. Dependencies, build output and root-level VSIX files are excluded from Git; explicitly archived packages in `releases/` are retained. Personal configuration, credentials and runtime data belong in VS Code settings/storage, outside this source tree. See [architecture](docs/ARCHITECTURE.md) and [contributing](CONTRIBUTING.md) before extending a module.
 
-Versions **0.1.0, 0.2.0, 0.3.0, 0.3.1, 0.4.0, 0.5.0, 0.6.0, 0.7.0 and 0.8.0** have separate [release archives](releases/README.md), source provenance, notes and SHA-256 checksums. See the [changelog](CHANGELOG.md) for changes. Run `npm run releases:verify` to check retained assets. The [release workflow](.github/workflows/release.yml) publishes a GitHub prerelease when a matching source tag is pushed; preparing these files does not publish anything by itself.
+Versions **0.1.0, 0.2.0, 0.3.0, 0.3.1, 0.4.0, 0.5.0, 0.6.0, 0.7.0, 0.8.0 and 0.9.0** have separate [release archives](releases/README.md), source provenance, notes and SHA-256 checksums. See the [changelog](CHANGELOG.md) for changes. Run `npm run releases:verify` to check retained assets. The [release workflow](.github/workflows/release.yml) publishes a GitHub prerelease when a matching source tag is pushed; preparing these files does not publish anything by itself.
 
 ### Configure your first team
 

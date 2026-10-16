@@ -66,5 +66,8 @@
   "profile.quotaCeiling": "Optional usage ceiling (1–100%). The lower account/global or daily-plan threshold stops subsequent steps; it does not interrupt an in-flight request.",
   "command.chat": "RelayCrew: Chat with an Account",
   "command.installCli": "RelayCrew: Install Provider CLI",
-  "command.checkConnection": "RelayCrew: Check CLI and Sign-in"
+  "command.checkConnection": "RelayCrew: Check CLI and Sign-in",
+  "profile.hosting": "Cloud by default. Local HTTP endpoints must use loopback; check the server model configuration for actual inference location.",
+  "profile.transport": "CLI is the default. Compatible HTTP profiles provide read-only chat/review with explicit context.",
+  "profile.endpoint": "OpenAI-compatible API base URL including /v1. HTTPS for cloud, loopback for local. API keys belong in SecretStorage."
 }

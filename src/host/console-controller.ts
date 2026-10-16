@@ -1,8 +1,9 @@
 import { answerOwner, type Job } from '../core/domain';
 import { parseConsoleInput } from '../core/console-input';
 import type { Attachment } from '../storage/attachments';
+import { acceptanceFromText } from '../core/task-insights';
 
-export interface ConsoleRequest { requestId:unknown; text:unknown; cwd:unknown; sessionId?:unknown; replyVersion?:unknown; attachments?:unknown; mode?:unknown;profileId?:unknown }
+export interface ConsoleRequest { requestId:unknown; text:unknown; cwd:unknown; sessionId?:unknown; replyVersion?:unknown; attachments?:unknown; mode?:unknown;profileId?:unknown;acceptance?:unknown }
 interface Hooks {
   jobs:Job[]; roots:()=>string[]; create:(prompt:string,cwd:string)=>Job;
   createChat?:(prompt:string,cwd:string,profileId:string,parent?:Job)=>Job;
@@ -33,7 +34,8 @@ export class ConsoleController {
         if(typeof request.cwd!=='string'||!h.roots().includes(request.cwd))throw new Error('Select an open workspace folder.');
         if(command.kind==='chat'&&(typeof request.profileId!=='string'||!h.createChat))throw new Error('Choose an account for chat.');
         await h.prepare?.(command.kind,typeof request.profileId==='string'?request.profileId:undefined);
-        const job=command.kind==='chat'?h.createChat!(command.text,request.cwd,request.profileId as string,selected?.kind==='chat'?selected:undefined):h.create(command.text,request.cwd);job.consoleRequestId=request.requestId;if(attachments.length)job.attachments=attachments;h.jobs.push(job);jobId=job.id;message=command.kind==='chat'?'Chat queued. One account replies without an audit.':'Task queued. Follow the session below.';
+        const acceptance=command.kind==='task'?acceptanceFromText(request.acceptance):[];
+        const job=command.kind==='chat'?h.createChat!(command.text,request.cwd,request.profileId as string,selected?.kind==='chat'?selected:undefined):h.create(command.text,request.cwd);if(acceptance.length)job.acceptance=acceptance;job.consoleRequestId=request.requestId;if(attachments.length)job.attachments=attachments;h.jobs.push(job);jobId=job.id;message=command.kind==='chat'?'Chat queued. One account replies without an audit.':'Task queued. Follow the session below.';
       }else if(command.kind==='reply'){
         if(!selected)throw new Error('Select a session waiting for your reply.');
         if(request.replyVersion!==(selected.ownerReplies?.length??0))throw new Error('The agent question changed. Review the latest question before replying.');
