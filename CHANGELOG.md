@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.9.3 — 2026-10-17
+
+Visual hierarchy and contrast
+
+- Theme-aware contrast, stronger focus rings and text/status symbols that do not rely on color.
+- Clearer primary manager, form labels, action bars, table spacing and selected tabs.
+- Text scaling now covers existing headings and metadata; narrow layouts and reduced motion remain supported.
+- Verified English/Vietnamese light/dark UI and layout interaction regression checks.
+
+
+
 ## 0.9.2 — 2026-10-17
 
 Interaction and layout fixes

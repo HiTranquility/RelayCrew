@@ -10,7 +10,7 @@ RelayCrew connects installed Codex, Claude Code and Gemini CLIs into a small, ob
 
 ## Features
 
-**Markdown starter pack (0.9.2):** [role guides, workflows and task/acceptance templates](examples/README.md), bundled in the VSIX. Open **Setup → Input and response templates → Markdown examples**, copy/edit a guide, then import it.
+**Markdown starter pack (0.9.3):** [role guides, workflows and task/acceptance templates](examples/README.md), bundled in the VSIX. Open **Setup → Input and response templates → Markdown examples**, copy/edit a guide, then import it.
 
 
 See the bilingual [operations guide](docs/OPERATIONS.md) for task acceptance, public agent conversations, timeline planning and Local/Cloud connections.
@@ -51,14 +51,14 @@ See the bilingual [operations guide](docs/OPERATIONS.md) for task acceptance, pu
 
 ### Install a local VSIX
 
-Download the VSIX from [RelayCrew 0.9.2 prerelease](https://github.com/HiTranquility/RelayCrew/releases/tag/v0.9.2), or build a package from this repository:
+Download the VSIX from [RelayCrew 0.9.3 prerelease](https://github.com/HiTranquility/RelayCrew/releases/tag/v0.9.3), or build a package from this repository:
 
 ```sh
 git clone https://github.com/HiTranquility/RelayCrew.git
 cd RelayCrew
 npm ci
 npm run package
-code --install-extension relaycrew-0.9.2.vsix
+code --install-extension relaycrew-0.9.3.vsix
 ```
 
 You can also use **Extensions → … → Install from VSIX…**. This repository does not automatically publish to the VS Code Marketplace.
@@ -87,7 +87,7 @@ RelayCrew/
 
 Build output goes into `dist/`; local packages are named `relaycrew-<version>.vsix`. Dependencies, build output and root-level VSIX files are excluded from Git; explicitly archived packages in `releases/` are retained. Personal configuration, credentials and runtime data belong in VS Code settings/storage, outside this source tree. See [architecture](docs/ARCHITECTURE.md) and [contributing](CONTRIBUTING.md) before extending a module.
 
-Versions **0.1.0, 0.2.0, 0.3.0, 0.3.1, 0.4.0, 0.5.0, 0.6.0, 0.7.0, 0.8.0, 0.9.2 and 0.9.2** have separate [release archives](releases/README.md), source provenance, notes and SHA-256 checksums. See the [changelog](CHANGELOG.md) for changes. Run `npm run releases:verify` to check retained assets. The [release workflow](.github/workflows/release.yml) publishes a GitHub prerelease when a matching source tag is pushed; preparing these files does not publish anything by itself.
+Versions **0.1.0, 0.2.0, 0.3.0, 0.3.1, 0.4.0, 0.5.0, 0.6.0, 0.7.0, 0.8.0, 0.9.3 and 0.9.3** have separate [release archives](releases/README.md), source provenance, notes and SHA-256 checksums. See the [changelog](CHANGELOG.md) for changes. Run `npm run releases:verify` to check retained assets. The [release workflow](.github/workflows/release.yml) publishes a GitHub prerelease when a matching source tag is pushed; preparing these files does not publish anything by itself.
 
 ### Configure your first team
 
