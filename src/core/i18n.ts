@@ -10,6 +10,28 @@ export function resolveLanguage(preference: unknown, displayLanguage = 'en'): La
 // English source messages are the fallback. Translate presentation, never stored
 // status codes, model IDs, account labels, prompts or provider responses.
 export const vietnamese: Record<string, string> = {
+"phases":"giai đoạn",
+"Flow and checklist":"Luồng và checklist",
+"Daily model budgets":"Định mức mô hình trong ngày",
+"Ceilings use observed account quota, not model token estimates. Agent runs include retries and every role. Limits stop the next dispatch; an in-flight request can exceed a threshold.":"Trần dùng quota tài khoản đã đo, không ước tính token theo model. Lượt chạy tính mọi vai trò và lần thử lại. Trần chặn lượt kế tiếp; lượt đang chạy có thể vượt ngưỡng.",
+"Model policy or optional model ID":"Chế độ mô hình hoặc ID tùy chọn",
+"* = all models; @automatic = automatic selection; @cli = CLI settings.":"* = mọi model; @automatic = chọn tự động; @cli = cấu hình CLI.",
+"Quota ceiling (%)":"Trần quota (%)",
+"Maximum agent runs":"Số lượt agents tối đa",
+"Save model budget":"Lưu định mức mô hình",
+"Remove budget":"Bỏ định mức",
+"Measured quota observations":"Các lần quan sát quota",
+"Before and after are provider/file observations with timestamps. Unchanged, missing or reset observations have no attributable delta. Percentage points are not token counts.":"Số trước/sau lấy từ nhà cung cấp hoặc file, kèm thời điểm. Dữ liệu chưa đổi, bị thiếu hoặc đã reset thì chưa xác định mức dùng. Điểm phần trăm không phải số token.",
+"No measurements yet. Run useful work with a configured quota source.":"Chưa có số đo. Chạy tác vụ hữu ích khi đã cấu hình nguồn quota.",
+"Save plan without starting":"Lưu kế hoạch, chưa chạy",
+"Last saved":"Lưu gần nhất",
+"Not saved":"Chưa lưu",
+"Use a quota ceiling of 1–100 and an agent-run budget of 1–1000.":"Trần quota từ 1–100 và định mức agents từ 1–1000 lượt.",
+"Before":"Trước",
+"After":"Sau",
+"Observed change":"Thay đổi quan sát",
+"Agent runs":"Lượt agents",
+
 "Import local folders":"Nhập thư mục cục bộ",
 "Select folders and permissions individually. Full permission requires confirmation; Allow Edits still applies.":"Chọn từng thư mục và quyền. Full cần xác nhận; công tắc Cho phép sửa vẫn áp dụng.",
 "Included folders and permissions":"Thư mục được chọn và quyền",

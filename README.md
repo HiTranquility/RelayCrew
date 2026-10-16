@@ -51,14 +51,14 @@ See the bilingual [operations guide](docs/OPERATIONS.md) for task acceptance, pu
 
 ### Install a local VSIX
 
-Download the VSIX from [RelayCrew 0.9.5 prerelease](https://github.com/HiTranquility/RelayCrew/releases/tag/v0.9.5), or build a package from this repository:
+Download the VSIX from [RelayCrew 0.9.7 prerelease](https://github.com/HiTranquility/RelayCrew/releases/tag/v0.9.7), or build a package from this repository:
 
 ```sh
 git clone https://github.com/HiTranquility/RelayCrew.git
 cd RelayCrew
 npm ci
 npm run package
-code --install-extension relaycrew-0.9.5.vsix
+code --install-extension relaycrew-0.9.7.vsix
 ```
 
 You can also use **Extensions → … → Install from VSIX…**. This repository does not automatically publish to the VS Code Marketplace.

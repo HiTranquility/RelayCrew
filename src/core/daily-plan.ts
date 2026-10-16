@@ -1,3 +1,5 @@
+import { budgetFor,checkDailyBudget,type DailyBudget } from './daily-budget';
+import { acceptanceFromText } from './task-insights';
 import { permissionAllows, type DailyWorkspace } from './daily-workspaces';
 import { fresh, nextCron, QuotaWait } from './domain';
 import type { Job, Management, Profile, Quota } from './domain';
@@ -5,10 +7,10 @@ import { newJob } from './engine';
 
 export const maintenanceCategories = ['review', 'uiux', 'hotkeys', 'conventions', 'cicd'] as const;
 export type MaintenanceCategory = typeof maintenanceCategories[number];
-export interface DailyItem { id: string; day: string; profileId: string; prompt: string; category: 'task' | MaintenanceCategory; jobId?: string; cwd?:string }
+export interface DailyItem { id: string; day: string; profileId: string; prompt: string; category: 'task' | MaintenanceCategory; jobId?: string; cwd?:string; acceptance?:string }
 export interface DecisionRecord { id: string; jobId: string; profileId?: string; question: string; createdAt: string; repliesBefore: number; status: 'pending' | 'answered' | 'cancelled'; answer?: string }
 export interface DailyPlan {
-  workspaces?:DailyWorkspace[]; savedAt?:string;
+  budgets?:DailyBudget[]; workspaces?:DailyWorkspace[]; savedAt?:string;
   enabled: boolean; day: string; until: number; timezone: string; cwd: string;
   accounts: Record<string, boolean>; targetPercent: number; remainingRuns: number;
   allowEdits: boolean; fallback: boolean; items: DailyItem[]; decisions: DecisionRecord[]; reason?: string;
@@ -64,8 +66,9 @@ export function carryDailyTasks(plan:DailyPlan,jobs:Job[],ids:string[]):void {
 }
 export function dailyProfile(plan: DailyPlan, id: string, profiles: Profile[], quotas: Record<string, Quota>, jobs: Job[], now = Date.now()): Profile {
   const profile = profiles.find(profile => profile.id === id), q = quotas[id];
+  if(profile)checkDailyBudget(plan.budgets,profile,jobs,new Set(plan.items.filter(i=>i.day===plan.day&&i.jobId).map(i=>i.jobId!)));
   const unrefreshedLimit = jobs.some(job => job.blockedProfileId === id && job.limitDetectedAt && (!q || Date.parse(q.observedAt) <= Date.parse(job.limitDetectedAt)));
-  if (!plan.enabled || now >= plan.until || !profile || plan.accounts[id] !== true || !fresh(q, now) || q.usedPercent >= Math.min(plan.targetPercent,profile.quotaCeiling??100) || q.remainingTokens === 0 || unrefreshedLimit) {
+  if (!plan.enabled || now >= plan.until || !profile || plan.accounts[id] !== true || !fresh(q, now) || q.usedPercent >= Math.min(plan.targetPercent,profile.quotaCeiling??100,budgetFor(plan.budgets,profile)?.ceiling??100) || q.remainingTokens === 0 || unrefreshedLimit) {
     throw new QuotaWait('Daily plan account is excluded, at its target, provider-limited, or missing fresh available quota.');
   }
   return profile;
@@ -102,7 +105,7 @@ export function dailyPrompt(plan: DailyPlan, item: DailyItem): string {
 export function makeDailyJob(plan: DailyPlan, item: DailyItem, management: Management): Job {
   const cwd=item.cwd??plan.cwd,permission=plan.workspaces?.find(w=>w.path===cwd&&w.enabled)?.permission??(plan.allowEdits?'auto':'read-only');
   const job = newJob(dailyPrompt(plan, item), cwd, { builder: item.profileId, auditor: item.profileId, worker: item.profileId, lead: management.primaryProfileId }, plan.allowEdits ? ['builder','auditor','worker','lead'] : ['builder','auditor','lead'], {}, { primaryProfileId: management.primaryProfileId, coordinatorIds: management.coordinatorIds.filter(id => plan.accounts[id]) });
-  job.dailyItemId = item.id; job.readOnly = !plan.allowEdits||permission==='read-only';job.permission=job.readOnly?'read-only':permission;
+  job.acceptance=acceptanceFromText(item.acceptance);job.dailyItemId = item.id; job.readOnly = !plan.allowEdits||permission==='read-only';job.permission=job.readOnly?'read-only':permission;
   job.profilePins = { builder: item.profileId, auditor: item.profileId, worker: item.profileId, lead: management.primaryProfileId };
   return job;
 }

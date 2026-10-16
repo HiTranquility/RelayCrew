@@ -1,3 +1,4 @@
+import { acceptanceFromText } from '../core/task-insights';
 import { dailyWorkspaces } from '../core/daily-workspaces';
 import type { PromptTemplateSnapshot } from '../core/prompt-templates';
 import * as vscode from 'vscode';
@@ -23,7 +24,7 @@ export class DailyController {
   constructor(private hooks: Hooks) {}
   async configure(raw:unknown,roots:string[]):Promise<void>{
     const value=raw as Record<string,unknown>,h=this.hooks;
-    if(!value||Array.isArray(value)||Object.keys(value).some(k=>!['cwd','timezone','runs','target','workspaces'].includes(k))||typeof value.cwd!=='string'||!roots.includes(value.cwd)||typeof value.timezone!=='string')throw new Error('Invalid daily plan settings.');
+    if(!value||Array.isArray(value)||Object.keys(value).some(k=>!['cwd','timezone','runs','target','workspaces','start'].includes(k))||typeof value.cwd!=='string'||!roots.includes(value.cwd)||typeof value.timezone!=='string')throw new Error('Invalid daily plan settings.');
     const ids=h.profiles().filter(p=>h.plan.accounts[p.id]===true).map(p=>p.id),timezone=resolveTimezone(value.timezone),runs=Number(value.runs),target=Number(value.target);
     if(!ids.length)throw new Error('Select at least one account in the daily quota table.');
     // Validate a copy before pausing or mutating the durable plan.
@@ -31,13 +32,13 @@ export class DailyController {
     if(workspaces.some(w=>w.permission==='full')){const choice=await vscode.window.showWarningMessage('Full permission permits commands beyond the folder sandbox.',{modal:true,detail:workspaces.filter(w=>w.permission==='full').map(w=>w.path).join('\n')},'Enable full permission');if(choice!=='Enable full permission')return;}
     next.workspaces=[...workspaces,...(h.plan.workspaces??[]).filter(w=>!workspaces.some(n=>n.path===w.path)).map(w=>({...w,enabled:false}))];
     startDailyPlan(next,value.cwd,timezone,ids,runs,target);
-    h.pauseActive();Object.assign(h.plan,next);this.tick();await h.save();h.changed();h.start();
+    if(value.start===false)next.enabled=false;h.pauseActive();Object.assign(h.plan,next);this.tick();await h.save();h.changed();h.start();
   }
   async addInline(raw:unknown,roots:string[]=[]):Promise<void>{
     const value=raw as Record<string,unknown>,h=this.hooks;
-    if(!value||Array.isArray(value)||Object.keys(value).some(k=>!['profileId','prompt','cwd'].includes(k))||typeof value.prompt!=='string'||!value.prompt.trim()||value.prompt.length>16000||!h.profiles().some(p=>p.id===value.profileId))throw new Error('Choose an account and enter a useful daily task.');
+    if(!value||Array.isArray(value)||Object.keys(value).some(k=>!['profileId','prompt','cwd','acceptance'].includes(k))||typeof value.prompt!=='string'||!value.prompt.trim()||value.prompt.length>16000||!h.profiles().some(p=>p.id===value.profileId))throw new Error('Choose an account and enter a useful daily task.');
     if(value.cwd!==undefined&&(typeof value.cwd!=='string'||!roots.includes(value.cwd)))throw new Error('Choose an approved local folder.');
-    const timezone=resolveTimezone(h.timezone());h.plan.items.push({id:randomUUID(),day:dayKey(timezone),profileId:value.profileId as string,prompt:value.prompt.trim(),category:'task',cwd:value.cwd as string|undefined});await h.save();h.changed();h.start();
+    acceptanceFromText(value.acceptance);const timezone=resolveTimezone(h.plan.timezone||h.timezone());h.plan.items.push({id:randomUUID(),day:dayKey(timezone),profileId:value.profileId as string,prompt:value.prompt.trim(),category:'task',cwd:value.cwd as string|undefined,acceptance:value.acceptance as string|undefined});await h.save();h.changed();h.start();
   }
   async moveItem(id:unknown,direction:unknown):Promise<void>{
     const h=this.hooks,items=h.plan.items,index=items.findIndex(i=>i.id===id&&!i.jobId&&i.category==='task');

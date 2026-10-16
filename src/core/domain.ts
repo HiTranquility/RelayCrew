@@ -45,6 +45,7 @@ export interface Issue { title: string; body: string; severity: 'bug' | 'improve
 export interface ChildTask { title: string; instructions: string }
 export interface Audit { summary: string; issues: Issue[]; tasks: ChildTask[] }
 export interface Step {
+  dailyBudgetModel?:string; dailyAttempts?:{profileId:string;modelKey:string;at:string}[]; quotaBefore?:Quota; quotaAfter?:Quota;
   transport?:'cli'|'http';hosting?:'cloud'|'local';endpoint?:string;
   role: Role; title: string; prompt: string; profileId?: string; model?: string; effort?: string; response?: string;
   status: 'pending' | 'running' | 'done' | 'failed' | 'waiting_owner'; error?: string;

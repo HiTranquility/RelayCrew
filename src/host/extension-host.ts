@@ -1,3 +1,4 @@
+import { budgetModel,validateDailyBudget } from '../core/daily-budget';
 import { normalizeLayout } from '../core/layout';
 import { scheduleFromForm } from '../core/schedule-form';
 import { acceptanceFromText } from '../core/task-insights';
@@ -220,6 +221,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       return choose(step.role, job.roles[step.role], true, job.overrides ?? {});
     }, save: async () => { await save(); await persistReports(); },
     run: async (profile, step, job, edits, signal) => {
+      if(job.dailyItemId){step.dailyBudgetModel=budgetModel(profile);(step.dailyAttempts??=[]).push({profileId:profile.id,modelKey:step.dailyBudgetModel,at:new Date().toISOString()});}
       edits = edits && (!job.dailyItemId || daily.allowEdits);
       if(profile.transport==='http'&&edits)throw new Error('The HTTP adapter is read-only. Use a CLI profile for file edits and repository tools.');
       if (edits && cfg().get('backupBeforeEdits', true)) {
@@ -236,12 +238,14 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         if (!value) throw new Error(`Missing secret ${key} for ${profile.label}. Use Store Profile Secret.`);
         secrets[key] = value;
       }
+      if(job.dailyItemId)step.dailyBudgetModel=budgetModel(profile);
       const selection=await prepareProfile(profile,secrets,signal);profile=selection.profile;step.model=profile.model;step.modelSource=selection.source;step.effort=profile.effort;
       (job.timeline??=[]).push({at:new Date().toISOString(),from:'orchestrator',to:profile.id,kind:'model_selection',text:`${profile.model??t('CLI default')} · ${t(selection.note)}`});await save();
       output.appendLine(`[${job.id}] ${step.role} → ${profile.id}, model=${profile.model || t("CLI default")}, effort=${profile.effort || t("default")}, edits=${edits}`);
       step.phase='cli';step.timeoutAt=new Date(Date.now()+cfg().get('timeoutMinutes',30)*60_000).toISOString();changed();
       let lastRefresh = 0;
-      const result = await execute({ permission:job.permission,profile, prompt: step.request ?? stepPrompt(job, step), cwd: job.cwd, edits, signal, secretValues: secrets,attachments:await attachmentStore.resolve(job.attachments?.map(a=>a.id)),
+      if(job.dailyItemId){await quotas.refresh([profile],state.quotas);step.quotaBefore=state.quotas[profile.id]?structuredClone(state.quotas[profile.id]):undefined;}
+      try{const result = await execute({ permission:job.permission,profile, prompt: step.request ?? stepPrompt(job, step), cwd: job.cwd, edits, signal, secretValues: secrets,attachments:await attachmentStore.resolve(job.attachments?.map(a=>a.id)),
         timeoutMs: cfg().get('timeoutMinutes', 30) * 60_000,
         onEvent: event => {
           const timeline = job.timeline ??= [];
@@ -253,7 +257,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         },
         log: text => { output.append(text); void appendRunLog(job.id, text); }
       });
-      return result;
+      return result;}finally{if(job.dailyItemId){await quotas.refresh([profile],state.quotas);step.quotaAfter=state.quotas[profile.id]?structuredClone(state.quotas[profile.id]):undefined;}}
     }
   });
   let logQueue = Promise.resolve();
@@ -386,6 +390,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       board.onDidDispose(() => { board = undefined; boardLanguage=undefined; boardReady=false; }, undefined, context.subscriptions);
       board.webview.onDidReceiveMessage(message => void guard(async () => {
         if(message?.action==='shareLayout'){if(message.kind==='export'){const uri=await vscode.window.showSaveDialog({defaultUri:vscode.Uri.file(join(storage,'relaycrew-layout.json')),filters:{JSON:['json']}});if(uri)await vscode.workspace.fs.writeFile(uri,Buffer.from(JSON.stringify({version:1,layout:normalizeLayout(message.layout)},null,2)));}else if(message.kind==='import'){const picked=await vscode.window.showOpenDialog({canSelectMany:false,filters:{JSON:['json']}});if(picked?.[0]){const info=await vscode.workspace.fs.stat(picked[0]);if(info.size>8192)throw new Error('Layout file is too large.');const value=JSON.parse(Buffer.from(await vscode.workspace.fs.readFile(picked[0])).toString('utf8'));if(value.version!==1||!value.layout)throw new Error('Invalid layout file.');await board?.webview.postMessage({type:'layoutImported',layout:normalizeLayout(value.layout),message:t('Layout imported.')});}}return;}
+        if(message?.action==='removeDailyBudget'){daily.budgets=daily.budgets?.filter(b=>b.profileId!==message.profileId||b.modelKey!==message.modelKey);await save();changed();return;}
+        if(message?.action==='saveDailyBudget'){try{const b=validateDailyBudget(message.value,profiles());daily.budgets??=[];const previous=daily.budgets.findIndex(v=>v.profileId===b.profileId&&v.modelKey===b.modelKey);if(previous<0){if(daily.budgets.length>=200)throw new Error('Too many daily model budgets.');daily.budgets.push(b);}else daily.budgets[previous]=b;await save();changed();await board?.webview.postMessage({type:'dailyBudgetResult',ok:true,message:t('Configuration saved.')});}catch{await board?.webview.postMessage({type:'dailyBudgetResult',ok:false,message:t('Use a quota ceiling of 1–100 and an agent-run budget of 1–1000.')});}return;}
         if(message?.action==='importDailyFolders'){const picked=await vscode.window.showOpenDialog({canSelectFolders:true,canSelectFiles:false,canSelectMany:true,title:t('Import local folders')});if(picked){daily.workspaces??=[];for(const uri of picked){if(uri.scheme!=='file'||!(await stat(uri.fsPath)).isDirectory())continue;if(dailyRoots().length>=20)break;if(!daily.workspaces.some(w=>w.path===uri.fsPath))daily.workspaces.push({path:uri.fsPath,permission:'read-only',enabled:false});}await save();changed();}return;}
         const sections:Record<string,string>={saveTeam:'team',saveRouting:'routing',previewWorkflow:'workflow',applyWorkflow:'workflow',saveQuota:'quota',switchAssignment:'assignment',tryCliInline:'trial',checkCli:'account',saveProfileSecret:'account',saveConnection:'connection',disconnectConnection:'connection',testConnection:'connection',saveTemplates:'templates',previewTemplates:'templates'};
         if(message&&Object.hasOwn(sections,message.action)){
