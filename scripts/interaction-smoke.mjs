@@ -19,10 +19,13 @@ try{
  assert.equal(await page.locator('#console-input').inputValue(),'Keep my draft');
  await page.reload();assert.equal(await page.locator('#console-input').inputValue(),'Keep my draft');
  assert.equal(await page.locator('html').evaluate(e=>e.style.getPropertyValue('--rc-text-scale')),'1.25');
+ await page.keyboard.press('Alt+l');await page.locator('[data-layout-field=composerPosition]').selectOption('right');await page.keyboard.press('Escape');await page.waitForTimeout(100);assert.equal(await page.locator('.console-workspace').evaluate(e=>e.classList.contains('composer-right')),true);assert.equal(await page.locator('#composer-divider').getAttribute('aria-orientation'),'vertical');
+ await page.locator('#voice-panel summary').click();await page.locator('#voice-toggle').click();assert.match(await page.locator('#voice-status').innerText(),/system dictation/);
+ await page.evaluate(()=>{window.SpeechRecognition=class{start(){setTimeout(()=>this.onresult({resultIndex:0,results:[Object.assign([{transcript:'voice fixture'}],{isFinal:true})]}),0)}abort(){this.onend?.()}};});await page.locator('#voice-opt-in').check();await page.locator('#voice-toggle').click();await page.waitForTimeout(50);assert.match(await page.locator('#console-input').inputValue(),/voice fixture/);await page.keyboard.press('Escape');assert.equal(await page.locator('#voice-toggle').getAttribute('aria-pressed'),'false');
  await page.locator('[data-tab=daily]').click();const prompt=page.locator('#daily-item-form [name=prompt]');await prompt.fill('draft during live update');await prompt.focus();
  await page.evaluate(()=>window.dispatchEvent(new MessageEvent('message',{data:{type:'boardSnapshot',html:document.documentElement.outerHTML,pageRequest:0,page:'daily'}})));
  assert.equal(await prompt.inputValue(),'draft during live update');assert.equal(await prompt.evaluate(e=>e===document.activeElement),true);
  await page.setViewportSize({width:420,height:900});await page.locator('[data-tab=console]').click();await page.waitForTimeout(150);
  assert.equal(await side.isVisible(),false);assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
- assert.deepEqual(errors,[]);console.log('Drag, keyboard resize, layout persistence, draft/focus during snapshots and narrow layout passed.');
+ await page.screenshot({path:resolve('.ui-smoke/latest-console.png'),fullPage:true});assert.deepEqual(errors,[]);console.log('Drag, keyboard resize, layout persistence, draft/focus during snapshots and narrow layout passed.');
 }finally{await browser.close();}

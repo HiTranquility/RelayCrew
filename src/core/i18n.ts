@@ -10,6 +10,24 @@ export function resolveLanguage(preference: unknown, displayLanguage = 'en'): La
 // English source messages are the fallback. Translate presentation, never stored
 // status codes, model IDs, account labels, prompts or provider responses.
 export const vietnamese: Record<string, string> = {
+"Prompt panel position":"Vị trí ô prompt",
+"Below monitor":"Dưới phần theo dõi",
+"Beside monitor":"Bên cạnh phần theo dõi",
+"Voice input":"Nhập bằng giọng nói",
+"Dictation inserts text into the draft. Review it before sending; audio is not stored by RelayCrew.":"Giọng nói được chuyển thành bản nháp. Kiểm tra trước khi gửi; RelayCrew không lưu âm thanh.",
+"System dictation":"Nhập giọng nói của hệ điều hành",
+"Focus the prompt first.":"Đặt con trỏ vào ô prompt trước.",
+"Your desktop dictation shortcut":"Phím nhập giọng nói của hệ điều hành",
+"Allow browser speech service when available (audio may be processed remotely).":"Cho phép dịch vụ nhận giọng nói của trình duyệt nếu có (âm thanh có thể được xử lý từ xa).",
+"Start dictation":"Bắt đầu nhập giọng nói",
+"Stop dictation":"Dừng nhập giọng nói",
+"Browser dictation is unavailable here. The prompt is focused; use system dictation.":"Webview chưa hỗ trợ dịch vụ nhận giọng nói này. Con trỏ đã ở ô prompt; hãy dùng dictation của hệ điều hành.",
+"Dictation could not start. Check microphone permission or use system dictation.":"Không thể bắt đầu. Kiểm tra quyền micro hoặc dùng dictation của hệ điều hành.",
+"Submitting…":"Đang gửi…",
+"Waiting for public CLI output…":"Đang chờ đầu ra công khai của CLI…",
+"Elapsed time is measured; completion time is unknown.":"Thời gian đã chạy được đo thực tế; chưa xác định lúc hoàn thành.",
+"Drop files or paste an image · text, DOCX, ODT, PDF, PNG/JPEG/WebP/GIF":"Thả file hoặc dán ảnh · văn bản, DOCX, ODT, PDF, PNG/JPEG/WebP/GIF",
+
 "phases":"giai đoạn",
 "Flow and checklist":"Luồng và checklist",
 "Daily model budgets":"Định mức mô hình trong ngày",

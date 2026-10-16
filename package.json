@@ -2,7 +2,7 @@
   "name": "ai-team-workbench",
   "displayName": "RelayCrew",
   "description": "%description%",
-  "version": "0.9.7",
+  "version": "0.9.8",
   "publisher": "local-ai-team",
   "license": "MIT",
   "engines": {
@@ -35,7 +35,8 @@
   },
   "dependencies": {
     "cron-parser": "^5.4.0",
-    "cross-spawn": "^7.0.6"
+    "cross-spawn": "^7.0.6",
+    "fflate": "0.8.2"
   },
   "devDependencies": {
     "@types/cross-spawn": "^6.0.6",

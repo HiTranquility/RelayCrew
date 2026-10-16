@@ -1,8 +1,9 @@
+import {documentText} from './document-text';
 import { createHash, randomUUID } from 'node:crypto';
 import { mkdir, readFile, readdir, stat, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-export interface Attachment { id:string; name:string; mime:'text/plain'|'image/png'|'image/jpeg'; bytes:number; sha256:string }
+export interface Attachment { id:string; name:string; mime:'text/plain'|'image/png'|'image/jpeg'|'image/webp'|'image/gif'|'application/pdf'; bytes:number; sha256:string }
 export interface AttachmentContent extends Attachment { data:Buffer }
 export const attachmentLimits={count:8,image:4*1024*1024,text:256*1024,total:16*1024*1024,cache:256*1024*1024};
 const hash=(data:Buffer)=>createHash('sha256').update(data).digest('hex');
@@ -12,6 +13,9 @@ export function attachmentContent(name:unknown,data:Buffer):Omit<AttachmentConte
   let mime:Attachment['mime'];
   if(data.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10])))mime='image/png';
   else if(data.length>=3&&data[0]===255&&data[1]===216&&data[2]===255)mime='image/jpeg';
+  else if(data.subarray(0,4).toString()==='RIFF'&&data.subarray(8,12).toString()==='WEBP')mime='image/webp';
+  else if(['GIF87a','GIF89a'].includes(data.subarray(0,6).toString()))mime='image/gif';
+  else if(data.subarray(0,5).toString()==='%PDF-')mime='application/pdf';
   else {
     if(/\.(png|jpe?g|gif|webp|pdf|zip|exe)$/i.test(name))throw new Error('Supported attachments: UTF-8 text/code, PNG and JPEG.');
     try {const text=new TextDecoder('utf-8',{fatal:true}).decode(data);if(/[\x00-\x08\x0e-\x1f]/.test(text))throw new Error();}
@@ -27,6 +31,7 @@ export class AttachmentStore {
   constructor(readonly directory:string){}
   add(name:unknown,data:Buffer):Promise<Attachment>{
     const operation=this.queue.then(async()=>{
+      const extracted=typeof name==='string'?documentText(name,data):undefined;if(extracted){name=extracted.name;data=extracted.data;}
       const content=attachmentContent(name,data);await mkdir(this.directory,{recursive:true});
       let bytes=0;for(const file of await readdir(this.directory))if(file.endsWith('.data'))bytes+=(await stat(join(this.directory,file))).size;
       if(bytes+data.length>attachmentLimits.cache)throw new Error('Attachment cache is full (256 MB). Open saved data to manage snapshots.');
