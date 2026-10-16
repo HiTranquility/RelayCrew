@@ -10,6 +10,11 @@ export function resolveLanguage(preference: unknown, displayLanguage = 'en'): La
 // English source messages are the fallback. Translate presentation, never stored
 // status codes, model IDs, account labels, prompts or provider responses.
 export const vietnamese: Record<string, string> = {
+"Install CLI on this computer?":"Cài CLI trên máy này?",
+"Export layout":"Xuất bố cục",
+"Import layout":"Nhập bố cục",
+"Layout imported.":"Đã nhập bố cục.",
+
 "Layout and shortcuts":"Bố cục và phím tắt",
 "Drag the dividers, use their arrow keys, or enter sizes below. Double-click a divider to reset it.":"Kéo thanh chia, dùng phím mũi tên hoặc nhập kích thước bên dưới. Nhấp đúp để đặt lại.",
 "Session list width (px)":"Chiều rộng danh sách phiên (px)",

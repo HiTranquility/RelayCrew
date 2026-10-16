@@ -13,7 +13,8 @@ export async function findLocalCli(provider:Provider,preferred?:string):Promise<
   const paths=(process.env.PATH??process.env.Path??'').split(delimiter).filter(Boolean);
   paths.push(join(homedir(),'.local','bin'),join(homedir(),'.npm-global','bin'));
   if(process.env.APPDATA)paths.push(join(process.env.APPDATA,'npm'));
-  for(const dir of paths)for(const suffix of suffixes)candidates.push(join(dir,provider+suffix));
+  if(provider==='antigravity'&&process.env.LOCALAPPDATA)paths.push(join(process.env.LOCALAPPDATA,'agy','bin'));
+  for(const dir of paths)for(const suffix of suffixes)candidates.push(join(dir,(provider==='antigravity'?'agy':provider)+suffix));
   if(provider==='codex'&&process.platform==='win32'&&process.env.LOCALAPPDATA){
     const root=join(process.env.LOCALAPPDATA,'OpenAI','Codex','bin');
     try {const dirs=await Promise.all((await readdir(root,{withFileTypes:true})).filter(d=>d.isDirectory()).map(async d=>({path:join(root,d.name,'codex.exe'),time:(await stat(join(root,d.name))).mtimeMs})));candidates.push(...dirs.sort((a,b)=>b.time-a.time).map(d=>d.path));}catch{/* optional desktop installation */}

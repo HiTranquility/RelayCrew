@@ -1,0 +1,22 @@
+{
+  "version": "0.9.4",
+  "extensionId": "local-ai-team.ai-team-workbench",
+  "displayName": "RelayCrew",
+  "artifact": {
+    "file": "relaycrew-0.9.4.vsix",
+    "sha256": "c17ab590f8fca8f06e9cef818a3816a6e158614367f77dcb11ccd9f1f1b3a7cc",
+    "bytes": 625417
+  },
+  "source": {
+    "file": "relaycrew-0.9.4-source.zip",
+    "sha256": "b1bc1ed8f0ffc744b57747acc12d1ea008016e85e778ba671aab0bc2984e166c",
+    "bytes": 355465,
+    "kind": "repository-source-snapshot",
+    "includesTests": true,
+    "includesLockfile": true,
+    "includesGitHistory": false,
+    "includesReleaseCatalog": false,
+    "files": 135
+  },
+  "provenance": "Versioned source and VSIX after type checking, tests and focused UI verification. Generated previews remain local."
+}

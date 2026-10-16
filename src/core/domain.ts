@@ -3,7 +3,7 @@ import { CronExpressionParser } from 'cron-parser';
 import type { Attachment } from '../storage/attachments';
 import type { WorkflowDocument } from './workflow';
 
-export type Provider = 'codex' | 'claude' | 'gemini' | 'compatible';
+export type Provider = 'codex' | 'claude' | 'gemini' | 'antigravity' | 'compatible';
 export type Role = 'builder' | 'auditor' | 'worker' | 'lead';
 export type RoleOverrides = Partial<Record<Role, { model?: string; effort?: string }>>;
 export interface Management { primaryProfileId: string; coordinatorIds: string[] }
@@ -116,7 +116,7 @@ export function validateProfiles(value: unknown): Profile[] {
   const ids = new Set<string>();
   for (const p of value) {
     if (!p || typeof p !== 'object' || !/^[a-zA-Z0-9_-]+$/.test(p.id) || ids.has(p.id)
-      || !['codex', 'claude', 'gemini', 'compatible'].includes(p.provider)
+      || !['codex', 'claude', 'gemini', 'antigravity', 'compatible'].includes(p.provider)
       || typeof p.label !== 'string' || !p.label || typeof p.executable !== 'string' || !p.executable) {
       throw new Error('Each profile needs a unique id, label, provider and executable.');
     }

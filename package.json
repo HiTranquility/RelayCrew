@@ -2,7 +2,7 @@
   "name": "ai-team-workbench",
   "displayName": "RelayCrew",
   "description": "%description%",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "publisher": "local-ai-team",
   "license": "MIT",
   "engines": {
@@ -331,7 +331,8 @@
                   "codex",
                   "claude",
                   "gemini",
-                  "compatible"
+                  "compatible",
+                  "antigravity"
                 ]
               },
               "executable": {
