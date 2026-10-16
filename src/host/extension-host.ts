@@ -122,6 +122,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   let quotaReadAt=0;
   const cfg = () => vscode.workspace.getConfiguration('aiTeam');
   const profiles = () => validateProfiles(cfg().get('profiles'));
+  const dailyRoots=()=>[...new Set([...projectRoots().map(r=>r.path),...(daily.workspaces??[]).map(w=>w.path)])];
   const projectRoots = () => (vscode.workspace.workspaceFolders ?? []).map(root => ({name:root.name,path:root.uri.fsPath}));
   const createJob = (...args: Parameters<typeof newJob>) => {
     const job=newJob(...args);job.isolationMode=cfg().get('isolateTasks',false)?'worktree':'shared';job.openInCodex=cfg().get('openTasksInCodex',false);job.promptTemplates=snapshotPromptTemplates(state.promptTemplates);if(state.workflow)job.workflow=structuredClone(state.workflow);return job;
@@ -240,7 +241,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       output.appendLine(`[${job.id}] ${step.role} → ${profile.id}, model=${profile.model || t("CLI default")}, effort=${profile.effort || t("default")}, edits=${edits}`);
       step.phase='cli';step.timeoutAt=new Date(Date.now()+cfg().get('timeoutMinutes',30)*60_000).toISOString();changed();
       let lastRefresh = 0;
-      const result = await execute({ profile, prompt: step.request ?? stepPrompt(job, step), cwd: job.cwd, edits, signal, secretValues: secrets,attachments:await attachmentStore.resolve(job.attachments?.map(a=>a.id)),
+      const result = await execute({ permission:job.permission,profile, prompt: step.request ?? stepPrompt(job, step), cwd: job.cwd, edits, signal, secretValues: secrets,attachments:await attachmentStore.resolve(job.attachments?.map(a=>a.id)),
         timeoutMs: cfg().get('timeoutMinutes', 30) * 60_000,
         onEvent: event => {
           const timeline = job.timeline ??= [];
@@ -385,6 +386,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       board.onDidDispose(() => { board = undefined; boardLanguage=undefined; boardReady=false; }, undefined, context.subscriptions);
       board.webview.onDidReceiveMessage(message => void guard(async () => {
         if(message?.action==='shareLayout'){if(message.kind==='export'){const uri=await vscode.window.showSaveDialog({defaultUri:vscode.Uri.file(join(storage,'relaycrew-layout.json')),filters:{JSON:['json']}});if(uri)await vscode.workspace.fs.writeFile(uri,Buffer.from(JSON.stringify({version:1,layout:normalizeLayout(message.layout)},null,2)));}else if(message.kind==='import'){const picked=await vscode.window.showOpenDialog({canSelectMany:false,filters:{JSON:['json']}});if(picked?.[0]){const info=await vscode.workspace.fs.stat(picked[0]);if(info.size>8192)throw new Error('Layout file is too large.');const value=JSON.parse(Buffer.from(await vscode.workspace.fs.readFile(picked[0])).toString('utf8'));if(value.version!==1||!value.layout)throw new Error('Invalid layout file.');await board?.webview.postMessage({type:'layoutImported',layout:normalizeLayout(value.layout),message:t('Layout imported.')});}}return;}
+        if(message?.action==='importDailyFolders'){const picked=await vscode.window.showOpenDialog({canSelectFolders:true,canSelectFiles:false,canSelectMany:true,title:t('Import local folders')});if(picked){daily.workspaces??=[];for(const uri of picked){if(uri.scheme!=='file'||!(await stat(uri.fsPath)).isDirectory())continue;if(dailyRoots().length>=20)break;if(!daily.workspaces.some(w=>w.path===uri.fsPath))daily.workspaces.push({path:uri.fsPath,permission:'read-only',enabled:false});}await save();changed();}return;}
         const sections:Record<string,string>={saveTeam:'team',saveRouting:'routing',previewWorkflow:'workflow',applyWorkflow:'workflow',saveQuota:'quota',switchAssignment:'assignment',tryCliInline:'trial',checkCli:'account',saveProfileSecret:'account',saveConnection:'connection',disconnectConnection:'connection',testConnection:'connection',saveTemplates:'templates',previewTemplates:'templates'};
         if(message&&Object.hasOwn(sections,message.action)){
           const section=sections[message.action];
@@ -444,8 +446,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
             if(message.action==='saveSchedule'){
               const previous=state.schedules.find(s=>s.id===message.value?.id),schedule=scheduleFromForm(message.value,projectRoots().map(r=>r.path),state.roles,previous);
               if(!previous){validateRoles();schedule.flow=[...state.flow!];schedule.overrides=structuredClone(state.overrides);schedule.management=structuredClone(state.management);state.schedules.push(schedule);}else state.schedules[state.schedules.indexOf(previous)]=schedule;
-            }else if(message.action==='saveDailyPlan')await dailyController.configure(message.value,projectRoots().map(r=>r.path));
-            else if(message.action==='addDailyItem')await dailyController.addInline(message.value);
+            }else if(message.action==='saveDailyPlan')await dailyController.configure(message.value,dailyRoots());
+            else if(message.action==='addDailyItem')await dailyController.addInline(message.value,dailyRoots());
             else if(message.action==='moveDailyItem')await dailyController.moveItem(message.id,message.direction);
             else {
               const job=state.jobs.find(j=>j.id===message.id);if(!job)throw new Error('Task no longer exists.');

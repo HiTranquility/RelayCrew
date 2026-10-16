@@ -56,6 +56,7 @@ export interface Step {
   modelSource?:'custom'|'alias'|'catalog'|'cli-default';
 }
 export interface Job {
+  permission?:import('./daily-workspaces').TaskPermission;
   acceptance?: {id:string;text:string;checked:boolean;checkedAt?:string}[];
   kind?:'chat';
   chatHistory?:{role:'user'|'assistant';text:string}[];

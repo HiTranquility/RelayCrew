@@ -10,6 +10,14 @@ export function resolveLanguage(preference: unknown, displayLanguage = 'en'): La
 // English source messages are the fallback. Translate presentation, never stored
 // status codes, model IDs, account labels, prompts or provider responses.
 export const vietnamese: Record<string, string> = {
+"Import local folders":"Nhập thư mục cục bộ",
+"Select folders and permissions individually. Full permission requires confirmation; Allow Edits still applies.":"Chọn từng thư mục và quyền. Full cần xác nhận; công tắc Cho phép sửa vẫn áp dụng.",
+"Included folders and permissions":"Thư mục được chọn và quyền",
+"Permissions":"Quyền",
+"Read only":"Chỉ đọc",
+"Auto · workspace edits":"Auto · sửa trong workspace",
+"Full permission":"Quyền đầy đủ",
+
 "Install CLI on this computer?":"Cài CLI trên máy này?",
 "Export layout":"Xuất bố cục",
 "Import layout":"Nhập bố cục",

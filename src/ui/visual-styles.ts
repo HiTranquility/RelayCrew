@@ -17,4 +17,5 @@ section,.task-card,.account-card{border-color:var(--rc-border)}section>h2{font-s
 summary{padding:6px 0;line-height:1.5}.layout-menu>summary{padding:4px 12px}input[type=checkbox],input[type=radio]{accent-color:var(--vscode-focusBorder,#007acc)}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
 @media(max-width:700px){.toolbar-actions{width:100%;gap:6px}.toolbar-actions>.primary{flex:1}.brand-subtitle{font-size:.9em}.workspace-label{display:none}.tabs button{padding:9px 10px}td,th{padding:9px}.form-grid{gap:12px}}
+.workspace-picker{grid-column:1/-1;min-width:0;border:1px solid var(--rc-border);padding:12px}.workspace-choice{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--rc-border)}.workspace-choice label{min-width:0;max-width:100%;overflow-wrap:anywhere}.workspace-choice select{max-width:240px}.workspace-choice small{display:block}
 `;
