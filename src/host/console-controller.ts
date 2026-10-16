@@ -2,9 +2,11 @@ import { answerOwner, type Job } from '../core/domain';
 import { parseConsoleInput } from '../core/console-input';
 import type { Attachment } from '../storage/attachments';
 
-export interface ConsoleRequest { requestId:unknown; text:unknown; cwd:unknown; sessionId?:unknown; replyVersion?:unknown; attachments?:unknown }
+export interface ConsoleRequest { requestId:unknown; text:unknown; cwd:unknown; sessionId?:unknown; replyVersion?:unknown; attachments?:unknown; mode?:unknown;profileId?:unknown }
 interface Hooks {
   jobs:Job[]; roots:()=>string[]; create:(prompt:string,cwd:string)=>Job;
+  createChat?:(prompt:string,cwd:string,profileId:string,parent?:Job)=>Job;
+  prepare?:(mode:'task'|'chat',profileId?:string)=>Promise<void>;
   paused:()=>boolean; pause:(paused:boolean)=>void; cancel:(id:string)=>void;
   save:()=>Promise<void>; changed:()=>void; start:()=>void;
   attachments?:(ids:unknown)=>Promise<Attachment[]>;
@@ -15,8 +17,8 @@ export class ConsoleController {
   async submit(request:ConsoleRequest):Promise<{jobId?:string;message:string}> {
     if(this.submitting)throw new Error('Another submission is being saved. Retry shortly.');
     if(typeof request.requestId!=='string'||!/^console-[a-f0-9-]{36}$/i.test(request.requestId))throw new Error('Invalid console request.');
-    const command=parseConsoleInput(request.text),h=this.hooks;
-    if(command.kind==='task'){
+    const parsed=parseConsoleInput(request.text),command=parsed.kind==='task'&&request.mode==='chat'&&typeof request.text==='string'&&!request.text.trim().startsWith('/')?{...parsed,kind:'chat' as const}:parsed,h=this.hooks;
+    if(command.kind==='task'||command.kind==='chat'){
       const previous=h.jobs.find(job=>job.consoleRequestId===request.requestId);
       if(previous){await h.save();h.changed();h.start();return {jobId:previous.id,message:'Task already queued.'};}
     }
@@ -25,11 +27,13 @@ export class ConsoleController {
     this.submitting=true;
     try {
       const attachments=h.attachments?await h.attachments(request.attachments):[];
-      if(attachments.length&&!['task','reply'].includes(command.kind))throw new Error('Attachments can only be sent with a task or reply.');
+      if(attachments.length&&!['task','chat','reply'].includes(command.kind))throw new Error('Attachments can only be sent with a task or reply.');
       let jobId:string|undefined,message:string;
-      if(command.kind==='task'){
+      if(command.kind==='task'||command.kind==='chat'){
         if(typeof request.cwd!=='string'||!h.roots().includes(request.cwd))throw new Error('Select an open workspace folder.');
-        const job=h.create(command.text,request.cwd);job.consoleRequestId=request.requestId;if(attachments.length)job.attachments=attachments;h.jobs.push(job);jobId=job.id;message='Task queued. Follow the session below.';
+        if(command.kind==='chat'&&(typeof request.profileId!=='string'||!h.createChat))throw new Error('Choose an account for chat.');
+        await h.prepare?.(command.kind,typeof request.profileId==='string'?request.profileId:undefined);
+        const job=command.kind==='chat'?h.createChat!(command.text,request.cwd,request.profileId as string,selected?.kind==='chat'?selected:undefined):h.create(command.text,request.cwd);job.consoleRequestId=request.requestId;if(attachments.length)job.attachments=attachments;h.jobs.push(job);jobId=job.id;message=command.kind==='chat'?'Chat queued. One account replies without an audit.':'Task queued. Follow the session below.';
       }else if(command.kind==='reply'){
         if(!selected)throw new Error('Select a session waiting for your reply.');
         if(request.replyVersion!==(selected.ownerReplies?.length??0))throw new Error('The agent question changed. Review the latest question before replying.');

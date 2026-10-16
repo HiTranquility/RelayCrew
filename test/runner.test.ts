@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtemp, writeFile, rm, chmod } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { decodeResponse, execute, invocation, liveEvent, providerLimited, redact } from '../src/adapters/cli/runner';
+import { decodeResponse, execute, invocation, liveEvent, publicEventStream, providerLimited, redact } from '../src/adapters/cli/runner';
 import type { Profile } from '../src/core/domain';
 test('arguments preserve exact requested model and keep owner prompt on stdin', () => {
   const p: Profile = { id: 'x', label: 'X', executable: 'codex', provider: 'codex', model: 'custom-model & echo injected', effort: 'medium' };
@@ -26,6 +26,14 @@ test('streaming adapters extract public answers and classify provider limits wit
   assert.equal(providerLimited('{"type":"turn.failed","error":{"message":"You have hit your usage limit"}}'),true);
   assert.equal(providerLimited('{"error":{"code":429}}'),true);
   assert.equal(providerLimited('{"response":"User mentioned quota exhausted in a normal answer"}'),false);
+});
+
+test('Claude partial streams and their final assistant snapshot are presented once, including across multiple messages',()=>{
+  const stream=publicEventStream(),delta=(text:string)=>({type:'stream_event',event:{delta:{type:'text_delta',text}}}),full=(text:string)=>({type:'assistant',message:{content:[{type:'text',text}]}});
+  assert.equal(stream(delta('Hello'))?.text,'Hello');assert.equal(stream(delta('!'))?.text,'!');assert.equal(stream(full('Hello!')),undefined);
+  stream({type:'stream_event',event:{type:'message_start'}});assert.equal(stream(full('Second answer'))?.text,'Second answer');
+  stream(delta('Partial'));assert.equal(stream(full('Partial remainder'))?.text,' remainder');
+  assert.equal(stream({type:'stream_event',event:{delta:{type:'thinking_delta',thinking:'private'}}}),undefined);
 });
 test('real subprocess transport: stdin, model quoting, secret masking, timeout, cancellation', async () => {
   const dir = await mkdtemp(join(tmpdir(), 'ai-team-test-'));

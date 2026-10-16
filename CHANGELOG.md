@@ -2,6 +2,15 @@
 
 Versions before 1.0 are early releases. See [release archives](releases/README.md) for exact packages, hashes and source provenance.
 
+## 0.8.0 — 2026-10-17
+
+- Add one-account read-only chat and greeting routing; keep coding pipelines explicit. Show readable replies with expandable technical activity.
+- Send with Enter/Shift+Enter, configurable Ctrl+Enter preference, composition/pending guards, configuration form shortcuts and global board/chat/task/pause shortcuts.
+- Deduplicate Claude text deltas and final assistant snapshots.
+- Show Install CLI, Sign in and Check connection on account cards; discover executables before dispatch and return actionable missing-CLI errors.
+- Move role controls into a separate card corner: accounts can cover multiple roles; the primary-manager selection is exclusive.
+- Open prompt editing from role pencils, flow nodes and composer. Rename roles and attach/edit per-role Markdown with immutable task snapshots.
+
 ## 0.7.0 — 2026-10-16
 
 - Add editable input/response templates by role, built-in presets, local preview/reset, Markdown import and per-task snapshots/hashes.

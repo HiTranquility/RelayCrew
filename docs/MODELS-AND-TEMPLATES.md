@@ -30,3 +30,7 @@ Không cần nhập model ID. Mặc định **Flagship / khuyến nghị tự đ
 Chỉnh mức suy luận và ngưỡng quota từng account trong form. Ngưỡng áp dụng giữa các bước, dựa trên quota đã quan sát; không cắt lượt đang chạy hoặc tạo hạn mức tiền/token cứng. Daily vẫn giữ nút loại trừ tài khoản.
 
 Vào **Thiết lập → Mẫu đầu vào và phản hồi** để chọn vai trò, mẫu có sẵn, sửa đầu vào/phản hồi mong muốn, xem trước, khôi phục và lưu. Xem trước không gọi AI. Audit/manager giữ các trường JSON cần điều phối. Tác vụ mới lưu bản chụp và hash; lịch sử cũ được giữ nguyên.
+
+## Role names and per-role Markdown (0.8)
+
+Pencil buttons on account cards and flow nodes open the chosen role directly. Set an optional name (80 characters), attach a UTF-8 `.md` guide (32 KB), or edit its content in place. Save all templates. The name and guide are part of the task template snapshot/hash and report; only the assigned role receives that role-specific guide. Renaming does not change internal Dev/Audit/Repair/Lead permissions or output envelopes. Choosing an input/output preset preserves the name/guide; Restore role default clears that role’s customization. The general conversational chat mode uses its own read-only conversation instructions rather than coding-role templates.

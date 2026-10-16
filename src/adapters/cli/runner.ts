@@ -66,6 +66,21 @@ export function liveEvent(e: any): { kind: string; text: string } | undefined {
   return;
 }
 
+export function publicEventStream(): (event:any)=>ReturnType<typeof liveEvent> {
+  let streamed='';
+  return event=>{
+    if(event.type==='stream_event'&&event.event?.type==='message_start')streamed='';
+    const value=liveEvent(event);if(!value)return;
+    if(event.type==='stream_event'&&event.event?.delta?.type==='text_delta'){streamed+=value.text;return value;}
+    if(event.type==='assistant'){
+      const prior=streamed;streamed='';
+      if(prior&&value.text===prior)return;
+      if(prior&&value.text.startsWith(prior))return {...value,text:value.text.slice(prior.length)};
+    }
+    return value;
+  };
+}
+
 export interface ExecuteOptions {
   profile: Profile; prompt: string; cwd: string; edits: boolean; signal: AbortSignal;
   timeoutMs: number; secretValues: Record<string, string>; log: (s: string) => void;
@@ -112,10 +127,11 @@ export async function execute(o: ExecuteOptions): Promise<string> {
       });
       let out = '', err = '', stopReason = '', stopping: Promise<void> | undefined;
       let pendingLine = '';
+      const publicEvent=publicEventStream();
       const outDecoder = new StringDecoder('utf8'), errDecoder = new StringDecoder('utf8');
       const eventLine = (line: string) => {
         try {
-          const event = liveEvent(JSON.parse(line));
+          const event = publicEvent(JSON.parse(line));
           if (event?.text) o.onEvent?.({ kind: event.kind, text: clean(event.text).slice(0, 3000) });
         } catch { /* non-JSON diagnostic line remains in sanitized final log */ }
       };

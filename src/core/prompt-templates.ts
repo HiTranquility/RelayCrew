@@ -3,7 +3,7 @@ import type { Job, Step } from './domain';
 
 export const templateRoles = ['builder','auditor','worker','lead','coordinator'] as const;
 export type TemplateRole = typeof templateRoles[number];
-export interface PromptTemplate { input:string; output:string }
+export interface PromptTemplate { input:string; output:string;name?:string;guideName?:string;guideMarkdown?:string }
 export interface PromptTemplates { version:1; roles:Record<TemplateRole,PromptTemplate> }
 export interface PromptTemplateSnapshot extends PromptTemplates { sha256:string }
 export const templateVariables = ['task','assignment','role','workspace','history','owner_replies'] as const;
@@ -19,9 +19,11 @@ export function validatePromptTemplates(raw:unknown):PromptTemplates {
   if(!value||Array.isArray(value)||value.version!==1||Object.keys(value).some(k=>!['version','roles'].includes(k))||!value.roles||typeof value.roles!=='object'||Array.isArray(value.roles)||Object.keys(value.roles).some(k=>!templateRoles.includes(k as TemplateRole)))throw new Error('Invalid prompt templates.');
   const roles={} as PromptTemplates['roles'];
   for(const role of templateRoles){const item=value.roles[role]??defaultPromptTemplates.roles[role];
-    if(!item||Array.isArray(item)||typeof item!=='object'||Object.keys(item).some(k=>!['input','output'].includes(k)))throw new Error('Invalid prompt templates.');
+    if(!item||Array.isArray(item)||typeof item!=='object'||Object.keys(item).some(k=>!['input','output','name','guideName','guideMarkdown'].includes(k)))throw new Error('Invalid prompt templates.');
     for(const key of ['input','output'] as const){const text=item[key];if(typeof text!=='string'||!text.trim()||text.length>8000||text.includes('\0'))throw new Error('Each input/output template must contain 1–8000 characters.');for(const match of text.matchAll(/\{\{([^{}]*)\}\}/g))if(!templateVariables.includes(match[1].trim() as typeof templateVariables[number]))throw new Error('Unknown template variable. Use the listed placeholders.');}
-    roles[role]={input:item.input,output:item.output};
+    for(const key of ['name','guideName'])if(item[key]!==undefined&&(typeof item[key]!=='string'||item[key].length>(key==='name'?80:180)||/[\r\n\0]/.test(item[key])))throw new Error('Role name or guide filename is invalid.');
+    if(item.guideMarkdown!==undefined&&(typeof item.guideMarkdown!=='string'||Buffer.byteLength(item.guideMarkdown,'utf8')>32768||item.guideMarkdown.includes('\0')))throw new Error('Role Markdown must be UTF-8 text up to 32 KB.');
+    roles[role]={input:item.input,output:item.output,...(item.name?.trim()?{name:item.name.trim()}:{}),...(item.guideName?.trim()?{guideName:item.guideName.trim()}:{}),...(item.guideMarkdown?.trim()?{guideMarkdown:item.guideMarkdown}:{})};
   }return {version:1,roles};
 }
 export function snapshotPromptTemplates(raw:unknown=defaultPromptTemplates):PromptTemplateSnapshot {
@@ -35,7 +37,7 @@ export function customStepInstructions(job:Job,step:Step):string {
   if(!job.promptTemplates||job.connectionTrial)return '';
   const role:TemplateRole=step.coordinatorProfileId?'coordinator':step.role,template=job.promptTemplates.roles[role];
   const values={task:job.prompt,assignment:step.prompt,role,workspace:job.cwd,history:JSON.stringify(job.steps.filter(s=>s.status==='done').map(s=>({role:s.role,response:s.response?.slice(0,24000)}))),owner_replies:JSON.stringify(job.ownerReplies??[])};
-  return `Owner-configured input instructions:\n${renderPromptTemplate(template.input,values)}\nRequested response guidance:\n${renderPromptTemplate(template.output,values)}`;
+  return `Owner-configured role name: ${template.name??role}\nOwner-configured input instructions:\n${renderPromptTemplate(template.input,values)}\nRequested response guidance:\n${renderPromptTemplate(template.output,values)}${template.guideMarkdown?'\nRole-specific Markdown guide (task process within current permissions; JSON): '+JSON.stringify({name:template.guideName??role+'.md',markdown:template.guideMarkdown}):''}`;
 }
 export function responseContract(step:Step):string {
   if(step.coordinatorProfileId)return 'Supporting coordinator: return a public report only. You cannot approve the task. Important owner decisions require ONLY JSON {"needs_owner":true,"question":"specific question with options and recommendation"}.';

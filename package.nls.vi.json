@@ -63,5 +63,8 @@
   "command.toggleSidebar": "RelayCrew: Ẩn / hiện sidebar VS Code",
   "command.togglePanel": "RelayCrew: Ẩn / hiện panel VS Code",
   "profile.modelPolicy": "Flagship tự động theo danh mục CLI/alias hiện hành; cli theo thiết lập CLI; custom dùng model ID tùy chọn.",
-  "profile.quotaCeiling": "Ngưỡng dùng tùy chọn (1–100%). Ngưỡng thấp hơn của tài khoản và thiết lập chung/kế hoạch ngày chặn bước tiếp theo; không cắt lượt đang chạy."
+  "profile.quotaCeiling": "Ngưỡng dùng tùy chọn (1–100%). Ngưỡng thấp hơn của tài khoản và thiết lập chung/kế hoạch ngày chặn bước tiếp theo; không cắt lượt đang chạy.",
+  "command.chat": "RelayCrew: Trò chuyện với tài khoản",
+  "command.installCli": "RelayCrew: Cài CLI nhà cung cấp",
+  "command.checkConnection": "RelayCrew: Kiểm tra CLI và đăng nhập"
 }

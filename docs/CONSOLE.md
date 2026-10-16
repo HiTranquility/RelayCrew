@@ -1,4 +1,16 @@
-# Live console (0.6)
+# Live console (0.8)
+
+## Chat, team tasks and keyboard
+
+The composer offers **Chat · one account, read-only**, **Team task · Dev → Audit → Manager**, and owner replies. Choose a chat account explicitly. A greeting such as `hello` runs one read-only reply; no audit/manager stages or repository inspection are requested. Team work is explicit through the selector, New task or `/new`/`/task`; `/ask` chooses chat. Chat sessions can include bounded previous conversation context.
+
+**Enter** sends, **Shift+Enter** adds a line, and **Ctrl/Cmd+Enter** also sends. The Send shortcut selector can restore Enter-for-newline behavior with Ctrl+Enter sending. IME composition, held keys and pending submissions do not submit again. Ctrl/Cmd+Enter also submits the active inline configuration form. Copy/paste remains native.
+
+Global shortcuts: Ctrl+Alt+Shift+R opens the board; C opens chat; N opens a team task; P pauses/resumes the queue. On macOS use Cmd instead of Ctrl. Customize these in VS Code Keyboard Shortcuts.
+
+The readable reply appears above expandable **Technical activity**. JSON audit/manager summaries are extracted for reading; raw requests, tool events and responses remain available. Claude partial streaming plus its full assistant snapshot is de-duplicated.
+
+**Tiếng Việt:** Chọn Trò chuyện để một tài khoản trả lời, hoặc Giao việc nhóm để chạy Dev/Audit/Manager. Enter gửi, Shift+Enter xuống dòng; có tùy chọn Ctrl+Enter. Câu chào không còn chạy kiểm định repo. Câu trả lời được tách khỏi nhật ký kỹ thuật có thể mở rộng. Nút Sửa prompt dẫn thẳng tới mẫu theo vai trò; các mẫu này dùng cho giao việc nhóm.
 
 ## Files, images and clipboard
 

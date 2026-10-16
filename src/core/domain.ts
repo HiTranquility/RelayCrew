@@ -47,6 +47,8 @@ export interface Step {
   modelSource?:'custom'|'alias'|'catalog'|'cli-default';
 }
 export interface Job {
+  kind?:'chat';
+  chatHistory?:{role:'user'|'assistant';text:string}[];
   id: string; prompt: string; cwd: string; createdAt: string;
   status: 'queued' | 'running' | 'completed' | 'needs_attention' | 'waiting_owner' | 'waiting_quota' | 'failed' | 'cancelled' | 'interrupted';
   roles: Record<Role, string>; steps: Step[]; audit?: Audit; error?: string;

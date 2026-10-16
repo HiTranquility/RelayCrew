@@ -29,3 +29,9 @@ test('Markdown can import validated template overrides while preserving current 
 test('connection trials keep their bounded instructions even when custom templates exist',()=>{
   const job=newJob('Trial','/repo',roles);job.connectionTrial=true;const set=structuredClone(defaultPromptTemplates);set.roles.builder.input='CUSTOM INPUT MUST NOT RUN';job.promptTemplates=snapshotPromptTemplates(set);assert.ok(!stepPrompt(job,job.steps[0]).includes('CUSTOM INPUT MUST NOT RUN'));
 });
+
+test('role names and Markdown guides are validated, snapshotted per role and supplied only to their assigned role',()=>{
+  const set=structuredClone(defaultPromptTemplates);set.roles.builder.name='Frontend Dev';set.roles.builder.guideName='frontend.md';set.roles.builder.guideMarkdown='# Frontend\nCheck keyboard accessibility.';const job=newJob('feature','/repo',roles);job.promptTemplates=snapshotPromptTemplates(set);set.roles.builder.guideMarkdown='later change';
+  assert.match(stepPrompt(job,job.steps[0]),/Frontend Dev/);assert.match(stepPrompt(job,job.steps[0]),/keyboard accessibility/);assert.ok(!stepPrompt(job,{role:'auditor',title:'Review',prompt:'Audit',status:'pending'}).includes('keyboard accessibility'));
+  assert.throws(()=>snapshotPromptTemplates({...set,roles:{...set.roles,builder:{...set.roles.builder,name:'x'.repeat(81)}}}));assert.throws(()=>snapshotPromptTemplates({...set,roles:{...set.roles,builder:{...set.roles.builder,guideMarkdown:'x'.repeat(32769)}}}));
+});

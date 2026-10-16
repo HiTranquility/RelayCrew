@@ -63,5 +63,8 @@
   "command.toggleSidebar": "RelayCrew: Toggle VS Code Sidebar",
   "command.togglePanel": "RelayCrew: Toggle VS Code Panel",
   "profile.modelPolicy": "Automatic flagship uses the current CLI catalog/provider alias; cli follows existing CLI settings; custom uses an optional model ID.",
-  "profile.quotaCeiling": "Optional usage ceiling (1–100%). The lower account/global or daily-plan threshold stops subsequent steps; it does not interrupt an in-flight request."
+  "profile.quotaCeiling": "Optional usage ceiling (1–100%). The lower account/global or daily-plan threshold stops subsequent steps; it does not interrupt an in-flight request.",
+  "command.chat": "RelayCrew: Chat with an Account",
+  "command.installCli": "RelayCrew: Install Provider CLI",
+  "command.checkConnection": "RelayCrew: Check CLI and Sign-in"
 }

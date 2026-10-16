@@ -1,5 +1,13 @@
 # Validation · 16/10/2026
 
+## 0.8.0
+
+99 automated tests cover the prior suite plus chat parsing/lifecycle/context, preflight failures before job creation, readable replies, Claude streaming deduplication, fixed install/login plans, shell argument quoting, honest authentication status, and role name/Markdown validation and isolation.
+
+Browser QA exercises Enter sending, Shift+Enter/newline, IME and pending guards, Ctrl+Enter preference retention, configuration Ctrl+Enter saving, multi-role account checkboxes, exclusive manager selection, visible onboarding actions, prompt-pencil navigation and role guide import/save. English/Vietnamese and light/dark themes are covered; previews use demo data. Native VS Code smoke checks contributed commands and common configuration without popup wizards.
+
+An authorized live Codex chat test sent `hello` through the real extension in an isolated VS Code profile. It completed with exactly one read-only call, current catalog model `gpt-6.1-sol`, medium effort, four public events and response `Hello! How can I help you today?`. No tool event or Audit/Manager stage occurred. The CLI sign-in check passed without exposing account identity. This verifies the bounded greeting path, not general coding quality. Install commands and interactive sign-in are wired and fixture-checked; no global CLI installation, login session change or real Claude/Gemini generation was performed during these tests.
+
 ## 0.7.0
 
 Added tests cover one-pass template substitution, immutable snapshots, actual engine role requests with required output contracts, Markdown templates, model catalog/alias/custom/fallback selection and account quota ceilings. A metadata-only check of the installed Codex model/list returned the current recommendation without creating a thread or model turn. Browser QA includes template presets/edit/preview/reset/reload and optional model controls.

@@ -16,11 +16,12 @@ The preview uses **demo data**, not live accounts or provider usage. The [assign
 
 ## Features
 
+- **CLI onboarding:** visible Install CLI, Sign in and Check connection controls on every saved account. Install/login run in dedicated terminals; authentication is completed by you.
 - **Real accounts and workflows:** add/edit profiles inline, detect CLI paths, assign team roles, open isolated login terminals, and run a real read-only trial. Import a Markdown guide with optional account/model configuration. See [quick start](docs/QUICKSTART.md) and the [workflow example](docs/workflow.example.md).
 - **Optional model IDs and usage controls:** automatic CLI catalog/provider flagship aliases, optional custom pins, reasoning levels and per-account quota ceilings. See [models and templates](docs/MODELS-AND-TEMPLATES.md).
-- **Editable handoff templates:** built-in role presets, custom input/expected-response instructions, local preview, restore defaults and per-task snapshots.
+- **Editable roles and prompts:** rename roles, attach a role-specific Markdown guide, edit input/output templates and preview locally. Pencil buttons on role cards and flow nodes open the editor directly; task snapshots retain names/guides.
 - **Attachments & clipboard:** pick/drop PNG/JPEG or UTF-8 text/code, paste clipboard images, and copy answers/reports. Draft snapshots survive reloads; limits and provider transport are documented in [console usage](docs/CONSOLE.md).
-- **Live console:** inline multiline requests, public CLI streaming, session selection and owner replies. Use Ctrl+Enter and `/new`, `/reply`, `/pause`, `/resume`, `/stop`, `/status`. See [console usage](docs/CONSOLE.md).
+- **Chat or team task:** chat uses one read-only account, while team tasks run the configured pipeline. Enter sends, Shift+Enter adds a line; Ctrl+Enter and a configurable send preference are supported. Greetings avoid unnecessary audits. See [console usage](docs/CONSOLE.md).
 - **Overview:** role/account cards, observed quota, current work and recent handoffs; task search, filters and compact step rails.
 - **English / Vietnamese:** change the live UI language in Setup; Command Palette and Settings labels follow the VS Code display language.
 - **Inline configuration:** theme-aware forms for accounts, team/model choices, routing, Markdown guides, quota, account switching and messaging, with Save actions and errors in the board. Common configuration commands open the same board instead of popup wizards.
@@ -48,14 +49,14 @@ The preview uses **demo data**, not live accounts or provider usage. The [assign
 
 ### Install a local VSIX
 
-Download the VSIX from [RelayCrew 0.7.0 prerelease](https://github.com/HiTranquility/RelayCrew/releases/tag/v0.7.0), or build a package from this repository:
+Download the VSIX from [RelayCrew 0.8.0 prerelease](https://github.com/HiTranquility/RelayCrew/releases/tag/v0.8.0), or build a package from this repository:
 
 ```sh
 git clone https://github.com/HiTranquility/RelayCrew.git
 cd RelayCrew
 npm ci
 npm run package
-code --install-extension relaycrew-0.7.0.vsix
+code --install-extension relaycrew-0.8.0.vsix
 ```
 
 You can also use **Extensions → … → Install from VSIX…**. This repository does not automatically publish to the VS Code Marketplace.
@@ -84,7 +85,7 @@ RelayCrew/
 
 Build output goes into `dist/`; local packages are named `relaycrew-<version>.vsix`. Dependencies, build output and root-level VSIX files are excluded from Git; explicitly archived packages in `releases/` are retained. Personal configuration, credentials and runtime data belong in VS Code settings/storage, outside this source tree. See [architecture](docs/ARCHITECTURE.md) and [contributing](CONTRIBUTING.md) before extending a module.
 
-Versions **0.1.0, 0.2.0, 0.3.0, 0.3.1, 0.4.0, 0.5.0, 0.6.0 and 0.7.0** have separate [release archives](releases/README.md), source provenance, notes and SHA-256 checksums. See the [changelog](CHANGELOG.md) for changes. Run `npm run releases:verify` to check retained assets. The [release workflow](.github/workflows/release.yml) publishes a GitHub prerelease when a matching source tag is pushed; preparing these files does not publish anything by itself.
+Versions **0.1.0, 0.2.0, 0.3.0, 0.3.1, 0.4.0, 0.5.0, 0.6.0, 0.7.0 and 0.8.0** have separate [release archives](releases/README.md), source provenance, notes and SHA-256 checksums. See the [changelog](CHANGELOG.md) for changes. Run `npm run releases:verify` to check retained assets. The [release workflow](.github/workflows/release.yml) publishes a GitHub prerelease when a matching source tag is pushed; preparing these files does not publish anything by itself.
 
 ### Configure your first team
 

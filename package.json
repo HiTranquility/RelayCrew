@@ -2,7 +2,7 @@
   "name": "ai-team-workbench",
   "displayName": "RelayCrew",
   "description": "%description%",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "publisher": "local-ai-team",
   "license": "MIT",
   "engines": {
@@ -216,6 +216,18 @@
       {
         "command": "aiTeam.togglePanel",
         "title": "%command.togglePanel%"
+      },
+      {
+        "command": "aiTeam.chat",
+        "title": "%command.chat%"
+      },
+      {
+        "command": "aiTeam.installCli",
+        "title": "%command.installCli%"
+      },
+      {
+        "command": "aiTeam.checkConnection",
+        "title": "%command.checkConnection%"
       }
     ],
     "viewsContainers": {
@@ -502,7 +514,29 @@
           "description": "%config.openTasksInCodex%"
         }
       }
-    }
+    },
+    "keybindings": [
+      {
+        "command": "aiTeam.board",
+        "key": "ctrl+alt+shift+r",
+        "mac": "cmd+alt+shift+r"
+      },
+      {
+        "command": "aiTeam.chat",
+        "key": "ctrl+alt+shift+c",
+        "mac": "cmd+alt+shift+c"
+      },
+      {
+        "command": "aiTeam.newTask",
+        "key": "ctrl+alt+shift+n",
+        "mac": "cmd+alt+shift+n"
+      },
+      {
+        "command": "aiTeam.pauseQueue",
+        "key": "ctrl+alt+shift+p",
+        "mac": "cmd+alt+shift+p"
+      }
+    ]
   },
   "author": "HiTranquility",
   "repository": {

@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { parseConsoleInput } from '../src/core/console-input';
 import { ConsoleController } from '../src/host/console-controller';
-import { Engine,newJob } from '../src/core/engine';
+import { Engine,newJob,stepPrompt } from '../src/core/engine';
 import type { Job } from '../src/core/domain';
 import { renderLiveConsole } from '../src/ui/live-console';
 import { renderOverview,quotaMeter } from '../src/ui/overview';
@@ -10,11 +10,30 @@ import { renderOverview,quotaMeter } from '../src/ui/overview';
 const roles={builder:'a',auditor:'a',worker:'a',lead:'a'},requestId='console-12345678-1234-1234-1234-123456789abc';
 const profiles=[{id:'a',label:'Account <A>',provider:'codex' as const,executable:'fake',model:'exact-model'}];
 test('console parses multiline tasks and bounded orchestration commands without executing shell text',()=>{
+  assert.deepEqual(parseConsoleInput('hello!'),{kind:'chat',text:'hello!'});
+  assert.deepEqual(parseConsoleInput('/ask Explain this'),{kind:'chat',text:'Explain this'});
   assert.deepEqual(parseConsoleInput('Build this\nAcceptance: tests pass'),{kind:'task',text:'Build this\nAcceptance: tests pass'});
   assert.deepEqual(parseConsoleInput('/new /some/path\nKeep data'),{kind:'task',text:'/some/path\nKeep data'});
   assert.deepEqual(parseConsoleInput('/reply Option A'),{kind:'reply',text:'Option A'});
   for(const command of ['pause','resume','stop','status'])assert.deepEqual(parseConsoleInput('/'+command),{kind:command});
   for(const invalid of ['',{},'x'.repeat(16001),'/exec rm file','/pause extra','/new'])assert.throws(()=>parseConsoleInput(invalid));
+});
+
+test('chat uses one read-only provider call, keeps conversational context and never dispatches audit or manager stages',async()=>{
+  const jobs:Job[]=[];const controller=new ConsoleController({jobs,roots:()=>['/project'],create:(prompt,cwd)=>newJob(prompt,cwd,roles),createChat:(prompt,cwd,id,parent)=>{const job=newJob(prompt,cwd,roles);job.kind='chat';job.readOnly=true;job.profilePins={builder:id};job.chatHistory=parent?[{role:'user',text:parent.prompt},{role:'assistant',text:parent.steps[0].response??''}]:[];return job;},prepare:async()=>{},paused:()=>false,pause:()=>{},cancel:()=>{},save:async()=>{},changed:()=>{},start:()=>{}});
+  const request={requestId,text:'hello',cwd:'/project',mode:'chat',profileId:'a'};await controller.submit(request);await controller.submit(request);assert.equal(jobs.length,1);let calls=0;
+  await new Engine(jobs,{profiles:()=>profiles,quotas:()=>({}),settings:()=>({autoSwitch:false,threshold:95,maxTasks:4,edits:true}),save:async()=>{},changed:()=>{},run:async(_p,step,_job,edits)=>{calls++;assert.equal(edits,false);assert.match(step.request!,/not a coding assignment/);return 'Hello!';}}).drain();
+  assert.equal(calls,1);assert.equal(jobs[0].status,'completed');assert.equal(jobs[0].steps.length,1);
+  await controller.submit({...request,requestId:requestId.replace('abc','abd'),text:'Explain more',sessionId:jobs[0].id});assert.equal(jobs[1].chatHistory?.[1].text,'Hello!');
+});
+
+test('missing CLI preflight preserves the draft without creating or dispatching a job',async()=>{
+  const jobs:Job[]=[];let started=false;const controller=new ConsoleController({jobs,roots:()=>['/project'],create:(prompt,cwd)=>newJob(prompt,cwd,roles),prepare:async()=>{throw new Error('CLI missing');},paused:()=>false,pause:()=>{},cancel:()=>{},save:async()=>{},changed:()=>{},start:()=>{started=true;}});
+  await assert.rejects(controller.submit({requestId,text:'Implement feature',cwd:'/project',mode:'task'}),/CLI missing/);assert.equal(jobs.length,0);assert.equal(started,false);
+});
+
+test('chat clarification replies reach the resumed request and completed chat summaries remain readable',()=>{
+  const job=newJob('hello','/project',roles);job.kind='chat';job.readOnly=true;job.ownerReplies=['Owner answer: concise Vietnamese'];assert.match(stepPrompt(job,job.steps[0]),/concise Vietnamese/);job.steps[0].response='Xin chào!';job.steps[0].status='done';job.status='completed';const html=renderLiveConsole([job],profiles,undefined,'vi');assert.match(html,/friendly-answer/);assert.match(html,/Xin chào!/);assert.match(html,/data-console-activity/);
 });
 function fixture(){
   const jobs:Job[]=[];let paused=false,saves=0,starts=0;

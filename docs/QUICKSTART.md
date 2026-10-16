@@ -4,15 +4,15 @@
 
 1. Open a trusted local project in VS Code, then **RelayCrew → Accounts & quota → Add account** (or **Connect local CLI**).
 2. Choose Codex, Claude or Gemini in the inline form. **Detect installed CLI** fills the executable path; adjust it if needed. Save an account label. Automatic flagship/recommended needs no model ID; Custom model exposes an optional override. Choose effort and a quota ceiling if needed.
-3. **Save account**, then expand its **Connection & limits** to check the local CLI version or open the CLI login terminal. A version check makes no model call.
+3. **Save account**, then use the visible **Install CLI**, **Sign in**, and **Check connection** buttons. Installation uses a dedicated terminal with the provider command shown on the card. Login is completed by you in its terminal/browser. Checking connection makes no model call; Gemini login remains unknown until a trial succeeds.
 4. Click **Run read-only CLI trial** on that account. In a single-root workspace the trial starts directly; otherwise select the profile/workspace in the inline trial form. This makes three real CLI calls, Dev → Audit → Lead, and reads only the project's root `package.json`. The queue must be active. Normal flow assignments remain unchanged.
 5. In **Setup → Team configuration**, select the three/four-stage flow, account and model/effort for each node, and optional coordinators. The accented **Primary manager** node has final approval. Click **Save team flow**. Account role buttons are a quick alternative for new tasks.
 
-Authentication uses the CLI's existing login. RelayCrew does not manufacture quota or verify an email from a configured profile. If authentication fails, open **Accounts & quota → Open CLI login**, complete the login yourself, then run another trial. RelayCrew does not install missing CLIs.
+Authentication uses the CLI's existing login. RelayCrew does not manufacture quota or verify an email from a configured profile. If authentication fails, open **Accounts & quota → Open CLI login**, complete the login yourself, then run another trial. Missing CLIs can be installed with the card’s explicit Install CLI action. No install or login starts from sending a message.
 
 For different accounts, use **Add account** in **Accounts & quota**. Set the label, provider, executable, model and effort. Codex/Claude can use an absolute, separate configuration folder (`CODEX_HOME` / `CLAUDE_CONFIG_DIR`); sign in within that profile's login terminal. Leaving the folder empty uses the current CLI login. Two labels pointing to the same login directory are not two authenticated accounts. Gemini environment isolation is available through advanced profile settings. Credentials stay with the CLI or VS Code SecretStorage.
 
-Role buttons immediately assign the selected account to **new tasks** and select account-based routing (turning off round robin). The manager button changes primary authority and removes that same account from supporting coordinators. To switch an existing session, use its **Switch account** button: running work is paused, then choose the unfinished role and replacement profile. Completed steps keep their recorded account/model. Read-only trials use the chosen profile for all three roles and do not change the normal flow.
+Role checkboxes can give one account several roles. The primary-manager radio is exclusive; choosing another account replaces it. Role controls immediately assign the selected account to **new tasks** and select account-based routing (turning off round robin). The manager button changes primary authority and removes that same account from supporting coordinators. To switch an existing session, use its **Switch account** button: running work is paused, then choose the unfinished role and replacement profile. Completed steps keep their recorded account/model. Read-only trials use the chosen profile for all three roles and do not change the normal flow.
 
 ## Import a Markdown workflow
 
@@ -22,7 +22,7 @@ Click **Preview workflow** to validate account assignments, then **Apply workflo
 
 ## Input/output templates and usage
 
-In **Setup → Input and response templates**, select a role/preset, edit the input and expected-response guidance, preview locally and save. New tasks retain snapshots/hashes. See [models and templates](MODELS-AND-TEMPLATES.md).
+Click the pencil next to a role (or **Edit prompt** in the composer), then select a role/preset, give it an optional display name, attach/edit a UTF-8 `.md` guide up to 32 KB, edit input/response guidance, preview locally and save. New tasks retain snapshots/hashes. See [models and templates](MODELS-AND-TEMPLATES.md).
 
 ## Show and hide panels
 
