@@ -16,6 +16,6 @@ export function checkDailyBudget(budgets:DailyBudget[]|undefined,p:Profile,jobs:
  const budget=budgetFor(budgets,p);if(budget&&budgetRuns(jobs,p.id,budget.modelKey,ids)>=budget.maxAgentRuns)throw new QuotaWait('Daily model agent-run budget reached.');
 }
 export function observedDelta(before:Quota|undefined,after:Quota|undefined):number|undefined{
- if(!fresh(before)||!fresh(after)||before.source!==after.source||before.resetsAt!==after.resetsAt||Date.parse(after.observedAt)<=Date.parse(before.observedAt)||after.usedPercent<before.usedPercent)return;
+ if(!fresh(before,Date.parse(before?.observedAt??''))||!fresh(after,Date.parse(after?.observedAt??''))||before.source!==after.source||before.resetsAt!==after.resetsAt||Date.parse(after.observedAt)<=Date.parse(before.observedAt)||after.usedPercent<before.usedPercent)return;
  return Math.round((after.usedPercent-before.usedPercent)*100)/100;
 }

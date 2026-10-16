@@ -23,7 +23,7 @@ exports.run = async function () {
     await checkBoard('Assignment board');
     const oldPick=vscode.window.showQuickPick,oldInput=vscode.window.showInputBox;let popups=0;
     vscode.window.showQuickPick=async()=>{popups++;throw new Error('Configuration opened a QuickPick');};vscode.window.showInputBox=async()=>{popups++;throw new Error('Configuration opened an input popup');};
-    try{for(const id of ['aiTeam.connectCli','aiTeam.profiles','aiTeam.flow','aiTeam.routing','aiTeam.quota','aiTeam.switch','aiTeam.connections','aiTeam.secret','aiTeam.accountMenu','aiTeam.language','aiTeam.schedule','aiTeam.dailyStart','aiTeam.dailyTask'])await vscode.commands.executeCommand(id);}finally{vscode.window.showQuickPick=oldPick;vscode.window.showInputBox=oldInput;}
+    try{for(const id of ['aiTeam.connectCli','aiTeam.profiles','aiTeam.flow','aiTeam.routing','aiTeam.quota','aiTeam.switch','aiTeam.connections','aiTeam.secret','aiTeam.accountMenu','aiTeam.language','aiTeam.schedule','aiTeam.dailyStart','aiTeam.dailyTask','aiTeam.backlog','aiTeam.utilization','aiTeam.reply','aiTeam.resume','aiTeam.cancel','aiTeam.report','aiTeam.pauseSchedule'])await vscode.commands.executeCommand(id);}finally{vscode.window.showQuickPick=oldPick;vscode.window.showInputBox=oldInput;}
     assert.equal(popups,0,'Routine configuration must not open native input dialogs');
     let apiCalls=0;const api=createServer(async(req,res)=>{res.setHeader('Content-Type','application/json');if(req.url==='/v1/models')res.end(JSON.stringify({data:[{id:'local-smoke-model'}]}));else if(req.url==='/v1/chat/completions'){apiCalls++;let body='';for await(const chunk of req)body+=chunk;const payload=JSON.parse(body);assert.equal(payload.model,'local-smoke-model');assert.equal(payload.tools,undefined);res.end(JSON.stringify({choices:[{message:{content:'Xin chào!'}}]}));}else{res.writeHead(404);res.end();}});
     await new Promise(resolve=>api.listen(0,'127.0.0.1',resolve));
@@ -34,6 +34,12 @@ exports.run = async function () {
       while(Date.now()<until){for(const directory of await fs.readdir(process.env.AI_TEAM_SMOKE_STATE)){try{const state=JSON.parse(await fs.readFile(path.join(process.env.AI_TEAM_SMOKE_STATE,directory,ext.id,'state.json'),'utf8'));job=state.jobs.find(j=>j.id===result.jobId);}catch{}}
         if(job&&!['queued','running'].includes(job.status))break;await new Promise(resolve=>setTimeout(resolve,100));}
       assert.equal(job?.status,'completed',job?.error);assert.equal(job.steps.length,1);assert.equal(job.steps[0].transport,'http');assert.equal(job.steps[0].model,'local-smoke-model');assert.equal(job.steps[0].response,'Xin chào!');assert.equal(apiCalls,1);
+      await vscode.commands.executeCommand('aiTeam.pauseQueue');
+      const queued=await vscode.commands.executeCommand('aiTeam.chat','Queued cancellation check','http-smoke');assert.ok(queued?.jobId);
+      await vscode.commands.executeCommand('aiTeam.cancel',queued.jobId);let cancelled;
+      for(const directory of await fs.readdir(process.env.AI_TEAM_SMOKE_STATE)){try{const state=JSON.parse(await fs.readFile(path.join(process.env.AI_TEAM_SMOKE_STATE,directory,ext.id,'state.json'),'utf8'));cancelled=state.jobs.find(j=>j.id===queued.jobId);}catch{}}
+      assert.equal(cancelled?.status,'cancelled','Stop must act on the supplied task ID');assert.equal(apiCalls,1,'Cancelled queued work makes no model call');
+      await vscode.commands.executeCommand('aiTeam.pauseQueue');
     }finally{api.closeAllConnections();await new Promise(resolve=>api.close(resolve));}
     await configuration.update('language','vi',vscode.ConfigurationTarget.Global);
     await checkBoard('Bảng phân công');

@@ -17,9 +17,9 @@ export function attachmentContent(name:unknown,data:Buffer):Omit<AttachmentConte
   else if(['GIF87a','GIF89a'].includes(data.subarray(0,6).toString()))mime='image/gif';
   else if(data.subarray(0,5).toString()==='%PDF-')mime='application/pdf';
   else {
-    if(/\.(png|jpe?g|gif|webp|pdf|zip|exe)$/i.test(name))throw new Error('Supported attachments: UTF-8 text/code, PNG and JPEG.');
+    if(/\.(png|jpe?g|gif|webp|pdf|zip|exe)$/i.test(name))throw new Error('Supported attachments: UTF-8 text/code, PNG, JPEG, WebP, GIF, PDF; import DOCX/ODT for extracted text.');
     try {const text=new TextDecoder('utf-8',{fatal:true}).decode(data);if(/[\x00-\x08\x0e-\x1f]/.test(text))throw new Error();}
-    catch {throw new Error('Supported attachments: UTF-8 text/code, PNG and JPEG.');}
+    catch {throw new Error('Supported attachments: UTF-8 text/code, PNG, JPEG, WebP, GIF, PDF; import DOCX/ODT for extracted text.');}
     mime='text/plain';
   }
   if(!data.length||data.length>(mime==='text/plain'?attachmentLimits.text:attachmentLimits.image))throw new Error('Attachment too large: text 256 KB, image 4 MB.');

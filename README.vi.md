@@ -8,6 +8,10 @@ RelayCrew kết nối các CLI Codex, Claude Code và Gemini đã cài trên má
 
 Đây là bản phát hành sớm, chạy cục bộ. Không cần tài khoản RelayCrew hay server chung. Test sử dụng CLI/transport giả và Git thật; tài khoản AI, bot/OA và các model cụ thể cần cấu hình và kiểm thử trên môi trường của bạn.
 
+## Bản 0.9.9
+
+Có kéo/chia panel prompt và màn hình agents, Daily nhiều thư mục và quyền riêng, trần theo account/model, quota đo trước/sau, checklist/kết quả từng việc, kiểm tra tài khoản, tìm kiếm–loại trừ, phân trang và backlog trực tiếp. Thêm tài liệu DOCX/ODT, định dạng ảnh và nhập giọng nói qua dictation. Xem [hướng dẫn workbench](docs/WORKBENCH-09.md) để biết chỗ nhập secret, cách dùng và giới hạn thực tế. Antigravity dùng CLI `agy` riêng; tài khoản Gemini cũ được giữ nguyên.
+
 ## Các phần chính
 
 - **Model tự động và định mức:** không cần model ID; tự theo danh mục CLI/alias, có mức suy luận và ngưỡng quota từng account. Xem [hướng dẫn model và mẫu](docs/MODELS-AND-TEMPLATES.md).
@@ -32,14 +36,14 @@ RelayCrew kết nối các CLI Codex, Claude Code và Gemini đã cài trên má
 
 Yêu cầu VS Code **1.96 trở lên**, workspace local đã tin cậy; CLI cần dùng đã cài và đăng nhập riêng. Git cần có trong PATH để sao lưu source và tạo worktree. Build từ source dùng Node.js **22** và npm.
 
-Tải VSIX tại [RelayCrew 0.9.8 prerelease](https://github.com/HiTranquility/RelayCrew/releases/tag/v0.9.8), rồi chọn **Extensions → … → Install from VSIX…**. Hoặc:
+Tải VSIX tại [RelayCrew 0.9.9 prerelease](https://github.com/HiTranquility/RelayCrew/releases/tag/v0.9.9), rồi chọn **Extensions → … → Install from VSIX…**. Hoặc:
 
 ```sh
 git clone https://github.com/HiTranquility/RelayCrew.git
 cd RelayCrew
 npm ci
 npm run package
-code --install-extension relaycrew-0.9.8.vsix
+code --install-extension relaycrew-0.9.9.vsix
 ```
 
 1. Mở folder dự án trong VS Code và sidebar **RelayCrew**.
@@ -48,7 +52,7 @@ code --install-extension relaycrew-0.9.8.vsix
 4. Giao một task nhỏ có tiêu chí hoàn thành rõ ràng. **Cho phép sửa file** mặc định tắt; bật khi muốn Dev/Repair chỉnh code. Audit/điều phối/quản lý vẫn chạy read-only/plan.
 5. Dùng **Tạm dừng ngay**, **Tiếp tục hàng đợi**, **Dừng tác vụ**, **Báo cáo** hoặc **Trả lời agent** ngay trên bảng.
 
-Extension chưa phát hành lên VS Code Marketplace. Các bản **0.1.0 / 0.2.0 / 0.3.0 / 0.3.1 / 0.4.0 / 0.5.0 / 0.6.0 / 0.7.0 / 0.8.0 / 0.9.8 / 0.9.8** được giữ riêng trong [release archives](releases/README.md), có ghi nguồn gốc source và SHA-256; không ghi đè bản cũ.
+Extension chưa phát hành lên VS Code Marketplace. Các bản **0.1.0 / 0.2.0 / 0.3.0 / 0.3.1 / 0.4.0 / 0.5.0 / 0.6.0 / 0.7.0 / 0.8.0 / 0.9.9 / 0.9.9** được giữ riêng trong [release archives](releases/README.md), có ghi nguồn gốc source và SHA-256; không ghi đè bản cũ.
 
 ## Tiếng Anh / Tiếng Việt
 
@@ -139,4 +143,4 @@ Vào **Tài khoản và quota → Thêm tài khoản** để nhập CLI/model, t
 
 Xem [hướng dẫn điều phối Anh/Việt](docs/OPERATIONS.md) để theo dõi hội thoại agent, nghiệm thu task, thiết lập lịch và Local/Cloud. Engine hiện chạy lần lượt; phần trăm là tiến độ bước, khung lịch là dự kiến.
 
-**Bộ mẫu 0.9.8:** [Hướng dẫn vai trò, luồng và đầu bài/nghiệm thu](examples/README.md), đi kèm VSIX. Mở **Thiết lập → Mẫu đầu vào và phản hồi → Mẫu Markdown**, sao chép/chỉnh file rồi nhập vào vai trò hoặc workflow.
+**Bộ mẫu 0.9.9:** [Hướng dẫn vai trò, luồng và đầu bài/nghiệm thu](examples/README.md), đi kèm VSIX. Mở **Thiết lập → Mẫu đầu vào và phản hồi → Mẫu Markdown**, sao chép/chỉnh file rồi nhập vào vai trò hoặc workflow.

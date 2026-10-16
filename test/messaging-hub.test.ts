@@ -34,6 +34,10 @@ test('signed Zalo webhook persists request, responds through same channel once, 
     const state=await readFile(join(dir,'messaging.json'),'utf8');assert.ok(!state.includes('TOKEN_THAT_MUST_NOT_BE_IN_STATE'));assert.ok(!state.includes('WEBHOOK_SECRET'));
     assert.match(hub.chatTranscript(),/trả lời: hỏi ai/);
     const forged=await fetch(`http://127.0.0.1:${port}/zalo/webhook`,{method:'POST',body:raw});assert.equal(forged.status,403);
+    await hub.configure({channel:'zalo',enabled:true,inbound:true,recipient:'300',cwd:'.',appId:'100',oaId:'200',port},'','');
+    assert.match(hub.chatTranscript(),/trả lời: hỏi ai/,'Editing transport settings preserves the same conversation identity');
+    assert.ok([...secrets.values()].includes('TOKEN_THAT_MUST_NOT_BE_IN_STATE'));
+    assert.ok([...secrets.values()].includes('WEBHOOK_SECRET'));
     await hub.disconnect('zalo');assert.equal(secrets.size,0);
   }finally{await hub.stop();globalThis.fetch=original;await rm(dir,{recursive:true,force:true});}
 });

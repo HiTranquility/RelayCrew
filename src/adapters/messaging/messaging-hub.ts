@@ -63,18 +63,22 @@ export class MessagingHub {
   }
   async configure(c: Connection, token: string, webhookSecret?: string): Promise<void> {
     if (!c.recipient || !/^\d+$/.test(c.allowedUserId ?? '0') || !/^-?\d+$/.test(c.recipient)) throw new Error('Recipient and allowed user must be numeric IDs.');
-    if (c.channel === 'zalo' && c.inbound && (!/^\d+$/.test(c.appId ?? '') || !/^\d+$/.test(c.oaId ?? '') || !webhookSecret || !Number.isInteger(c.port) || c.port! < 1024 || c.port! > 65535)) throw new Error('Zalo two-way requires App ID, OA ID, webhook secret and port 1024–65535.');
+    if (c.channel === 'zalo' && c.inbound && (!/^\d+$/.test(c.appId ?? '') || !/^\d+$/.test(c.oaId ?? '') || !(webhookSecret||await this.secrets.get(this.secretKey(c.channel,'webhook'))) || !Number.isInteger(c.port) || c.port! < 1024 || c.port! > 65535)) throw new Error('Zalo two-way requires App ID, OA ID, webhook secret and port 1024–65535.');
     if (c.channel === 'telegram' && c.inbound && !c.allowedUserId) throw new Error('Telegram two-way requires the allowed sender user ID.');
+    const previous=this.state.connections.find(v=>v.channel===c.channel),oldToken=await this.secrets.get(this.secretKey(c.channel));token=token||oldToken||'';
+    const identityChanged=!previous||['recipient','allowedUserId','appId','oaId'].some(key=>(previous as any)[key]!== (c as any)[key])||token!==oldToken;
+    if(!token)throw new Error('Enter a credential for the first connection.');
+    if(c.channel==='zalo'&&c.inbound&&!webhookSecret)webhookSecret=await this.secrets.get(this.secretKey(c.channel,'webhook'));
     await this.stop();
     await this.secrets.store(this.secretKey(c.channel), token);
     if (webhookSecret) await this.secrets.store(this.secretKey(c.channel, 'webhook'), webhookSecret);
     const index = this.state.connections.findIndex(x => x.channel === c.channel);
     if (index >= 0) this.state.connections[index] = { ...c }; else this.state.connections.push({ ...c });
     // New identity must never inherit conversation context, polling cursor or queued deliveries.
-    delete this.state.history[c.channel];
+    if(identityChanged){delete this.state.history[c.channel];
     if (c.channel === 'telegram') this.state.offset = undefined;
     for (const d of this.state.outbox) if (d.channel === c.channel && d.status === 'pending') { d.status = 'failed'; d.error = 'Connection changed; delivery cancelled.'; }
-    for (const i of this.state.inbox) if (i.channel === c.channel && i.status === 'queued') i.status = 'failed';
+    for (const i of this.state.inbox) if (i.channel === c.channel && i.status === 'queued') i.status = 'failed';}
     await this.save(); await this.start();
   }
   async disconnect(channel: string): Promise<void> {

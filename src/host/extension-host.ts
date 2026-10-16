@@ -1,3 +1,4 @@
+import {safeBoardState} from '../core/board-state';
 import { budgetModel,validateDailyBudget } from '../core/daily-budget';
 import { normalizeLayout } from '../core/layout';
 import { scheduleFromForm } from '../core/schedule-form';
@@ -36,7 +37,7 @@ import { importWorkflow, type WorkflowDocument } from '../core/workflow';
 import { accountFromForm } from '../core/account';
 import { flowConfiguration, manualQuota, routingConfiguration } from '../core/configuration';
 
-interface State { version: 1; roles: Record<Role, string>; jobs: Job[]; schedules: Schedule[]; quotas: Record<string, Quota>; backlog?: Backlog; rotationCursor?: Partial<Record<Role, number>>; quotaAlerted?: Record<string, boolean>; flow?: Role[]; overrides?: RoleOverrides; queuePaused?: boolean; management?: Management; dailyPlan?: DailyPlan; workflow?:WorkflowDocument; promptTemplates?:PromptTemplates }
+interface State { formReceipts?:string[]; version: 1; roles: Record<Role, string>; jobs: Job[]; schedules: Schedule[]; quotas: Record<string, Quota>; backlog?: Backlog; rotationCursor?: Partial<Record<Role, number>>; quotaAlerted?: Record<string, boolean>; flow?: Role[]; overrides?: RoleOverrides; queuePaused?: boolean; management?: Management; dailyPlan?: DailyPlan; workflow?:WorkflowDocument; promptTemplates?:PromptTemplates }
 const roles: Role[] = ['builder', 'auditor', 'worker', 'lead'];
 let shutdown: (() => Promise<void>) | undefined;
 const initial = (): State => ({ version: 1, roles: { builder: 'codex-main', auditor: 'claude-main', worker: 'gemini-main', lead: 'codex-main' }, jobs: [], schedules: [], quotas: {} });
@@ -132,12 +133,12 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   const announced = new Set(state.jobs.filter(j => !['running', 'queued'].includes(j.status)).map(eventKey));
   let messaging: MessagingHub | undefined;
   let board: vscode.WebviewPanel | undefined;
-  let boardState=context.workspaceState.get<Record<string,unknown>>('boardState',{}),boardStateTimer:ReturnType<typeof setTimeout>|undefined;
+  let boardState=safeBoardState(context.workspaceState.get<Record<string,unknown>>('boardState',{})),boardStateTimer:ReturnType<typeof setTimeout>|undefined;
   const saveBoardState=()=>context.workspaceState.update('boardState',boardState);
   let boardLanguage: string | undefined;
   const cliStatuses:Record<string,CliStatus>={};
   let pendingWorkflow:{type:'workflowLoaded';name:string;markdown:string}|undefined;
-  let boardReady=false,pendingCompose: {cwd?:string;mode?:'chat'|'task';profileId?:string}|undefined,pendingConfiguration:{type:'configurationOpen';kind:string;id?:string;profileId?:string}|undefined;
+  const pendingForms=new Set<string>();let pendingReply:string|undefined;let boardReady=false,pendingCompose: {cwd?:string;mode?:'chat'|'task';profileId?:string}|undefined,pendingConfiguration:{type:'configurationOpen';kind:string;id?:string;profileId?:string}|undefined;
   const consoleOptions = () => ({queuePaused:!!state.queuePaused,allowEdits:cfg().get('allowEdits',false),projectRoots:projectRoots(),flow:state.flow,initialState:boardState} as Parameters<typeof renderLiveConsole>[2]);
   const refreshConsole = () => {if(board)void board.webview.postMessage({type:'consoleSnapshot',html:renderLiveConsole(state.jobs,profiles(),consoleOptions(),language())});};
   let requestedPage = 'console', pageRequest = 0, applyingSettings = false;
@@ -244,7 +245,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       output.appendLine(`[${job.id}] ${step.role} → ${profile.id}, model=${profile.model || t("CLI default")}, effort=${profile.effort || t("default")}, edits=${edits}`);
       step.phase='cli';step.timeoutAt=new Date(Date.now()+cfg().get('timeoutMinutes',30)*60_000).toISOString();changed();
       let lastRefresh = 0;
-      if(job.dailyItemId){await quotas.refresh([profile],state.quotas);step.quotaBefore=state.quotas[profile.id]?structuredClone(state.quotas[profile.id]):undefined;}
+      if(job.dailyItemId){await quotas.refresh([profile],state.quotas);step.quotaBefore=state.quotas[profile.id]?structuredClone(state.quotas[profile.id]):undefined;await save();}
       try{const result = await execute({ permission:job.permission,profile, prompt: step.request ?? stepPrompt(job, step), cwd: job.cwd, edits, signal, secretValues: secrets,attachments:await attachmentStore.resolve(job.attachments?.map(a=>a.id)),
         timeoutMs: cfg().get('timeoutMinutes', 30) * 60_000,
         onEvent: event => {
@@ -272,7 +273,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   const guard = async (action: () => unknown | Promise<unknown>) => {
     try { return await action(); } catch (e) { void vscode.window.showErrorMessage(`RelayCrew: ${t(e instanceof Error ? e.message : String(e))}`); }
   };
-  const command = (id: string, handler: (...args: any[]) => unknown) => context.subscriptions.push(vscode.commands.registerCommand(id, (...args) => guard(() => handler(...args))));
+  const command = (id: string, handler: (...args: any[]) => unknown) => context.subscriptions.push(vscode.commands.registerCommand(id, (...args) => guard(async()=>{try{return await handler(...args);}catch(error){if(['aiTeam.installCli','aiTeam.loginCli','aiTeam.checkConnection'].includes(id)&&typeof args[0]==='string'){await board?.webview.postMessage({type:'cliSetupStatus',profileId:args[0],message:t(error instanceof Error?error.message:String(error))});return;}throw error;}})));
   command('aiTeam.language',()=>vscode.commands.executeCommand('aiTeam.board','setup'));
   const provider: vscode.TreeDataProvider<Node> = {
     onDidChangeTreeData: events.event,
@@ -347,7 +348,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     await board?.webview.postMessage({type:'cliSetupStatus',profileId:id,message:t('Complete sign-in in the terminal/browser, then click Check connection.')});
   });
   command('aiTeam.installCli',async(id?:string)=>{const profile=profiles().find(p=>p.id===id);if(!profile)return openConfiguration('account');if(profile.transport==='http')return openConfiguration('account',profile.id);const installed=await findLocalCli(profile.provider,profile.executable);if(installed){await vscode.commands.executeCommand('aiTeam.checkConnection',id);return;}const plan=installPlan(profile.provider);const confirmation=await vscode.window.showWarningMessage(t('Install CLI on this computer?'),{modal:true,detail:plan.command+'\n'+plan.docs},t('Install CLI'));if(confirmation!==t('Install CLI'))return;const terminal=vscode.window.createTerminal({name:'RelayCrew · '+t('Install CLI')+' · '+profile.provider,cwd:process.env.USERPROFILE??process.env.HOME,...(process.platform==='win32'?{shellPath:'powershell.exe',shellArgs:['-NoLogo','-NoProfile']}:{} )});terminal.show();terminal.sendText(plan.command,true);await board?.webview.postMessage({type:'cliSetupStatus',profileId:id,message:t('Installer opened in the terminal. When it finishes, click Check connection.')});});
-  command('aiTeam.checkConnection',async(id?:string)=>{const profile=profiles().find(p=>p.id===id);if(!profile)return openConfiguration('account');let result:CliStatus;try{result=profile.transport==='http'?{installed:true,authenticated:'unknown',checkedAt:new Date().toISOString(),message:'API catalog connected. Repository tools are unavailable.',models:await listModels(profile,await profileSecrets(profile))}:await inspectCli(profile,await profileSecrets(profile));}catch{result={installed:false,authenticated:'unknown',checkedAt:new Date().toISOString(),message:'API connection failed. Verify endpoint, server and API key.'};}cliStatuses[profile.id]=result;if(result.executable&&result.executable!==profile.executable){await cfg().update('profiles',profiles().map(p=>p.id===profile.id?{...p,executable:result.executable!}:p),vscode.ConfigurationTarget.Global);}await board?.webview.postMessage({type:'cliSetupStatus',profileId:id,status:result,message:t(result.message)});changed();return result;});
+  command('aiTeam.checkConnection',async(id?:string)=>{const profile=profiles().find(p=>p.id===id);if(!profile)return openConfiguration('account');let result:CliStatus;try{result=profile.transport==='http'?{installed:true,authenticated:'unknown',checkedAt:new Date().toISOString(),message:'API catalog connected. Repository tools are unavailable.',models:await listModels(profile,await profileSecrets(profile))}:await inspectCli(profile,await profileSecrets(profile));}catch{result={installed:false,authenticated:'unknown',checkedAt:new Date().toISOString(),message:'API connection failed. Verify endpoint, server and API key.'};}const missing=[];for(const key of profile.secretEnv??[])if(!await context.secrets.get(`aiTeam:${profile.id}:${key}`))missing.push(key);if(missing.length)result.message+=' '+t('Missing secret references: {0}',missing.join(', '));cliStatuses[profile.id]=result;if(result.executable&&result.executable!==profile.executable){await cfg().update('profiles',profiles().map(p=>p.id===profile.id?{...p,executable:result.executable!}:p),vscode.ConfigurationTarget.Global);}await board?.webview.postMessage({type:'cliSetupStatus',profileId:id,status:result,message:t(result.message)});changed();return result;});
   const openConfiguration=async(kind:string,id?:string,profileId?:string)=>{
     pendingConfiguration={type:'configurationOpen',kind,id,profileId};
     await vscode.commands.executeCommand('aiTeam.board',kind==='account'||kind==='quota'?'accounts':['team','routing','workflow','connections'].includes(kind)?'setup':'console');
@@ -389,6 +390,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       board = vscode.window.createWebviewPanel('aiTeam.board', 'RelayCrew · ' + t('Assignment board'), vscode.ViewColumn.One, { enableScripts: true });
       board.onDidDispose(() => { board = undefined; boardLanguage=undefined; boardReady=false; }, undefined, context.subscriptions);
       board.webview.onDidReceiveMessage(message => void guard(async () => {
+        if(message?.action==='removeProfileSecret'){const p=profiles().find(p=>p.id===message.profileId);if(!p||typeof message.key!=='string'||!p.secretEnv?.includes(message.key))return;const choice=await vscode.window.showWarningMessage(t('Delete stored secret {0} for {1}?',message.key,p.label),{modal:true},t('Delete secret'));if(choice!==t('Delete secret'))return;await context.secrets.delete(`aiTeam:${p.id}:${message.key}`);await cfg().update('profiles',profiles().map(v=>v.id===p.id?{...v,secretEnv:v.secretEnv?.filter(k=>k!==message.key)}:v),vscode.ConfigurationTarget.Global);changed();return;}
+        if(message?.action==='checkAllAccounts'){for(const p of profiles())await vscode.commands.executeCommand('aiTeam.checkConnection',p.id);return;}
+        if(['addBacklog','startBacklog','stopBacklog','removeBacklog'].includes(message?.action)){const receipt=typeof message.requestId==='string'&&/^form-[a-f0-9-]{36}$/.test(message.requestId)?message.action+':'+message.requestId:undefined;if(receipt&&pendingForms.has(receipt))return;if(receipt)pendingForms.add(receipt);try{const v=message.value;if(receipt&&state.formReceipts?.includes(receipt)){await save();await board?.webview.postMessage({type:'backlogResult',action:message.action,ok:true,message:t('Configuration saved.')});return;}if(message.action==='addBacklog'){if(typeof v?.prompt!=='string'||!v.prompt.trim()||v.prompt.length>16000||!projectRoots().some(r=>r.path===v.cwd))throw new Error('Choose an open folder and a useful task.');backlog.items.push({id:randomUUID(),prompt:v.prompt.trim(),cwd:v.cwd});}if(message.action==='removeBacklog'){const item=backlog.items.find(i=>i.id===message.id);if(!item||item.jobId)throw new Error('Only pending backlog items can be removed.');backlog.items=backlog.items.filter(i=>i.id!==item.id);}if(message.action==='stopBacklog')backlog.enabled=false;if(message.action==='startBacklog'){const runs=Number(v?.runs),minutes=Number(v?.minutes);if(!Number.isInteger(runs)||runs<1||runs>20||!Number.isInteger(minutes)||minutes<1||minutes>180||!backlog.items.some(i=>!i.jobId))throw new Error('Add pending work and use budgets within the displayed ranges.');validateRoles();backlog.enabled=true;backlog.remaining=runs;backlog.until=Date.now()+minutes*60000;backlog.sessionJobs=[];}if(receipt){(state.formReceipts??=[]).push(receipt);state.formReceipts=state.formReceipts.slice(-500);}await save();changed();start();await board?.webview.postMessage({type:'backlogResult',action:message.action,ok:true,message:t('Configuration saved.')});}catch(error){await board?.webview.postMessage({type:'backlogResult',action:message.action,ok:false,message:t(error instanceof Error?error.message:String(error))});}finally{if(receipt)pendingForms.delete(receipt);}return;}
         if(message?.action==='shareLayout'){if(message.kind==='export'){const uri=await vscode.window.showSaveDialog({defaultUri:vscode.Uri.file(join(storage,'relaycrew-layout.json')),filters:{JSON:['json']}});if(uri)await vscode.workspace.fs.writeFile(uri,Buffer.from(JSON.stringify({version:1,layout:normalizeLayout(message.layout)},null,2)));}else if(message.kind==='import'){const picked=await vscode.window.showOpenDialog({canSelectMany:false,filters:{JSON:['json']}});if(picked?.[0]){const info=await vscode.workspace.fs.stat(picked[0]);if(info.size>8192)throw new Error('Layout file is too large.');const value=JSON.parse(Buffer.from(await vscode.workspace.fs.readFile(picked[0])).toString('utf8'));if(value.version!==1||!value.layout)throw new Error('Invalid layout file.');await board?.webview.postMessage({type:'layoutImported',layout:normalizeLayout(value.layout),message:t('Layout imported.')});}}return;}
         if(message?.action==='removeDailyBudget'){daily.budgets=daily.budgets?.filter(b=>b.profileId!==message.profileId||b.modelKey!==message.modelKey);await save();changed();return;}
         if(message?.action==='saveDailyBudget'){try{const b=validateDailyBudget(message.value,profiles());daily.budgets??=[];const previous=daily.budgets.findIndex(v=>v.profileId===b.profileId&&v.modelKey===b.modelKey);if(previous<0){if(daily.budgets.length>=200)throw new Error('Too many daily model budgets.');daily.budgets.push(b);}else daily.budgets[previous]=b;await save();changed();await board?.webview.postMessage({type:'dailyBudgetResult',ok:true,message:t('Configuration saved.')});}catch{await board?.webview.postMessage({type:'dailyBudgetResult',ok:false,message:t('Use a quota ceiling of 1–100 and an agent-run budget of 1–1000.')});}return;}
@@ -432,7 +436,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
             if(['disconnectConnection','testConnection'].includes(message.action)){if(!messaging||!['telegram','zalo'].includes(message.channel))throw new Error('Invalid connection configuration.');if(message.action==='disconnectConnection'){await messaging.disconnect(message.channel);result.message=t('Channel disconnected; local credentials removed.');}else{await messaging.test(message.channel,language());result.message=t('Test queued. Check delivery status for the result.');}}
             if(message.action==='saveConnection'){
               const c=message.connection;
-              if(!messaging||!c||!['telegram','zalo'].includes(c.channel)||typeof c.inbound!=='boolean'||!projectRoots().some(root=>root.path===c.cwd)||typeof c.recipient!=='string'||! /^-?\d{1,100}$/.test(c.recipient)||typeof message.token!=='string'||!message.token.trim()||message.token.length>8192||/[\r\n]/.test(message.token)||typeof message.webhookSecret!=='string'||message.webhookSecret.length>8192)throw new Error('Invalid connection configuration.');
+              if(!messaging||!c||!['telegram','zalo'].includes(c.channel)||typeof c.inbound!=='boolean'||!projectRoots().some(root=>root.path===c.cwd)||typeof c.recipient!=='string'||! /^-?\d{1,100}$/.test(c.recipient)||typeof message.token!=='string'||message.token.length>8192||/[\r\n]/.test(message.token)||typeof message.webhookSecret!=='string'||message.webhookSecret.length>8192)throw new Error('Invalid connection configuration.');
               for(const key of ['allowedUserId','appId','oaId'])if(c[key]!==undefined&&(typeof c[key]!=='string'||c[key].length>100))throw new Error('Invalid connection configuration.');
               await messaging.configure({channel:c.channel,enabled:true,inbound:c.inbound,recipient:c.recipient,cwd:c.cwd,allowedUserId:c.allowedUserId||undefined,appId:c.appId||undefined,oaId:c.oaId||undefined,port:c.port},message.token.trim(),message.webhookSecret||undefined);
             }
@@ -444,11 +448,14 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         }
         if(message?.action==='inspectSession'&&typeof message.id==='string'&&state.jobs.some(j=>j.id===message.id)){boardState={...boardState,consoleSelected:message.id,consoleNew:false};requestedPage='console';pageRequest++;changed();await board?.webview.postMessage({type:'consoleSelect',id:message.id});return;}
         if(message?.action==='boardState'){
-          if(message.state&&typeof message.state==='object'&&!Array.isArray(message.state)&&JSON.stringify(message.state).length<=768000){boardState=message.state;clearTimeout(boardStateTimer);boardStateTimer=setTimeout(()=>{void saveBoardState().then(undefined,error=>output.appendLine(String(error)));},400);}return;
+          if(message.state&&typeof message.state==='object'&&!Array.isArray(message.state)&&JSON.stringify(message.state).length<=768000){boardState=safeBoardState(message.state);clearTimeout(boardStateTimer);boardStateTimer=setTimeout(()=>{void saveBoardState().then(undefined,error=>output.appendLine(String(error)));},400);}return;
         }
         if(['saveSchedule','saveDailyPlan','addDailyItem','moveDailyItem','addCriteria','checkCriterion'].includes(message?.action)){
           const target=message.action==='saveSchedule'?'schedule-message':message.action==='saveDailyPlan'?'daily-plan-message':message.action==='addDailyItem'||message.action==='moveDailyItem'?'daily-item-message':'task-planning-message';
+          const receipt=typeof message.requestId==='string'&&/^form-[a-f0-9-]{36}$/.test(message.requestId)?message.action+':'+message.requestId:undefined;if(receipt&&pendingForms.has(receipt))return;if(receipt)pendingForms.add(receipt);
           try{
+            if(receipt&&state.formReceipts?.includes(receipt)){await save();await board?.webview.postMessage({type:'planningResult',target,action:message.action,id:message.id,ok:true,message:t('Configuration saved.')});return;}
+            if(receipt){(state.formReceipts??=[]).push(receipt);state.formReceipts=state.formReceipts.slice(-500);}
             if(message.action==='saveSchedule'){
               const previous=state.schedules.find(s=>s.id===message.value?.id),schedule=scheduleFromForm(message.value,projectRoots().map(r=>r.path),state.roles,previous);
               if(!previous){validateRoles();schedule.flow=[...state.flow!];schedule.overrides=structuredClone(state.overrides);schedule.management=structuredClone(state.management);state.schedules.push(schedule);}else state.schedules[state.schedules.indexOf(previous)]=schedule;
@@ -461,7 +468,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
               else {const criterion=job.acceptance?.find(c=>c.id===message.criterionId);if(!criterion||typeof message.checked!=='boolean')throw new Error('Invalid acceptance criterion.');criterion.checked=message.checked;criterion.checkedAt=message.checked?new Date().toISOString():undefined;}
             }
             await save();changed();await board?.webview.postMessage({type:'planningResult',target,action:message.action,id:message.id,ok:true,message:t('Configuration saved.')});
-          }catch(error){await board?.webview.postMessage({type:'planningResult',target,action:message.action,id:message.id,ok:false,message:t(error instanceof Error?error.message:String(error))});}return;
+          }catch(error){if(receipt)state.formReceipts=state.formReceipts?.filter(r=>r!==receipt);await board?.webview.postMessage({type:'planningResult',target,action:message.action,id:message.id,ok:false,message:t(error instanceof Error?error.message:String(error))});}finally{if(receipt)pendingForms.delete(receipt);}return;
         }
         if(message?.action==='saveAccount'){
           try{const profile=accountFromForm(message.profile,profiles()),next=profiles().some(p=>p.id===profile.id)?profiles().map(p=>p.id===profile.id?profile:p):[...profiles(),profile];await cfg().update('profiles',next,vscode.ConfigurationTarget.Global);await board?.webview.postMessage({type:'accountSaved',ok:true,message:t('Account saved. Assign its role, then run a trial or open CLI login.')});changed();}
@@ -498,7 +505,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
           const job=state.jobs.find(job=>job.id===message.sessionId);
           if(job){await vscode.env.clipboard.writeText(message.part==='last'?job.steps.slice().reverse().find(step=>step.response)?.response??'':reportText(job));await board?.webview.postMessage({type:'consoleCopied',message:t('Copied to clipboard.')});}return;
         }
-        if(message?.action==='consoleReady'){boardReady=true;refreshConsole();if(pendingConfiguration){await board?.webview.postMessage(pendingConfiguration);pendingConfiguration=undefined;}if(pendingWorkflow){await board?.webview.postMessage(pendingWorkflow);pendingWorkflow=undefined;}if(pendingCompose){await board?.webview.postMessage({type:'consoleCompose',...pendingCompose});pendingCompose=undefined;}return;}
+        if(message?.action==='consoleReady'){boardReady=true;refreshConsole();if(pendingReply){await board?.webview.postMessage({type:'consoleSelect',id:pendingReply,reply:true});pendingReply=undefined;}if(pendingConfiguration){await board?.webview.postMessage(pendingConfiguration);pendingConfiguration=undefined;}if(pendingWorkflow){await board?.webview.postMessage(pendingWorkflow);pendingWorkflow=undefined;}if(pendingCompose){await board?.webview.postMessage({type:'consoleCompose',...pendingCompose});pendingCompose=undefined;}return;}
         if(message?.action==='consoleSubmit'){try{const result=await consoleController.submit(message);await board?.webview.postMessage({type:'consoleAck',requestId:message.requestId,ok:true,...result,message:t(result.message)});}catch(error){await board?.webview.postMessage({type:'consoleAck',requestId:message.requestId,ok:false,message:t(error instanceof Error?error.message:String(error))});}return;}
         const actions: Record<string,string> = {examples:'aiTeam.examples',pauseSchedule:'aiTeam.pauseSchedule',schedule:'aiTeam.schedule',closeBoard:'aiTeam.closeBoard',toggleSidebar:'aiTeam.toggleSidebar',togglePanel:'aiTeam.togglePanel', installCli:'aiTeam.installCli',checkConnection:'aiTeam.checkConnection',chat:'aiTeam.chat',connectCli:'aiTeam.connectCli',tryCli:'aiTeam.tryCli',loginCli:'aiTeam.loginCli',importWorkflow:'aiTeam.importWorkflow',viewWorkflow:'aiTeam.viewWorkflow',clearWorkflow:'aiTeam.clearWorkflow', language:'aiTeam.language', flow:'aiTeam.flow', connections:'aiTeam.connections', newTask:'aiTeam.newTask', backlog:'aiTeam.backlog', utilization:'aiTeam.utilization', account:'aiTeam.accountDetails', report:'aiTeam.report', reply:'aiTeam.reply', resume:'aiTeam.resume', backups:'aiTeam.backups', routing:'aiTeam.routing', switch:'aiTeam.switch', profiles:'aiTeam.profiles', editProfile:'aiTeam.profiles', quota:'aiTeam.quota', settings:'aiTeam.settings',shortcuts:'aiTeam.shortcuts',refreshQuota:'aiTeam.refreshQuota',dailyStart:'aiTeam.dailyStart',dailyStop:'aiTeam.dailyStop',dailyTask:'aiTeam.dailyTask',projectTask:'aiTeam.newTask',projectFolder:'aiTeam.projectFolder',projectCodex:'aiTeam.projectCodex' };
         if(message?.action==='setLanguage'&&['auto','en','vi'].includes(message.value)){await cfg().update('language',message.value,vscode.ConfigurationTarget.Global);return;}
@@ -546,37 +553,15 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     job.status = 'queued'; job.error = undefined; return true;
   };
   command('aiTeam.resume', async (id?: string) => {
-    const selected = id ?? (await vscode.window.showQuickPick(state.jobs.filter(j => j.status === 'waiting_quota').map(j => ({label:j.prompt.slice(0,80),id:j.id}))))?.id;
+    if(!id)return vscode.commands.executeCommand('aiTeam.board','tasks');const selected=id;
     const job = state.jobs.find(j => j.id === selected); if (!job) return;
     resume(job, false); await save(); changed(); start();
   });
   command('aiTeam.flow',()=>openConfiguration('team'));
   command('aiTeam.connections',()=>openConfiguration('connections'));
-  command('aiTeam.reply', async (id?: string) => {
-    const chosen = id ?? (await vscode.window.showQuickPick(state.jobs.filter(j => j.status === 'waiting_owner').map(j => ({ label: j.prompt.slice(0, 80), description: j.ownerQuestion, id: j.id }))))?.id;
-    const job = state.jobs.find(j => j.id === chosen); if (!job) return;
-    const answer = await vscode.window.showInputBox({ title: t("Reply to agent"), prompt: job.ownerQuestion, ignoreFocusOut: true });
-    if (!answer?.trim()) return;
-    answerOwner(job, answer); await save(); changed(); start();
-  });
-  command('aiTeam.backlog', async () => {
-    const prompt = await vscode.window.showInputBox({ title: t("Useful backlog task"), prompt: t("Describe a real improvement and acceptance criteria. It will run once when utilization is enabled.") });
-    if (!prompt?.trim()) return;
-    const cwd = await pickCwd(); if (!cwd) return;
-    backlog.items.push({ id: randomUUID(), prompt: prompt.trim(), cwd }); await save(); changed();
-  });
-  command('aiTeam.utilization', async () => {
-    if (backlog.enabled) { backlog.enabled = false; await save(); changed(); return; }
-    if (!backlog.items.some(i => !i.jobId)) throw new Error('Add useful backlog items first.');
-    const runs = await vscode.window.showInputBox({ title: t("Maximum backlog runs this session"), value: '3', validateInput: s => Number.isInteger(Number(s)) && Number(s) >= 1 && Number(s) <= 20 ? undefined : t("Enter 1–20.") });
-    if (!runs) return;
-    const minutes = await vscode.window.showInputBox({ title: t("Stop dispatching backlog after (minutes)"), value: '60', validateInput: s => Number.isInteger(Number(s)) && Number(s) >= 1 && Number(s) <= 180 ? undefined : t("Enter 1–180.") });
-    if (!minutes) return;
-    validateRoles(); backlog.enabled = true; backlog.remaining = Number(runs); backlog.until = Date.now() + Number(minutes) * 60_000;
-    backlog.sessionJobs = [];
-    await save(); changed();
-    void vscode.window.showInformationMessage(t("Useful backlog mode enabled. Requires fresh quota below threshold for all roles. Each item runs once; no dummy token-burning calls."));
-  });
+  command('aiTeam.reply', async(id?:string)=>{if(!id)return vscode.commands.executeCommand('aiTeam.board','tasks');const job=state.jobs.find(j=>j.id===id);if(!job)return;boardState={...boardState,consoleSelected:id,consoleNew:false};pendingReply=id;await vscode.commands.executeCommand('aiTeam.board','console');if(boardReady){await board?.webview.postMessage({type:'consoleSelect',id,reply:true});pendingReply=undefined;}});
+  command('aiTeam.backlog',async()=>{await vscode.commands.executeCommand('aiTeam.board','tasks');await board?.webview.postMessage({type:'backlogOpen'});});
+  command('aiTeam.utilization',()=>vscode.commands.executeCommand('aiTeam.backlog'));
   command('aiTeam.newTask', async (project?:string) => {
     const selectedProject = project === undefined ? undefined : await projectPath(project);
     if(selectedProject&&!projectRoots().some(root=>root.path===selectedProject))throw new Error(t('Open this folder in your VS Code workspace before creating a task.'));
@@ -591,20 +576,16 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   command('aiTeam.secret',(id?:string)=>openConfiguration('account',id));
   command('aiTeam.quota',(id?:string)=>openConfiguration('quota',id));
   command('aiTeam.report', async (id?: string) => {
-    const chosen = id ?? (await vscode.window.showQuickPick(state.jobs.slice().reverse().map(j => ({ label: j.prompt.slice(0, 90), description: stateName(j.status), id: j.id }))))?.id;
+    if(!id)return vscode.commands.executeCommand('aiTeam.board','tasks');const chosen=id;
     const job = state.jobs.find(j => j.id === chosen); if (!job) return;
     await persistReports();
     await vscode.window.showTextDocument(await vscode.workspace.openTextDocument(join(storage, 'reports', `${job.id}.md`)));
   });
-  command('aiTeam.cancel', async () => {
-    const choice = await vscode.window.showQuickPick(state.jobs.filter(j => ['queued', 'running', 'waiting_owner', 'waiting_quota'].includes(j.status)).map(j => ({ label: j.prompt.slice(0, 90), description: stateName(j.status), id: j.id })), { title: t("Stop task (existing edits remain for review)") });
-    if (!choice) return;
-    engine.cancel(choice.id); await save();
-  });
+  command('aiTeam.cancel',async(id?:string)=>{if(!id)return vscode.commands.executeCommand('aiTeam.board','tasks');if(!state.jobs.some(j=>j.id===id))return;engine.cancel(id);await save();changed();});
   command('aiTeam.examples',()=>vscode.commands.executeCommand('revealFileInOS',vscode.Uri.file(join(context.extensionPath,'examples'))));
   command('aiTeam.schedule',()=>vscode.commands.executeCommand('aiTeam.board','schedules'));
   command('aiTeam.pauseSchedule', async (id?: string) => {
-    const selected = id ?? (await vscode.window.showQuickPick(state.schedules.map(s => ({ label: s.title, id: s.id }))))?.id;
+    if(!id)return vscode.commands.executeCommand('aiTeam.board','schedules');const selected=id;
     const s = state.schedules.find(x => x.id === selected); if (!s) return;
     if (!s.enabled && s.cron) s.nextAt = nextCron(s.cron, s.timezone);
     if (!s.enabled && !s.cron && Date.parse(s.nextAt) <= Date.now()) throw new Error('One-time occurrence has passed. Create a new schedule.');

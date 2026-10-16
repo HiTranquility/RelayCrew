@@ -47,7 +47,7 @@ export class JsonStore<T> {
       await mkdir(dirname(this.file), { recursive: true }); await mkdir(this.backups, { recursive: true });
       try { await copyFile(this.file, join(this.backups, `${Date.now()}-${randomUUID()}.json`)); } catch (e: any) { if (e.code !== 'ENOENT') throw e; }
       const temp = `${this.file}.${randomUUID()}.tmp`;
-      await writeFile(temp, text, { encoding: 'utf8', flush: true }); await replaceStateFile(temp, this.file); this.last = text;
+      await writeFile(temp, text, { encoding: 'utf8', flush: true, mode:0o600 }); await replaceStateFile(temp, this.file); this.last = text;
       const names = (await readdir(this.backups)).filter(n => /^\d+-[a-f0-9-]+\.json$/.test(n)).sort().reverse();
       for (const name of names.slice(50)) await unlink(join(this.backups, name));
     });

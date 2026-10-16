@@ -40,6 +40,10 @@ See the bilingual [operations guide](docs/OPERATIONS.md) for task acceptance, pu
 - **Useful backlog mode:** dispatch real backlog items within a time/run budget and available quota. No dummy requests to burn tokens.
 - **Persistence and backups:** durable queue/pause state, previous JSON state versions, local reports and source snapshots before editable steps.
 
+## Workbench upgrades
+
+Version 0.9.9 includes resizable/split prompt panels, multi-folder Daily plans with explicit permissions, model-policy budgets, measured quota observations, daily checklists/results, account checks, searchable paginated lists and inline backlog. DOCX/ODT text, additional image formats and voice-dictation guidance are included. See [the workbench guide](docs/WORKBENCH-09.md) for setup, shortcuts, credential locations and current transport/voice limitations. Antigravity uses its own `agy` adapter; Gemini profiles stay intact.
+
 ## Quick start
 
 ### Requirements
@@ -51,14 +55,14 @@ See the bilingual [operations guide](docs/OPERATIONS.md) for task acceptance, pu
 
 ### Install a local VSIX
 
-Download the VSIX from [RelayCrew 0.9.8 prerelease](https://github.com/HiTranquility/RelayCrew/releases/tag/v0.9.8), or build a package from this repository:
+Download the VSIX from [RelayCrew 0.9.9 prerelease](https://github.com/HiTranquility/RelayCrew/releases/tag/v0.9.9), or build a package from this repository:
 
 ```sh
 git clone https://github.com/HiTranquility/RelayCrew.git
 cd RelayCrew
 npm ci
 npm run package
-code --install-extension relaycrew-0.9.8.vsix
+code --install-extension relaycrew-0.9.9.vsix
 ```
 
 You can also use **Extensions → … → Install from VSIX…**. This repository does not automatically publish to the VS Code Marketplace.

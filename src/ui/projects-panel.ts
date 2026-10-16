@@ -1,3 +1,4 @@
+import {scopedControls} from './scoped-filters';
 import type { Job, Profile } from '../core/domain';
 import { projectSummaries, type ProjectRoot } from '../core/projects';
 import { statusLabel, translator, type Language } from '../core/i18n';
@@ -6,9 +7,9 @@ import { escapeHtml as h } from './html';
 export function renderProjectsPanel(roots: ProjectRoot[], jobs: Job[], profiles: Profile[], language: Language,isolateTasks=false,openTasksInCodex=false): string {
   const t=translator(language), tr=(message:string,...values:unknown[])=>h(t(message,...values));
   return `<h2>${tr('Projects')}</h2><p class="muted">${tr('Tasks are grouped automatically by their working folder. Each project shows its own agents and progress.')}</p><label class="check-row"><input type="checkbox" data-setting="isolateTasks" ${isolateTasks?'checked':''}>${tr('Create a separate Git worktree for each new task')}</label><p class="muted">${tr('Requires committed source changes. Task branches and folders are kept for review; nothing is merged automatically.')}</p><label class="check-row"><input type="checkbox" data-setting="openTasksInCodex" ${openTasksInCodex?'checked':''}>${tr('Prepare a Codex desktop chat for each new task')}</label><p class="muted">${tr('Opens the task folder once when execution starts. You send prompts in Codex; RelayCrew continues its own CLI workflow.')}</p>`+
-    projectSummaries(roots,jobs).map(project=>{
+    scopedControls('projects',language)+projectSummaries(roots,jobs).map(project=>{
       const active=project.jobs.filter(job=>['running','queued'].includes(job.status));
-      return `<section><div class="row"><h2>${h(project.name)}</h2><span class="badge">${tr(project.open?'Open workspace':'Task history')}</span></div><p class="muted">${h(project.path)}</p>
+      return `<section data-scope-row="projects"><div class="row"><h2>${h(project.name)}</h2><span class="badge">${tr(project.open?'Open workspace':'Task history')}</span></div><p class="muted">${h(project.path)}</p>
       <p>${tr('{0} tasks · {1} running / queued · {2} waiting for your reply',project.jobs.length,active.length,project.jobs.filter(job=>job.status==='waiting_owner').length)}</p>
       ${project.open?`<button data-action="projectTask" data-id="${h(project.path)}">${tr('New task in project')}</button>`:''}
       <button data-action="projectFolder" data-id="${h(project.path)}">${tr('Show folder')}</button><button data-action="projectCodex" data-id="${h(project.path)}">${tr('Open project chat in Codex')}</button>

@@ -29,7 +29,7 @@ export class DailyController {
     if(!ids.length)throw new Error('Select at least one account in the daily quota table.');
     // Validate a copy before pausing or mutating the durable plan.
     const next=structuredClone(h.plan),workspaces=dailyWorkspaces(value.workspaces??[{path:value.cwd,permission:h.plan.allowEdits?'auto':'read-only'}],roots);
-    if(workspaces.some(w=>w.permission==='full')){const choice=await vscode.window.showWarningMessage('Full permission permits commands beyond the folder sandbox.',{modal:true,detail:workspaces.filter(w=>w.permission==='full').map(w=>w.path).join('\n')},'Enable full permission');if(choice!=='Enable full permission')return;}
+    if(workspaces.some(w=>w.permission==='full')){const choice=await vscode.window.showWarningMessage('Full permission permits commands beyond the folder sandbox.',{modal:true,detail:workspaces.filter(w=>w.permission==='full').map(w=>w.path).join('\n')},'Enable full permission');if(choice!=='Enable full permission')throw new Error('Permission change cancelled; daily plan was not changed.');}
     next.workspaces=[...workspaces,...(h.plan.workspaces??[]).filter(w=>!workspaces.some(n=>n.path===w.path)).map(w=>({...w,enabled:false}))];
     startDailyPlan(next,value.cwd,timezone,ids,runs,target);
     if(value.start===false)next.enabled=false;h.pauseActive();Object.assign(h.plan,next);this.tick();await h.save();h.changed();h.start();

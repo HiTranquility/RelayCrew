@@ -1,3 +1,4 @@
+import {secretEvents} from '../../core/stream-redaction';
 import { assertAntigravityReadOnly } from './antigravity';
 import spawn from 'cross-spawn';
 import { execFile } from 'node:child_process';
@@ -128,7 +129,7 @@ async function stopTree(pid: number): Promise<void> {
 
 export async function execute(o: ExecuteOptions): Promise<string> {
   if (o.signal.aborted) throw new Error('Cancelled.');
-  if(o.profile.provider==='antigravity'&&!o.edits)await assertAntigravityReadOnly();
+  if(o.profile.provider==='antigravity'&&!o.edits){if([...Object.keys(o.profile.env??{}),...Object.keys(o.secretValues)].some(key=>!['GEMINI_API_KEY','GOOGLE_API_KEY','HTTP_PROXY','HTTPS_PROXY','NO_PROXY'].includes(key)))throw new Error('Antigravity configuration environment overrides are not supported for read-only tasks.');await assertAntigravityReadOnly();}
   const temp = await mkdtemp(join(tmpdir(), 'ai-team-'));
   const output = join(temp, 'final.txt');
   const secretList = Object.values(o.secretValues);
@@ -142,12 +143,12 @@ export async function execute(o: ExecuteOptions): Promise<string> {
       });
       let out = '', err = '', stopReason = '', stopping: Promise<void> | undefined;
       let pendingLine = '';
-      const publicEvent=publicEventStream();
+      const publicEvent=publicEventStream(),safeEvents=secretEvents(secretList,e=>o.onEvent?.({...e,text:e.text.slice(0,3000)}));
       const outDecoder = new StringDecoder('utf8'), errDecoder = new StringDecoder('utf8');
       const eventLine = (line: string) => {
         try {
           const event = publicEvent(JSON.parse(line));
-          if (event?.text) o.onEvent?.({ kind: event.kind, text: clean(event.text).slice(0, 3000) });
+          if (event?.text) safeEvents.write({kind:event.kind,text:event.text});
         } catch { /* non-JSON diagnostic line remains in sanitized final log */ }
       };
       const stop = (reason: string) => {
@@ -176,7 +177,7 @@ export async function execute(o: ExecuteOptions): Promise<string> {
         cleanup();
         await stopping;
         out += outDecoder.end(); err += errDecoder.end();
-        if (pendingLine) eventLine(pendingLine);
+        if (pendingLine) eventLine(pendingLine);safeEvents.finish();
         // Redact complete buffers, so a secret split across output chunks is still masked.
         o.log(clean(`\n[${o.profile.id}] exit=${code}\n${out.slice(0, 2_000_000)}\n${err.slice(0, 100_000)}\n`));
         if (stopReason) reject(new Error(stopReason));

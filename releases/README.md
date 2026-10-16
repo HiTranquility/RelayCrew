@@ -16,13 +16,23 @@ Keep each version in its own immutable directory. Never replace an existing VSIX
 | [0.9.0](v0.9.0/NOTES.md) | `relaycrew-0.9.0.vsix` | Observable tasks, acceptance, schedule planning and Local/Cloud HTTP adapters |
 | [0.9.1](v0.9.1/NOTES.md) | `relaycrew-0.9.1.vsix` | Bundled bilingual Markdown role, workflow and task/acceptance examples |
 
+| [0.9.2](v0.9.2/NOTES.md) | `relaycrew-0.9.2.vsix` | Resize, layout persistence and keyboard/focus fixes |
+| [0.9.3](v0.9.3/NOTES.md) | `relaycrew-0.9.3.vsix` | Theme contrast, visual hierarchy and accessibility |
+| [0.9.4](v0.9.4/NOTES.md) | `relaycrew-0.9.4.vsix` | Confirmed onboarding, Antigravity adapter and portable layout |
+| [0.9.5](v0.9.5/NOTES.md) | `relaycrew-0.9.5.vsix` | Multi-folder Daily work and explicit per-folder permissions |
+| [0.9.7](v0.9.7/NOTES.md) | `relaycrew-0.9.7.vsix` | Model-policy budgets, quota observations and daily checklists |
+| [0.9.8](v0.9.8/NOTES.md) | `relaycrew-0.9.8.vsix` | Split prompt panel, document formats and dictation |
+| [0.9.9](v0.9.9/NOTES.md) | `relaycrew-0.9.9.vsix` | Account checks, filters/pagination, inline backlog and privacy fixes |
+
+0.9.6 remains reserved for remote repository authentication; no tag is backfilled.
+
 Each directory contains the exact VSIX, a source ZIP, `release.json`, `SHA256SUMS` and release notes. Run `npm run releases:verify` to verify every archived asset. These archives are retained in Git but excluded from the installed extension package. The original 0.1/0.2 package names are preserved; their display name was AI Team Workbench.
 
 The older source ZIPs contain only original `src/` files recovered from `sourcesContent`, plus package metadata and any README/license shipped in that VSIX. They are **not full historical repositories**: tests, build scripts, lockfiles and Git history were not packaged and cannot be recovered by this process. The archive manifest records this limitation. Historical checks have not been rerun against those partial snapshots.
 
 ## GitHub release process
 
-The local archives do not mean releases have already been published to GitHub. Current source is 0.9.1; do not point older tags at this source. GitHub's automatic source ZIP for such a tag would misrepresent those versions.
+The local archives do not mean releases have already been published to GitHub. Current source is 0.9.9; do not point older tags at this source. GitHub's automatic source ZIP for such a tag would misrepresent those versions.
 
 For a new source release:
 
@@ -31,9 +41,9 @@ For a new source release:
 3. Create an annotated tag matching the manifest, then push the commit and tag. For the current source:
 
    ```sh
-   git tag -a v0.9.1 -m "RelayCrew 0.9.1"
+   git tag -a v0.9.9 -m "RelayCrew 0.9.9"
    git push origin main
-   git push origin v0.9.1
+   git push origin v0.9.9
    ```
 
 4. The release workflow checks/tests the tagged source, verifies retained archives, builds a fresh VSIX, checks the tag/version match and publishes a GitHub **prerelease** with the VSIX and its SHA-256 checksum. It never publishes to the VS Code Marketplace. A duplicate release fails rather than replacing existing assets.
