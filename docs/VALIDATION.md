@@ -1,4 +1,12 @@
-# Validation · 0.3.1 · 16/10/2026
+# Validation · 16/10/2026
+
+## 0.7.0
+
+Added tests cover one-pass template substitution, immutable snapshots, actual engine role requests with required output contracts, Markdown templates, model catalog/alias/custom/fallback selection and account quota ceilings. A metadata-only check of the installed Codex model/list returned the current recommendation without creating a thread or model turn. Browser QA includes template presets/edit/preview/reset/reload and optional model controls.
+
+92 automated tests pass, including flow/model/manager validation, rotation pools, manual quota bounds and credential exclusion from rendered configuration. Strict TypeScript and production build checks pass. English/Vietnamese browser QA passes in light/dark themes: inline team/routing/Markdown/quota/account switching, errors retaining drafts, added account choices during live snapshots, secret inputs excluded from saved state, and narrow layouts. Primary-manager account and final-node highlighting is asserted and preview screenshots are inspected.
+
+Native VS Code smoke checks activation, contributed commands, English/Vietnamese titles, one shared board and zero QuickPick/input dialogs for common account, flow, routing, quota, switching, messaging, secret and language configuration commands. File selection and interactive CLI authentication deliberately remain native. Scheduling and daily-plan legacy dialogs are outside this change. These UI checks make no new provider calls or live messaging deliveries; the authorized Codex trial evidence below remains from 0.6.0.
 
 ## 0.6.0
 

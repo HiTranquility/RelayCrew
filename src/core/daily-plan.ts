@@ -63,7 +63,7 @@ export function carryDailyTasks(plan:DailyPlan,jobs:Job[],ids:string[]):void {
 export function dailyProfile(plan: DailyPlan, id: string, profiles: Profile[], quotas: Record<string, Quota>, jobs: Job[], now = Date.now()): Profile {
   const profile = profiles.find(profile => profile.id === id), q = quotas[id];
   const unrefreshedLimit = jobs.some(job => job.blockedProfileId === id && job.limitDetectedAt && (!q || Date.parse(q.observedAt) <= Date.parse(job.limitDetectedAt)));
-  if (!plan.enabled || now >= plan.until || !profile || plan.accounts[id] !== true || !fresh(q, now) || q.usedPercent >= plan.targetPercent || q.remainingTokens === 0 || unrefreshedLimit) {
+  if (!plan.enabled || now >= plan.until || !profile || plan.accounts[id] !== true || !fresh(q, now) || q.usedPercent >= Math.min(plan.targetPercent,profile.quotaCeiling??100) || q.remainingTokens === 0 || unrefreshedLimit) {
     throw new QuotaWait('Daily plan account is excluded, at its target, provider-limited, or missing fresh available quota.');
   }
   return profile;

@@ -1,3 +1,4 @@
+import type { PromptTemplateSnapshot } from '../core/prompt-templates';
 import * as vscode from 'vscode';
 import { randomUUID } from 'node:crypto';
 import type { Job, Management, Profile } from '../core/domain';
@@ -12,6 +13,7 @@ interface Hooks {
   management: () => Management; language: () => Language; timezone: () => string;
   isolation: () => boolean;
   workflow?:()=>WorkflowDocument|undefined;
+  promptTemplates?:()=>PromptTemplateSnapshot;
   openInCodex: () => boolean;
   paused: () => boolean; pauseActive: (profileId?: string) => void; save: () => Promise<void>; changed: () => void;
   cwd: () => Promise<string | undefined>; start: () => void;
@@ -78,6 +80,7 @@ export class DailyController {
     const job = makeDailyJob(p, item, h.management());
     job.isolationMode=h.isolation()?'worktree':'shared';
     job.openInCodex=h.openInCodex();
+    const templates=h.promptTemplates?.();if(templates)job.promptTemplates=structuredClone(templates);
     const workflow=h.workflow?.();if(workflow)job.workflow=structuredClone(workflow);
     item.jobId = job.id; h.jobs.push(job); p.remainingRuns--;
   }

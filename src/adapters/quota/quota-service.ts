@@ -1,3 +1,4 @@
+import { profileModelLabel } from '../../core/i18n';
 import { open } from 'node:fs/promises';
 import { isAbsolute } from 'node:path';
 import { fresh, parseQuota } from '../../core/domain';
@@ -47,6 +48,6 @@ export function usageStatus(profiles:Profile[],jobs:Job[],quotas:Record<string,Q
   const unknown=profiles.length-current.length;
   const text=active?`$(pulse) ${profile?.label??active}: ${fresh(snapshot,now)?snapshot.usedPercent+'%':t('unknown')}`
     :`$(dashboard) ${t('Quota: {0}',current.length?t('{0}% max',Math.max(...current.map(q=>q.usedPercent))):t('unknown'))}${unknown?' · '+t('{0} unknown',unknown):''}`;
-  const tooltip=profiles.map(p=>`${p.label} [${p.id}] · ${p.model||t('CLI default')}\n${quotaSummary(quotas[p.id],now,language)}\n${t('Reset')}: ${quotas[p.id]?.resetsAt??t('unknown')}${quotas[p.id]?.windows?.map(w=>`\n${w.label} · ${t('Reset')}: ${w.resetsAt??t('unknown')}`).join('')??''}`).join('\n\n')+'\n\n'+t('Click to inspect quota or switch the account assigned to a task.');
-  return{text,tooltip,warning:current.some(q=>q.usedPercent>=threshold)};
+  const tooltip=profiles.map(p=>`${p.label} [${p.id}] · ${profileModelLabel(p,language)}${p.quotaCeiling?' · '+t('Account quota ceiling (%)')+': '+p.quotaCeiling+'%':''}\n${quotaSummary(quotas[p.id],now,language)}\n${t('Reset')}: ${quotas[p.id]?.resetsAt??t('unknown')}${quotas[p.id]?.windows?.map(w=>`\n${w.label} · ${t('Reset')}: ${w.resetsAt??t('unknown')}`).join('')??''}`).join('\n\n')+'\n\n'+t('Click to inspect quota or switch the account assigned to a task.');
+  return{text,tooltip,warning:profiles.some(p=>fresh(quotas[p.id],now)&&quotas[p.id].usedPercent>=Math.min(threshold,p.quotaCeiling??100))};
 }

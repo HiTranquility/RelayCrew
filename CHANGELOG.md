@@ -2,6 +2,17 @@
 
 Versions before 1.0 are early releases. See [release archives](releases/README.md) for exact packages, hashes and source provenance.
 
+## 0.7.0 — 2026-10-16
+
+- Add editable input/response templates by role, built-in presets, local preview/reset, Markdown import and per-task snapshots/hashes.
+- Make model IDs optional: current Codex catalog recommendation or Claude/Gemini flagship aliases, retained custom pins, reasoning levels and per-account quota ceilings.
+- Refresh the VS Code themed workbench with compact navigation, account cards, responsive forms and section links.
+- Highlight the primary manager card, selected account role button, overview card and final flow node; label final approval separately from supporting coordinators.
+- Replace common account/team/routing/quota/switch/messaging popup wizards with inline board forms, validation, Save actions and local feedback. Native file selection and interactive CLI authentication remain available.
+- Paste, edit and preview Markdown workflow guides in Setup before applying. Preserve configuration drafts through reloads and live snapshots; refresh newly added account choices without discarding edits.
+- Store profile secrets outside draft state, clear password fields after submission/closing, and retain connection test/disconnect controls.
+- Add configuration validation and browser/native checks; preserve all previous release assets.
+
 ## 0.6.0 — 2026-10-16
 
 - Add inline account forms, CLI discovery, role assignment buttons, scoped CLI login terminals and real read-only Dev → Audit → Lead connection trials.

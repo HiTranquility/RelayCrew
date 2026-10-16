@@ -16,6 +16,15 @@ This example uses the built-in profile IDs. Connect and authenticate each CLI fi
   "management": {
     "primaryProfileId": "codex-main",
     "coordinatorIds": []
+  },
+  "promptTemplates": {
+    "version": 1,
+    "roles": {
+      "lead": {
+        "input": "Verify acceptance criteria for {{task}} using implementation and review evidence.",
+        "output": "Explain the final decision in summary with tests and remaining risks."
+      }
+    }
   }
 }
 ```
@@ -49,3 +58,7 @@ Manager chính tổng hợp và quyết định cuối. Coordinator chỉ báo c
 Empty overrides keep each connected profile's model and effort. To pin a role, add an existing CLI model ID, for example `"builder": {"model": "YOUR_MODEL_ID", "effort": "medium"}` inside `overrides`. Model availability depends on your authenticated account; import validates structure and profile IDs, not provider entitlements.
 
 Để trống overrides sẽ dùng model/effort của profile. Có thể đặt model riêng cho từng vai trò bằng ID mà CLI và tài khoản của bạn hỗ trợ.
+
+Model IDs are optional. Empty overrides inherit the account selection policy. The promptTemplates object customizes role input/output content; mandatory orchestration fields remain. See [models and templates](MODELS-AND-TEMPLATES.md).
+
+Model ID không bắt buộc. Mẫu trong block chỉnh hướng dẫn đầu vào/phản hồi; các trường cần điều phối vẫn giữ. Có thể chỉnh bằng form Thiết lập và xem trước.

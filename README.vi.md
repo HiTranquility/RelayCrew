@@ -14,13 +14,15 @@ RelayCrew kết nối các CLI Codex, Claude Code và Gemini đã cài trên má
 
 ## Các phần chính
 
+- **Model tự động và định mức:** không cần model ID; tự theo danh mục CLI/alias, có mức suy luận và ngưỡng quota từng account. Xem [hướng dẫn model và mẫu](docs/MODELS-AND-TEMPLATES.md).
+- **Mẫu đầu vào/phản hồi:** có mẫu theo vai trò, cho sửa trước khi chạy, xem trước không gọi AI, khôi phục và lưu bản chụp theo task.
 - **Console trực tiếp như CLI:** nhập nhiều dòng, Ctrl+Enter để gửi, xem phiên/output công khai, trả lời agent tại chỗ và dùng lệnh điều phối. Xem [hướng dẫn console](docs/CONSOLE.md).
 - **Tổng quan mới:** thẻ vai trò/account, quota đã quan sát, việc cần xử lý và trao đổi gần nhất. Tác vụ có tìm kiếm, bộ lọc và các bước đã ghi nhận.
 - **Tác vụ:** phân công Dev → Audit → Repair (tùy chọn) → Quản lý chính; xem tiến độ, input, phản hồi công khai, báo cáo và trao đổi giữa các bước.
 - **Tài khoản và quota:** account/model thực đang chạy, phần trăm sử dụng, các cửa sổ giới hạn, thời điểm reset và số token nếu nguồn cung cấp. Có nút đổi account theo task.
-- **Thiết lập:** giao diện theo theme VS Code, form có kiểm tra giá trị, hộp thoại cấu hình account/env/secret; không bắt buộc sửa JSON.
+- **Thiết lập:** giao diện theo theme VS Code, form tài khoản, luồng/model, luân phiên, quota, Markdown và kết nối ngay trong bảng; có nút Lưu và lỗi tại chỗ. Các lệnh cấu hình thường dùng mở cùng bảng thay vì popup.
 - **Tasklist quota trong ngày:** chọn tài khoản được dùng, bỏ chọn model yếu/account cần giữ quota, giới hạn số task và ngưỡng sử dụng.
-- **Quản lý chính:** chọn một account có quyền duyệt cuối cùng; tối đa bốn điều phối viên phụ chỉ review/báo cáo. Hai account Claude vẫn có vai trò chính/phụ riêng.
+- **Quản lý chính:** thẻ có viền nhấn, nút vai trò tô nổi bật và ô duyệt cuối giúp nhận ra account có quyền duyệt cuối cùng; tối đa bốn điều phối viên phụ chỉ review/báo cáo. Hai account Claude vẫn có vai trò chính/phụ riêng.
 - **Dự án:** tự gom task theo project gốc, thấy account đang làm; có thể tự tạo Git worktree cho từng task và chuẩn bị chat Codex ở đúng thư mục đó.
 - **Hẹn giờ và nhắn tin hai chiều:** lịch một lần/cron, reminder, Telegram và Zalo OA; người dùng có thể giao việc, hỏi trạng thái và trả lời agent.
 - **Lưu dữ liệu:** hàng đợi, lịch, lịch sử quyết định, báo cáo, bản JSON trước đó và snapshot source trước bước được sửa file.
@@ -29,23 +31,23 @@ RelayCrew kết nối các CLI Codex, Claude Code và Gemini đã cài trên má
 
 Yêu cầu VS Code **1.96 trở lên**, workspace local đã tin cậy; CLI cần dùng đã cài và đăng nhập riêng. Git cần có trong PATH để sao lưu source và tạo worktree. Build từ source dùng Node.js **22** và npm.
 
-Tải VSIX tại [RelayCrew 0.6.0 prerelease](https://github.com/HiTranquility/RelayCrew/releases/tag/v0.6.0), rồi chọn **Extensions → … → Install from VSIX…**. Hoặc:
+Tải VSIX tại [RelayCrew 0.7.0 prerelease](https://github.com/HiTranquility/RelayCrew/releases/tag/v0.7.0), rồi chọn **Extensions → … → Install from VSIX…**. Hoặc:
 
 ```sh
 git clone https://github.com/HiTranquility/RelayCrew.git
 cd RelayCrew
 npm ci
 npm run package
-code --install-extension relaycrew-0.6.0.vsix
+code --install-extension relaycrew-0.7.0.vsix
 ```
 
 1. Mở folder dự án trong VS Code và sidebar **RelayCrew**.
-2. Mở **Bảng phân công → Thiết lập → Cấu hình hồ sơ**. Đặt account label, executable, model ID đúng với CLI/account của bạn.
+2. Mở **Tài khoản và quota → Thêm tài khoản**, nhập form rồi lưu. Đặt nhãn và đường dẫn CLI; mặc định tự chọn flagship/khuyến nghị, model ID là tùy chọn nâng cao.
 3. Mở sơ đồ nhóm, chọn các vai trò, **Quản lý chính** và điều phối viên phụ. Model/reasoning để trống sẽ dùng giá trị của profile.
 4. Giao một task nhỏ có tiêu chí hoàn thành rõ ràng. **Cho phép sửa file** mặc định tắt; bật khi muốn Dev/Repair chỉnh code. Audit/điều phối/quản lý vẫn chạy read-only/plan.
 5. Dùng **Tạm dừng ngay**, **Tiếp tục hàng đợi**, **Dừng tác vụ**, **Báo cáo** hoặc **Trả lời agent** ngay trên bảng.
 
-Extension chưa phát hành lên VS Code Marketplace. Các bản **0.1.0 / 0.2.0 / 0.3.0 / 0.3.1 / 0.4.0 / 0.5.0 / 0.6.0** được giữ riêng trong [release archives](releases/README.md), có ghi nguồn gốc source và SHA-256; không ghi đè bản cũ.
+Extension chưa phát hành lên VS Code Marketplace. Các bản **0.1.0 / 0.2.0 / 0.3.0 / 0.3.1 / 0.4.0 / 0.5.0 / 0.6.0 / 0.7.0** được giữ riêng trong [release archives](releases/README.md), có ghi nguồn gốc source và SHA-256; không ghi đè bản cũ.
 
 ## Tiếng Anh / Tiếng Việt
 
@@ -55,7 +57,7 @@ Không dịch lại yêu cầu của bạn, phản hồi agent, account label ha
 
 ## Account, quota và điều phối
 
-Profile là môi trường CLI do bạn cấu hình, chưa tự xác minh email/danh tính đăng nhập. Hai profile khác tên nhưng cùng môi trường đăng nhập vẫn có thể dùng **cùng một account**. Tạo môi trường/config directory riêng theo hướng dẫn của từng CLI rồi khai báo env qua hộp thoại. Khai báo tên biến secret trong profile và lưu giá trị bằng **Lưu secret**; không đặt token vào repo hay env thường.
+Profile là môi trường CLI do bạn cấu hình, chưa tự xác minh email/danh tính đăng nhập. Hai profile khác tên nhưng cùng môi trường đăng nhập vẫn có thể dùng **cùng một account**. Tạo môi trường/config directory riêng theo hướng dẫn của từng CLI rồi khai báo đường dẫn trong form tài khoản. Mở **Lưu secret cho profile** để nhập tên biến và giá trị; các biến môi trường thường nằm trong Settings nâng cao; không đặt token vào repo hay env thường.
 
 Quota hiện lấy từ snapshot thủ công hoặc `quotaFile` JSON local có nguồn và thời điểm quan sát. Dữ liệu quá năm phút hoặc qua mốc reset cần làm mới. Nếu có nhiều cửa sổ (ví dụ phiên ngắn và tuần), dùng tỷ lệ cao nhất. Không tự chuyển phần trăm thành số token và không coi dữ liệu thiếu là 0%.
 

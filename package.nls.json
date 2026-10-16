@@ -61,5 +61,7 @@
   "command.loginCli": "RelayCrew: Open CLI Login",
   "command.closeBoard": "RelayCrew: Close RelayCrew Board",
   "command.toggleSidebar": "RelayCrew: Toggle VS Code Sidebar",
-  "command.togglePanel": "RelayCrew: Toggle VS Code Panel"
+  "command.togglePanel": "RelayCrew: Toggle VS Code Panel",
+  "profile.modelPolicy": "Automatic flagship uses the current CLI catalog/provider alias; cli follows existing CLI settings; custom uses an optional model ID.",
+  "profile.quotaCeiling": "Optional usage ceiling (1–100%). The lower account/global or daily-plan threshold stops subsequent steps; it does not interrupt an in-flight request."
 }

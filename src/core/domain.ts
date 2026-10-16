@@ -1,3 +1,4 @@
+import type { PromptTemplateSnapshot } from './prompt-templates';
 import { CronExpressionParser } from 'cron-parser';
 import type { Attachment } from '../storage/attachments';
 import type { WorkflowDocument } from './workflow';
@@ -21,8 +22,10 @@ export function validateFlow(value: unknown): Role[] {
 }
 export interface Profile {
   id: string; label: string; provider: Provider; executable: string;
+  modelPolicy?:'flagship'|'cli'|'custom'; quotaCeiling?:number;
   model?: string; effort?: string; env?: Record<string, string>; secretEnv?: string[]; quotaFile?: string;
 }
+export function profileModelPolicy(profile:Profile):'flagship'|'cli'|'custom' {return profile.modelPolicy??(profile.model?'custom':'flagship');}
 export interface Quota {
   usedPercent: number; observedAt: string; resetsAt?: string; source: string;
   limitTokens?: number; remainingTokens?: number;
@@ -41,6 +44,7 @@ export interface Step {
   backupPath?: string;
   timeoutAt?: string; phase?: 'backing_up' | 'cli';
   coordinatorProfileId?: string;
+  modelSource?:'custom'|'alias'|'catalog'|'cli-default';
 }
 export interface Job {
   id: string; prompt: string; cwd: string; createdAt: string;
@@ -67,6 +71,7 @@ export interface Job {
   attachments?: Attachment[];
   workflow?: WorkflowDocument;
   connectionTrial?: boolean;
+  promptTemplates?:PromptTemplateSnapshot;
 }
 
 export function ownerQuestion(raw: string): string | undefined {
@@ -103,6 +108,8 @@ export function validateProfiles(value: unknown): Profile[] {
       throw new Error('Each profile needs a unique id, label, provider and executable.');
     }
     ids.add(p.id);
+    if(p.modelPolicy!==undefined&&!['flagship','cli','custom'].includes(p.modelPolicy))throw new Error('Invalid model policy.');
+    if(p.quotaCeiling!==undefined&&(!Number.isFinite(p.quotaCeiling)||p.quotaCeiling<1||p.quotaCeiling>100))throw new Error('Account quota ceiling must be between 1 and 100.');
     for (const key of ['model', 'effort', 'quotaFile']) {
       if (p[key] !== undefined && typeof p[key] !== 'string') throw new Error(`Invalid ${key}.`);
     }
@@ -167,11 +174,11 @@ export function routeProfile(id: string, profiles: Profile[], quotas: Record<str
   const selected = profiles.find(p => p.id === id);
   if (!selected) throw new Error(`Missing profile ${id}. Configure role assignments.`);
   const q = quotas[id];
-  if (!fresh(q, now) || q.usedPercent < threshold) return selected;
+  if (!fresh(q, now) || q.usedPercent < Math.min(threshold,selected.quotaCeiling??100)) return selected;
   if (auto) {
     const fallback = profiles.find(p => p.id !== id && p.provider === selected.provider
-      && p.model === selected.model && p.effort === selected.effort
-      && fresh(quotas[p.id], now) && quotas[p.id].usedPercent < threshold);
+      && p.modelPolicy === selected.modelPolicy && p.model === selected.model && p.effort === selected.effort
+      && fresh(quotas[p.id], now) && quotas[p.id].usedPercent < Math.min(threshold,p.quotaCeiling??100));
     if (fallback) return fallback;
   }
   throw new QuotaWait(`${selected.label}: quota at ${q.usedPercent}%. Select another account or wait for a fresh quota refresh.`);
@@ -184,7 +191,7 @@ export function rotateProfile(pool: string[], profiles: Profile[], quotas: Recor
     const index = (cursor + offset) % pool.length;
     const p = profiles.find(p => p.id === pool[index]);
     if (!p) throw new Error(`Rotation profile missing: ${pool[index]}`);
-    if (fresh(quotas[p.id], now) && quotas[p.id].usedPercent < threshold) return { profile: p, cursor: (index + 1) % pool.length };
+    if (fresh(quotas[p.id], now) && quotas[p.id].usedPercent < Math.min(threshold,p.quotaCeiling??100)) return { profile: p, cursor: (index + 1) % pool.length };
   }
   throw new QuotaWait('Rotation pool has no account with fresh available quota. Refresh quota data to continue.');
 }

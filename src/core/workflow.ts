@@ -1,7 +1,8 @@
+import { validatePromptTemplates, type PromptTemplates } from './prompt-templates';
 import { createHash } from 'node:crypto';
 import { validateFlow, validateManagement, type Management, type Profile, type Role, type RoleOverrides } from './domain';
 export interface WorkflowDocument {name:string;markdown:string;sha256:string}
-export interface WorkflowConfiguration {flow:Role[];roles:Record<Role,string>;overrides:RoleOverrides;management:Management}
+export interface WorkflowConfiguration {flow:Role[];roles:Record<Role,string>;overrides:RoleOverrides;management:Management;promptTemplates?:PromptTemplates}
 export function importWorkflow(name:string,bytes:Buffer,profiles:Profile[],current:WorkflowConfiguration):{document:WorkflowDocument;configuration:WorkflowConfiguration;structured:boolean}{
   if(!/\.md$/i.test(name)||bytes.length>64*1024||!bytes.length)throw new Error('Choose a Markdown file up to 64 KB.');
   let markdown:string;try{markdown=new TextDecoder('utf-8',{fatal:true}).decode(bytes);if(markdown.includes('\0')||!markdown.trim())throw new Error();}catch{throw new Error('Workflow Markdown must contain UTF-8 text.');}
@@ -10,7 +11,8 @@ export function importWorkflow(name:string,bytes:Buffer,profiles:Profile[],curre
   let configuration=structuredClone(current);
   if(blocks.length){
     let value:any;try{value=JSON.parse(blocks[0][1]);}catch{throw new Error('The relaycrew block must contain valid JSON.');}
-    if(!value||Array.isArray(value)||value.version!==1||Object.keys(value).some(key=>!['version','flow','roles','overrides','management'].includes(key)))throw new Error('Unsupported workflow configuration. Use version 1 with flow, roles, overrides and management.');
+    if(!value||Array.isArray(value)||value.version!==1||Object.keys(value).some(key=>!['version','flow','roles','overrides','management','promptTemplates'].includes(key)))throw new Error('Unsupported workflow configuration. Use version 1 with flow, roles, overrides and management.');
+    if(value.promptTemplates!==undefined)configuration.promptTemplates=validatePromptTemplates(value.promptTemplates);
     configuration.flow=validateFlow(value.flow??current.flow);
     if(value.roles!==undefined){if(!value.roles||Array.isArray(value.roles)||typeof value.roles!=='object'||Object.keys(value.roles).some(key=>!['builder','auditor','worker','lead'].includes(key)))throw new Error('Invalid workflow roles.');configuration.roles={...configuration.roles,...value.roles};}
     const ids=new Set(profiles.map(p=>p.id));if(Object.values(configuration.roles).some(id=>!ids.has(id)))throw new Error('Workflow references an unknown account. Configure its profile before importing.');
