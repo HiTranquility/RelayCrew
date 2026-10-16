@@ -2,6 +2,15 @@
 
 Versions before 1.0 are early releases. See [release archives](releases/README.md) for exact packages, hashes and source provenance.
 
+## 0.5.0 — 2026-10-16
+
+- Make Live console the default: inline multiline composer, session list, actual runtime identity, public event output, elapsed time and inline owner replies.
+- Support `/new`, `/reply`, `/pause`, `/resume`, `/stop`, `/status` through the existing engine. Persist request IDs for deduplication and guard replies against changed questions.
+- Patch stream/snapshot updates without replacing the composer; retain drafts, selected session, follow preference and filters. Scrolling up pauses follow output.
+- Add Overview role/account cards, observed quota meters, current work, recent handoffs and first-run guidance.
+- Add task search, status filters, recorded-step rails and expandable assignment details; retain English/Vietnamese and VS Code theme support.
+- Add console controller/engine/render tests and browser checks for submission, errors, snapshot updates and drafts.
+
 ## 0.4.0 — 2026-10-16
 
 - Add English/Vietnamese runtime UI, manifest localization and a Vietnamese README.

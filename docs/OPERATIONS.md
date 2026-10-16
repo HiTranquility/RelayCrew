@@ -1,5 +1,11 @@
 # Điều phối, quan sát và dữ liệu
 
+## Console trực tiếp (0.5)
+
+Màn hình mặc định có danh sách phiên, đầu ra CLI công khai và khung nhập nhiều dòng. Ctrl+Enter gửi, Enter xuống dòng. Dùng `/new`, `/reply`, `/pause`, `/resume`, `/stop`, `/status`; không chạy shell tùy ý. Reply gắn với phiên và số lần trả lời hiện tại, không gửi vào câu hỏi đã đổi. ID gửi được lưu để retry không tạo trùng task/reply.
+
+Output cập nhật tối đa khoảng 750 ms theo sự kiện CLI, không tải lại composer. Cuộn lên tắt follow; bật lại để theo dòng mới. Cửa sổ sự kiện có giới hạn; báo cáo chứa request/response đầy đủ từng bước. Chưa có output thì chờ provider, không bịa tiến độ/ETA. Hàng đợi vẫn tuần tự. Xem [hướng dẫn console](CONSOLE.md).
+
 ## UI
 
 **Setup Team Flow** là sơ đồ gọn: 3 node Dev → Audit → Lead, hoặc 4 node thêm Repair trước Lead. Mỗi node chọn CLI/account profile và override model/reasoning. Trống dùng cấu hình profile; Gemini không nhận reasoning flag. Task và schedule chụp lại flow/overrides riêng, không bị đổi khi sửa flow cho task mới. Chưa có graph tùy ý, branch/loop hoặc kéo thả kiểu n8n đầy đủ.

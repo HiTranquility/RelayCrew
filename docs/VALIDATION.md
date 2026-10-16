@@ -1,5 +1,9 @@
 # Validation · 0.3.1 · 16/10/2026
 
+## 0.5.0
+
+69 automated tests cover the existing suite plus console parsing, root validation, persistent task/reply deduplication, changed-question rejection, actual engine progression, HTML escaping and observed quota presentation. Native smoke also opens New Task without a blocking input dialog. Browser QA checks multiline Ctrl+Enter submission, inline errors, drafts through snapshot/reload, session replies, filters/search and narrow console layout in both languages/themes. All preview sessions are demo data; no paid provider or live messaging accounts were used.
+
 - TypeScript strict check: passed.
 - 38 unit/integration tests: passed locally on Windows.
 - Native VS Code Extension Development Host: activated; all contributed commands registered; Assignment Board và Setup Flow mở thành webview tabs.

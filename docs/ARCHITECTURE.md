@@ -1,5 +1,11 @@
 # RelayCrew architecture
 
+## Live console boundary (0.5)
+
+`core/console-input.ts` parses bounded application commands, never shell commands. `host/console-controller.ts` validates workspace/session scope, persists task/reply IDs, checks owner-question versions, and calls the existing job factory and engine. Pause/resume set explicit states.
+
+`ui/live-console.ts` escapes public events; `ui/console-client.ts` patches session content while preserving the composer. The CLI runner supplies redacted public output. Streaming refreshes at most roughly once per 750 ms; other state/configuration updates patch board panels. Language changes rebuild with retained webview state. A ready handshake delivers composer requests after initial load. No PTY or closed-editor daemon is introduced. See [console behavior](CONSOLE.md).
+
 RelayCrew runs on each user's machine. GitHub stars/downloads increase the number of independent installations, not traffic to a shared RelayCrew backend. The extension does not proxy AI credentials through a project server.
 
 ```mermaid

@@ -8,12 +8,14 @@ RelayCrew kết nối các CLI Codex, Claude Code và Gemini đã cài trên má
 
 Đây là bản phát hành sớm, chạy cục bộ. Không cần tài khoản RelayCrew hay server chung. Test sử dụng CLI/transport giả và Git thật; tài khoản AI, bot/OA và các model cụ thể cần cấu hình và kiểm thử trên môi trường của bạn.
 
-![Sơ đồ nhóm với dữ liệu minh họa](https://raw.githubusercontent.com/HiTranquility/RelayCrew/main/docs/previews/flow.vi.png)
+![Console trực tiếp với phiên minh họa](https://raw.githubusercontent.com/HiTranquility/RelayCrew/main/docs/previews/console.vi.png)
 
 Ảnh dùng **dữ liệu demo**, không phải account/quota đang hoạt động. Xem thêm [bảng Dự án](docs/previews/projects.vi.png), [tasklist ngày](docs/previews/daily.vi.png) và [thiết lập](docs/previews/setup.vi.png).
 
 ## Các phần chính
 
+- **Console trực tiếp như CLI:** nhập nhiều dòng, Ctrl+Enter để gửi, xem phiên/output công khai, trả lời agent tại chỗ và dùng lệnh điều phối. Xem [hướng dẫn console](docs/CONSOLE.md).
+- **Tổng quan mới:** thẻ vai trò/account, quota đã quan sát, việc cần xử lý và trao đổi gần nhất. Tác vụ có tìm kiếm, bộ lọc và các bước đã ghi nhận.
 - **Tác vụ:** phân công Dev → Audit → Repair (tùy chọn) → Quản lý chính; xem tiến độ, input, phản hồi công khai, báo cáo và trao đổi giữa các bước.
 - **Tài khoản và quota:** account/model thực đang chạy, phần trăm sử dụng, các cửa sổ giới hạn, thời điểm reset và số token nếu nguồn cung cấp. Có nút đổi account theo task.
 - **Thiết lập:** giao diện theo theme VS Code, form có kiểm tra giá trị, hộp thoại cấu hình account/env/secret; không bắt buộc sửa JSON.
@@ -27,14 +29,14 @@ RelayCrew kết nối các CLI Codex, Claude Code và Gemini đã cài trên má
 
 Yêu cầu VS Code **1.96 trở lên**, workspace local đã tin cậy; CLI cần dùng đã cài và đăng nhập riêng. Git cần có trong PATH để sao lưu source và tạo worktree. Build từ source dùng Node.js **22** và npm.
 
-Tải VSIX tại [RelayCrew 0.4.0 prerelease](https://github.com/HiTranquility/RelayCrew/releases/tag/v0.4.0), rồi chọn **Extensions → … → Install from VSIX…**. Hoặc:
+Tải VSIX tại [RelayCrew 0.5.0 prerelease](https://github.com/HiTranquility/RelayCrew/releases/tag/v0.5.0), rồi chọn **Extensions → … → Install from VSIX…**. Hoặc:
 
 ```sh
 git clone https://github.com/HiTranquility/RelayCrew.git
 cd RelayCrew
 npm ci
 npm run package
-code --install-extension relaycrew-0.4.0.vsix
+code --install-extension relaycrew-0.5.0.vsix
 ```
 
 1. Mở folder dự án trong VS Code và sidebar **RelayCrew**.
@@ -43,7 +45,7 @@ code --install-extension relaycrew-0.4.0.vsix
 4. Giao một task nhỏ có tiêu chí hoàn thành rõ ràng. **Cho phép sửa file** mặc định tắt; bật khi muốn Dev/Repair chỉnh code. Audit/điều phối/quản lý vẫn chạy read-only/plan.
 5. Dùng **Tạm dừng ngay**, **Tiếp tục hàng đợi**, **Dừng tác vụ**, **Báo cáo** hoặc **Trả lời agent** ngay trên bảng.
 
-Extension chưa phát hành lên VS Code Marketplace. Các bản **0.1.0 / 0.2.0 / 0.3.0 / 0.3.1 / 0.4.0** được giữ riêng trong [release archives](releases/README.md), có ghi nguồn gốc source và SHA-256; không ghi đè bản cũ.
+Extension chưa phát hành lên VS Code Marketplace. Các bản **0.1.0 / 0.2.0 / 0.3.0 / 0.3.1 / 0.4.0 / 0.5.0** được giữ riêng trong [release archives](releases/README.md), có ghi nguồn gốc source và SHA-256; không ghi đè bản cũ.
 
 ## Tiếng Anh / Tiếng Việt
 

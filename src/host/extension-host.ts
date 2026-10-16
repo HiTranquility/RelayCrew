@@ -17,6 +17,8 @@ import { listBackups, snapshotWorkspace } from '../storage/backup';
 import { QuotaService, quotaSummary, usageStatus } from '../adapters/quota/quota-service';
 import { resolveLanguage, roleLabel, statusLabel, translator, type Translator } from '../core/i18n';
 import { dailyCanRun, dailyProfile, emptyDailyPlan, syncDecisions, type DailyPlan } from '../core/daily-plan';
+import { ConsoleController } from './console-controller';
+import { renderLiveConsole } from '../ui/live-console';
 import { DailyController } from './daily-controller';
 import { numericSettings, validateSettingsPatch } from '../core/settings';
 import { editProfiles } from '../ui/profile-editor';
@@ -117,8 +119,12 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   const announced = new Set(state.jobs.filter(j => !['running', 'queued'].includes(j.status)).map(eventKey));
   let messaging: MessagingHub | undefined;
   let board: vscode.WebviewPanel | undefined;
+  let boardLanguage: string | undefined;
+  let boardReady=false,pendingCompose: {cwd?:string}|undefined;
+  const consoleOptions = () => ({queuePaused:!!state.queuePaused,allowEdits:cfg().get('allowEdits',false),projectRoots:projectRoots(),flow:state.flow} as Parameters<typeof renderLiveConsole>[2]);
+  const refreshConsole = () => {if(board)void board.webview.postMessage({type:'consoleSnapshot',html:renderLiveConsole(state.jobs,profiles(),consoleOptions(),language())});};
   const flowPanels = new Set<vscode.WebviewPanel>();
-  let requestedPage = 'tasks', pageRequest = 0, applyingSettings = false;
+  let requestedPage = 'console', pageRequest = 0, applyingSettings = false;
   const reportText = (job: Job) => `# RelayCrew · ${job.id}\n\n${t('Status')}: ${stateName(job.status)}\n\n${t('Workspace')}: ${job.cwd}\n\n${t('Owner task')}:\n\n${job.prompt}\n\n${job.error ? t(job.error) : ''}\n\n`
     + (job.ownerQuestion ? `## ${t('Question for owner')}\n\n${job.ownerQuestion}\n\n` : '')
     + (job.ownerReplies?.length ? `## ${t('Owner replies')}\n\n${job.ownerReplies.join('\n\n')}\n\n` : '')
@@ -139,11 +145,11 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       usage.text=summary.text;usage.tooltip=summary.tooltip;usage.backgroundColor=summary.warning?new vscode.ThemeColor('statusBarItem.warningBackground'):undefined;usage.show();
     } catch { status.text = '$(warning) RelayCrew: ' + t('Fix profiles');usage.hide(); }
     status.show();
-    if (board && refreshBoard) { try { board.title = 'RelayCrew · ' + t('Assignment board'); board.webview.html = renderBoard(state.jobs, profiles(), state.quotas, backlog, messaging?.summary(language()) ?? t('No channels connected'), {
+    if (board && refreshBoard) { try { board.title = 'RelayCrew · ' + t('Assignment board'); const html = renderBoard(state.jobs, profiles(), state.quotas, backlog, messaging?.summary(language()) ?? t('No channels connected'), {
       queuePaused: state.queuePaused ?? false, autoSwitch: cfg().get('autoSwitch', false), resumeAfterQuota: cfg().get('resumeAfterQuota', false), resumeProviderLimited: cfg().get('resumeProviderLimited', false), allowEdits: cfg().get('allowEdits', false), routingMode: cfg().get('routingMode', 'selected'), timeoutMinutes: cfg().get('timeoutMinutes', 30), remoteTranscript: messaging?.chatTranscript(language()), language: language(),
-      languagePreference: cfg().get('language','auto'), management: state.management, flow: state.flow, dailyPlan: daily, backupBeforeEdits: cfg().get('backupBeforeEdits',true),
+      languagePreference: cfg().get('language','auto'), management: state.management, roles:state.roles, flow: state.flow, dailyPlan: daily, backupBeforeEdits: cfg().get('backupBeforeEdits',true),
       settings: Object.fromEntries(Object.entries(numericSettings).map(([key,rule])=>[key,cfg().get(key,rule.default)])), requestedPage, pageRequest, projectRoots:projectRoots(),isolateTasks:cfg().get('isolateTasks',false),openTasksInCodex:cfg().get('openTasksInCodex',false)
-    }); } catch { /* configuration editor may be temporarily invalid */ } }
+    });if(boardLanguage!==language()){boardLanguage=language();boardReady=false;board.webview.html=html;}else void board.webview.postMessage({type:'boardSnapshot',html,page:requestedPage,pageRequest}); } catch { /* configuration editor may be temporarily invalid */ } }
     for (const [id, q] of Object.entries(state.quotas)) if (fresh(q)) {
       const exhausted = q.usedPercent >= cfg().get('quotaThreshold', 95);
       if (exhausted && !state.quotaAlerted![id]) {
@@ -221,7 +227,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
           if (event.kind === 'assistant' && last?.kind === 'stream' && last.from === `${step.role}:${profile.id}` && last.text.length < 6000) last.text += event.text;
           else timeline.push({ at: new Date().toISOString(), from: `${step.role}:${profile.id}`, to: 'orchestrator / observer', kind: event.kind === 'assistant' ? 'stream' : event.kind, text: event.text });
           if (timeline.length > 300) timeline.splice(0, timeline.length - 300);
-          if (Date.now() - lastRefresh > 750) { lastRefresh = Date.now(); changed(); }
+          if (Date.now() - lastRefresh > 750) { lastRefresh = Date.now(); refreshConsole(); }
         },
         log: text => { output.append(text); void appendRunLog(job.id, text); }
       });
@@ -305,6 +311,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     const active=state.jobs.find(job=>job.status==='running'&&job.dailyItemId);
     if(active&&(!id||active.steps.some(step=>step.status==='running'&&step.profileId===id)||daily.items.some(item=>item.jobId===active.id&&item.profileId===id)))engine.pause();
   }});
+  const consoleController=new ConsoleController({jobs:state.jobs,roots:()=>projectRoots().map(root=>root.path),create:(prompt,cwd)=>{validateRoles();return createJob(prompt,cwd,state.roles,state.flow,state.overrides,state.management);},paused:()=>!!state.queuePaused,pause:paused=>{state.queuePaused=paused;if(paused)engine.pause();},cancel:id=>engine.cancel(id),save,changed,start});
   command('aiTeam.setup',()=>vscode.commands.executeCommand('aiTeam.board','setup'));
   command('aiTeam.projects',()=>vscode.commands.executeCommand('aiTeam.board','projects'));
   const projectPath = async (path: unknown) => {
@@ -322,12 +329,14 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   command('aiTeam.dailyTask',()=>dailyController.addItem());
   command('aiTeam.shortcuts',()=>vscode.commands.executeCommand('workbench.action.openGlobalKeybindings'));
   command('aiTeam.board', (page?:string) => {
-    if(page&&['tasks','accounts','setup','daily','projects'].includes(page)){requestedPage=page;pageRequest++;}
+    if(page&&['console','overview','tasks','accounts','setup','daily','projects'].includes(page)){requestedPage=page;pageRequest++;}
     if (board) board.reveal();
     else {
       board = vscode.window.createWebviewPanel('aiTeam.board', 'RelayCrew · ' + t('Assignment board'), vscode.ViewColumn.One, { enableScripts: true });
-      board.onDidDispose(() => { board = undefined; }, undefined, context.subscriptions);
+      board.onDidDispose(() => { board = undefined; boardLanguage=undefined; boardReady=false; }, undefined, context.subscriptions);
       board.webview.onDidReceiveMessage(message => void guard(async () => {
+        if(message?.action==='consoleReady'){boardReady=true;refreshConsole();if(pendingCompose){await board?.webview.postMessage({type:'consoleCompose',...pendingCompose});pendingCompose=undefined;}return;}
+        if(message?.action==='consoleSubmit'){try{const result=await consoleController.submit(message);await board?.webview.postMessage({type:'consoleAck',requestId:message.requestId,ok:true,...result,message:t(result.message)});}catch(error){await board?.webview.postMessage({type:'consoleAck',requestId:message.requestId,ok:false,message:t(error instanceof Error?error.message:String(error))});}return;}
         const actions: Record<string,string> = { language:'aiTeam.language', flow:'aiTeam.flow', connections:'aiTeam.connections', newTask:'aiTeam.newTask', backlog:'aiTeam.backlog', utilization:'aiTeam.utilization', account:'aiTeam.accountDetails', report:'aiTeam.report', reply:'aiTeam.reply', resume:'aiTeam.resume', backups:'aiTeam.backups', routing:'aiTeam.routing', switch:'aiTeam.switch', profiles:'aiTeam.profiles', editProfile:'aiTeam.profiles', quota:'aiTeam.quota', settings:'aiTeam.settings',shortcuts:'aiTeam.shortcuts',refreshQuota:'aiTeam.refreshQuota',dailyStart:'aiTeam.dailyStart',dailyStop:'aiTeam.dailyStop',dailyTask:'aiTeam.dailyTask',projectTask:'aiTeam.newTask',projectFolder:'aiTeam.projectFolder',projectCodex:'aiTeam.projectCodex' };
         if(message?.action==='setLanguage'&&['auto','en','vi'].includes(message.value)){await cfg().update('language',message.value,vscode.ConfigurationTarget.Global);return;}
         if(message?.action==='dailyAccount'){await dailyController.account(message.id,message.value);return;}
@@ -452,12 +461,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   command('aiTeam.newTask', async (project?:string) => {
     const selectedProject = project === undefined ? undefined : await projectPath(project);
     if(selectedProject&&!projectRoots().some(root=>root.path===selectedProject))throw new Error(t('Open this folder in your VS Code workspace before creating a task.'));
-    validateRoles();
-    const prompt = await vscode.window.showInputBox({ title: t("Task for your AI team"), prompt: t("Describe the result and acceptance criteria. CLI permissions and Allow Edits apply.") });
-    if (!prompt?.trim()) return;
-    const cwd = selectedProject ?? await pickCwd(); if (!cwd) return;
-    state.jobs.push(createJob(prompt.trim(), cwd, state.roles, state.flow, state.overrides,state.management));
-    await save(); changed(); start();
+    pendingCompose={cwd:selectedProject};
+    await vscode.commands.executeCommand('aiTeam.board','console');
+    if(boardReady){await board?.webview.postMessage({type:'consoleCompose',...pendingCompose});pendingCompose=undefined;}
   });
   command('aiTeam.switch', async (taskId?:string,preferredProfile?:string) => {
     const targets = [{ label: t("Future tasks"), id: '' }, ...state.jobs.filter(j => ['queued','waiting_quota','waiting_owner','running'].includes(j.status)).map(j => ({ label: `${stateName(j.status)}: ${j.prompt.slice(0, 70)}`, id: j.id }))];

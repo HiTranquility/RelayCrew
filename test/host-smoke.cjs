@@ -15,6 +15,7 @@ exports.run = async function () {
     await vscode.commands.executeCommand('aiTeam.logs');
     await vscode.commands.executeCommand('aiTeam.dashboard.focus');
     await vscode.commands.executeCommand('aiTeam.board');
+    await vscode.commands.executeCommand('aiTeam.newTask');
     await vscode.commands.executeCommand('aiTeam.flow');
     const checkPanels=async(board,flow)=>{let panels=[];const deadline=Date.now()+5000;while(Date.now()<deadline){panels=vscode.window.tabGroups.all.flatMap(g=>g.tabs).filter(t=>t.input instanceof vscode.TabInputWebview);if(panels.some(t=>t.label.includes(board))&&panels.some(t=>t.label.includes(flow)))return;await new Promise(resolve=>setTimeout(resolve,50));}assert.fail('Missing localized board/flow panels: '+board+' / '+flow);};
     await checkPanels('Assignment board','Setup flow');

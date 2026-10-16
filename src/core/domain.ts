@@ -60,6 +60,8 @@ export interface Job {
   openInCodex?: boolean;
   codexLinkAttemptedAt?: string;
   codexLinkError?: string;
+  consoleRequestId?: string;
+  consoleReplyIds?: string[];
 }
 
 export function ownerQuestion(raw: string): string | undefined {
