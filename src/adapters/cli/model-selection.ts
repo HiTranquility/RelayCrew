@@ -19,7 +19,7 @@ export async function codexModels(profile:Profile,env:Record<string,string>,sign
     const send=(value:unknown)=>child.stdin?.write(JSON.stringify(value)+'\n');
     lines.on('line',line=>{total+=line.length;if(total>2_000_000){finish(new Error('Model catalog unavailable. Using CLI default.'));return;}try{const message=JSON.parse(line);if(message.id===1){if(message.error){finish(new Error('Model catalog unavailable. Using CLI default.'));return;}send({method:'initialized',params:{}});send({id:2,method:'model/list',params:{limit:100,includeHidden:false}});}if(message.id===2){if(message.error)finish(new Error('Model catalog unavailable. Using CLI default.'));else finish(undefined,message.result);}}catch{/* Ignore non-protocol startup diagnostics. */}});
     child.on('error',()=>finish(new Error('Model catalog unavailable. Using CLI default.')));child.on('exit',()=>finish(new Error('Model catalog unavailable. Using CLI default.')));
-    send({id:1,method:'initialize',params:{clientInfo:{name:'relaycrew',title:'RelayCrew',version:'0.9.0'}}});
+    send({id:1,method:'initialize',params:{clientInfo:{name:'relaycrew',title:'RelayCrew',version:'0.9.1'}}});
   });
 }
 export async function resolveModel(profile:Profile,env:Record<string,string>,signal:AbortSignal,load=codexModels):Promise<{profile:Profile;source:'custom'|'alias'|'catalog'|'cli-default';note:string}> {

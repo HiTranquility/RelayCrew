@@ -1,5 +1,11 @@
 # Validation · 16/10/2026
 
+## 0.9.1 — 2026-10-17
+
+113 automated tests and strict TypeScript/noUnusedLocals checks pass. Each shipped workflow imports without changing arbitrary existing account/model configuration; all five role Markdown guides survive validated snapshots. Native isolated VS Code host passes version 0.9.1, command registration and one local HTTP chat. Browser QA passes both languages/themes including the Markdown examples action.
+
+Generated screenshots/HTML live only in the ignored local `docs/previews/` folder. They are not included in the current repository tree, VSIX or new source snapshot. Generate locally with `npm run preview`; optional browser checks use `npm run test:ui`. Historical release archives remain immutable.
+
 ## 0.9.0 — 2026-10-17
 
 - Strict TypeScript check and 112 automated tests pass locally on Windows. New tests use real loopback HTTP servers for catalog discovery, optional/ambiguous model selection, streaming UTF-8/SSE, split-secret masking, HTTP 429, cancellation, interrupted streams, redirect rejection, unsupported tools and actual engine completion/wait states.

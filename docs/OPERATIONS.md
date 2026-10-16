@@ -151,3 +151,9 @@ Trong **Dự án** hoặc **Thiết lập**, bật tạo Git worktree cho task m
 Không tự merge/xóa worktree. Đường dẫn, branch và base commit được lưu, hiển thị trong bảng/timeline. Git worktree metadata vẫn liên kết repo gốc: giữ cả repo gốc lẫn extension storage cho đến khi tích hợp xong. Worktree không nằm trong quota dung lượng source-backup; theo dõi disk và dọn bằng Git sau khi kiểm tra thay đổi. Bản thân worktree không phải bản sao lưu độc lập.
 
 Tùy chọn mở chat Codex tự động chỉ chuẩn bị chat tại folder một lần lúc bắt đầu task. Không tự gửi prompt, không chuyển account desktop, không đồng bộ session CLI và chưa tự tạo nhóm Projects ở sidebar Codex. Nút mở thủ công có thể thử lại. Xem [PROJECTS.md](PROJECTS.md).
+
+## 0.9.1 Markdown starter pack
+
+Open **Setup → Input and response templates → Markdown examples** to reveal the bundled `examples` folder, or use [the source examples](../examples/README.md). Copy/edit a guide, then use the existing role Markdown or workflow importer. Five role guides, four workflows and task/acceptance examples are included. Samples contain no credentials or account/model pins, do not execute automatically and cannot grant permissions.
+
+Mở **Mẫu Markdown** để xem thư mục mẫu, sao chép/chỉnh file rồi nhập cho đúng vai trò hoặc workflow. Mẫu đầu bài có thể đính kèm trong Console; chép các dòng checklist vào ô nghiệm thu để có checkbox.

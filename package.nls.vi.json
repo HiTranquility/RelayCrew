@@ -69,5 +69,6 @@
   "command.checkConnection": "RelayCrew: Kiểm tra CLI và đăng nhập",
   "profile.hosting": "Mặc định Cloud. Endpoint Local dùng địa chỉ loopback; kiểm tra máy chủ để biết mô hình có thực sự chạy cục bộ.",
   "profile.transport": "Mặc định CLI. HTTP tương thích hỗ trợ chat/review chỉ đọc với tài liệu được cung cấp.",
-  "profile.endpoint": "URL gốc API tương thích OpenAI, gồm /v1. Cloud dùng HTTPS, Local dùng loopback. Lưu khóa API trong SecretStorage."
+  "profile.endpoint": "URL gốc API tương thích OpenAI, gồm /v1. Cloud dùng HTTPS, Local dùng loopback. Lưu khóa API trong SecretStorage.",
+  "command.examples": "RelayCrew: Mở bộ mẫu Markdown"
 }

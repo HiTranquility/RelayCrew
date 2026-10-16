@@ -2,6 +2,14 @@
 
 Versions before 1.0 are early releases. See [release archives](releases/README.md) for exact packages, hashes and source provenance.
 
+## 0.9.1 — 2026-10-17
+
+- Remove generated previews from the tracked repository and README; retain local ignored QA files.
+
+- Bundle five editable role guides, four workflow guides, a task brief and a Definition of Done example, with bilingual usage instructions and no account/model pins.
+- Add a Markdown examples button and Command Palette action to reveal the bundled folder; use the existing role/workflow importers after copying and editing.
+- Validate every shipped guide through the existing role-template/workflow snapshot contracts. Existing task snapshots and all 0.9.0 archives are retained unchanged.
+
 ## 0.9.0 — 2026-10-17
 
 - Remove obsolete rendering helpers/imports and enforce TypeScript noUnusedLocals.

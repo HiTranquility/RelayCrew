@@ -69,5 +69,6 @@
   "command.checkConnection": "RelayCrew: Check CLI and Sign-in",
   "profile.hosting": "Cloud by default. Local HTTP endpoints must use loopback; check the server model configuration for actual inference location.",
   "profile.transport": "CLI is the default. Compatible HTTP profiles provide read-only chat/review with explicit context.",
-  "profile.endpoint": "OpenAI-compatible API base URL including /v1. HTTPS for cloud, loopback for local. API keys belong in SecretStorage."
+  "profile.endpoint": "OpenAI-compatible API base URL including /v1. HTTPS for cloud, loopback for local. API keys belong in SecretStorage.",
+  "command.examples": "RelayCrew: Browse Markdown examples"
 }

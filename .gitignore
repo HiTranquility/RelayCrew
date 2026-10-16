@@ -8,3 +8,6 @@ release-assets/
 *.log
 .vscode-test/
 .ui-smoke/
+
+# Local UI QA artifacts; keep them off GitHub and source snapshots.
+docs/previews/

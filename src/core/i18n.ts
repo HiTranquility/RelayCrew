@@ -10,6 +10,8 @@ export function resolveLanguage(preference: unknown, displayLanguage = 'en'): La
 // English source messages are the fallback. Translate presentation, never stored
 // status codes, model IDs, account labels, prompts or provider responses.
 export const vietnamese: Record<string, string> = {
+  'Markdown examples':'Mẫu Markdown',
+  'Copy a bundled guide, edit it, then import it for a role or workflow. Samples do not run automatically.':'Sao chép mẫu, chỉnh nội dung rồi nhập cho vai trò hoặc luồng làm việc. Mẫu không tự chạy.',
   'API connection failed. Verify endpoint, server and API key.':'Kết nối API thất bại. Kiểm tra endpoint, máy chủ và khóa API.',
   'Eligible for supplied-context tasks; maintenance needs CLI':'Nhận task có ngữ cảnh được cung cấp; bảo trì repo cần CLI',
   'Read-only API: disable daily edits for builder work':'API chỉ đọc: tắt quyền sửa của kế hoạch ngày để nhận việc Dev',
