@@ -52,5 +52,14 @@
   "profile.quotaFile": "Absolute path to normalized quota JSON written by your integration.",
   "command.projects": "RelayCrew: Projects",
   "config.isolateTasks": "Create each new task in a separate Git worktree from committed HEAD. Source must be clean. Checkouts are retained for review; changes are never merged automatically.",
-  "config.openTasksInCodex": "Prepare one Codex desktop chat at each new task folder when execution starts. Requires the desktop app; does not submit a prompt or synchronize the CLI task."
+  "config.openTasksInCodex": "Prepare one Codex desktop chat at each new task folder when execution starts. Requires the desktop app; does not submit a prompt or synchronize the CLI task.",
+  "command.connectCli": "RelayCrew: Connect Local CLI & Try It",
+  "command.tryCli": "RelayCrew: Run Read-only CLI Trial",
+  "command.importWorkflow": "RelayCrew: Import Workflow from Markdown",
+  "command.viewWorkflow": "RelayCrew: View Workflow Guide",
+  "command.clearWorkflow": "RelayCrew: Remove Workflow Guide for New Tasks",
+  "command.loginCli": "RelayCrew: Open CLI Login",
+  "command.closeBoard": "RelayCrew: Close RelayCrew Board",
+  "command.toggleSidebar": "RelayCrew: Toggle VS Code Sidebar",
+  "command.togglePanel": "RelayCrew: Toggle VS Code Panel"
 }

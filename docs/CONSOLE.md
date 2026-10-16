@@ -1,4 +1,22 @@
-# Live console (0.5)
+# Live console (0.6)
+
+## Files, images and clipboard
+
+Choose **Attach files**, drop files into the composer, or paste a clipboard image with **Ctrl+V** (Cmd+V on macOS). Text copy/paste and selection with Ctrl+C remain native; Ctrl+C does not cancel a task. Add a short request and press Ctrl+Enter to send. Attachments work for new tasks and owner replies. Preview image thumbnails and remove chips before sending. Selecting, pasting or dropping a file only stages a local snapshot; it does not invoke a provider.
+
+Limits: up to **8 files / 16 MB per task**, including later owner replies; **PNG/JPEG up to 4 MB each**, or **UTF-8 text/code up to 256 KB each**. PDF, archives, other image formats and binary documents are rejected. No conversion or OCR is implied. Failed submissions retain the draft and file IDs; retries use the existing submission ID. Provider image/model support still depends on the installed CLI and authenticated account.
+
+Snapshots and hashes persist in the workspace's extension storage `attachments/`, outside the repository and retained across reloads. Removing a chip detaches it from the draft; it does not delete the cached snapshot. The cache is capped at **256 MB** and is not automatically pruned. **Backups / saved data** lists its location. Include the entire attachments folder along with state/backups in manual backups; deleting snapshots referenced by tasks prevents those tasks from continuing. Reports include the manifest/hash, not binary bytes. The webview saves only metadata, not base64 image data. Every step receives the task's selected attachments; role handoffs preserve them. Changed or missing snapshots block execution.
+
+Text files are passed as JSON evidence on stdin. Codex images use its [native image flag](https://learn.chatgpt.com/docs/developer-commands?surface=cli). Claude receives selected temporary image paths and a scoped `--add-dir`, following its documented [image-path workflow](https://code.claude.com/docs/en/common-workflows#work-with-images). Gemini receives paths and `--include-directories` for its [image-capable read_file tool](https://geminicli.com/docs/tools/file-system/). Claude/Gemini are instructed to read each image and ask the owner if access/vision is unavailable; their image consumption requires the agent's tool call, rather than eager multimodal injection. The temporary directory contains only this run's images/output and is removed when execution ends. No bypass-permission flag is added.
+
+**Copy last answer** copies the last recorded final step response (which may be the manager's JSON). **Copy report** copies the complete textual report. Streaming partial output can be selected and copied normally. [Connect a real account and configure workflow](QUICKSTART.md).
+
+### Đính kèm và clipboard
+
+Bấm **Đính kèm file**, kéo thả vào ô soạn hoặc **Ctrl+V** để dán ảnh. Ctrl+C/V cho văn bản vẫn hoạt động bình thường. Viết yêu cầu rồi Ctrl+Enter để gửi; chọn file chưa gửi cho model. Dùng được cả khi giao việc mới và trả lời agent. Hỗ trợ tối đa 8 file/tổng 16 MB cho mỗi tác vụ: PNG/JPEG tối đa 4 MB/ảnh, file văn bản/mã UTF-8 tối đa 256 KB/file. Chưa hỗ trợ PDF/ZIP hoặc định dạng nhị phân khác.
+
+Bản chụp lưu ngoài repo trong dữ liệu workspace của extension, giới hạn cache 256 MB. Bỏ chip chỉ bỏ khỏi bản nháp; bản chụp vẫn được giữ. Sao lưu cả thư mục attachments cùng state. Mọi vai trò nhận cùng file; file mất hoặc bị sửa sẽ chặn chạy. Codex nhận ảnh qua cờ native; Claude/Gemini đọc ảnh qua công cụ CLI, phụ thuộc model/quyền hiện tại. Nút **Sao chép câu trả lời cuối** và **Sao chép báo cáo** ghi nội dung vào clipboard khi bạn bấm.
 
 The board opens on **Live console**. **New task** focuses the inline composer instead of opening a single-line input dialog. Choose a workspace, describe a result and acceptance criteria, and press **Ctrl+Enter**. Enter adds a new line. New tasks use the configured flow, accounts, models and edit permissions.
 

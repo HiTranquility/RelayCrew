@@ -2,6 +2,14 @@
 
 Versions before 1.0 are early releases. See [release archives](releases/README.md) for exact packages, hashes and source provenance.
 
+## 0.6.0 — 2026-10-16
+
+- Add inline account forms, CLI discovery, role assignment buttons, scoped CLI login terminals and real read-only Dev → Audit → Lead connection trials.
+- Import UTF-8 Markdown workflow guides with optional validated role/model/manager configuration; preview before applying and retain a guide snapshot per task.
+- Attach PNG/JPEG or UTF-8 text/code via picker, drop or clipboard image paste; persist bounded, hashed local snapshots for tasks and owner replies.
+- Add copy-answer/report actions, session/composer visibility controls and native VS Code sidebar/panel/close-board commands.
+- Preserve earlier release archives. See QUICKSTART and CONSOLE documentation for authentication, file limits, retained cache and provider image-tool behavior.
+
 ## 0.5.0 — 2026-10-16
 
 - Make Live console the default: inline multiline composer, session list, actual runtime identity, public event output, elapsed time and inline owner replies.

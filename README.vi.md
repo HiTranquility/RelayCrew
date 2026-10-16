@@ -29,14 +29,14 @@ RelayCrew kết nối các CLI Codex, Claude Code và Gemini đã cài trên má
 
 Yêu cầu VS Code **1.96 trở lên**, workspace local đã tin cậy; CLI cần dùng đã cài và đăng nhập riêng. Git cần có trong PATH để sao lưu source và tạo worktree. Build từ source dùng Node.js **22** và npm.
 
-Tải VSIX tại [RelayCrew 0.5.0 prerelease](https://github.com/HiTranquility/RelayCrew/releases/tag/v0.5.0), rồi chọn **Extensions → … → Install from VSIX…**. Hoặc:
+Tải VSIX tại [RelayCrew 0.6.0 prerelease](https://github.com/HiTranquility/RelayCrew/releases/tag/v0.6.0), rồi chọn **Extensions → … → Install from VSIX…**. Hoặc:
 
 ```sh
 git clone https://github.com/HiTranquility/RelayCrew.git
 cd RelayCrew
 npm ci
 npm run package
-code --install-extension relaycrew-0.5.0.vsix
+code --install-extension relaycrew-0.6.0.vsix
 ```
 
 1. Mở folder dự án trong VS Code và sidebar **RelayCrew**.
@@ -45,7 +45,7 @@ code --install-extension relaycrew-0.5.0.vsix
 4. Giao một task nhỏ có tiêu chí hoàn thành rõ ràng. **Cho phép sửa file** mặc định tắt; bật khi muốn Dev/Repair chỉnh code. Audit/điều phối/quản lý vẫn chạy read-only/plan.
 5. Dùng **Tạm dừng ngay**, **Tiếp tục hàng đợi**, **Dừng tác vụ**, **Báo cáo** hoặc **Trả lời agent** ngay trên bảng.
 
-Extension chưa phát hành lên VS Code Marketplace. Các bản **0.1.0 / 0.2.0 / 0.3.0 / 0.3.1 / 0.4.0 / 0.5.0** được giữ riêng trong [release archives](releases/README.md), có ghi nguồn gốc source và SHA-256; không ghi đè bản cũ.
+Extension chưa phát hành lên VS Code Marketplace. Các bản **0.1.0 / 0.2.0 / 0.3.0 / 0.3.1 / 0.4.0 / 0.5.0 / 0.6.0** được giữ riêng trong [release archives](releases/README.md), có ghi nguồn gốc source và SHA-256; không ghi đè bản cũ.
 
 ## Tiếng Anh / Tiếng Việt
 
@@ -127,3 +127,9 @@ Hiện mỗi workspace chạy tuần tự; chưa có agent song song, app-server
 ## Giấy phép
 
 [MIT](LICENSE) · Copyright (c) 2026 HiTranquility.
+
+## Tài khoản thật, file đính kèm và luồng Markdown (0.6)
+
+Vào **Tài khoản và quota → Thêm tài khoản** để nhập CLI/model, tìm CLI đã cài, chọn thư mục đăng nhập riêng và gán vai trò trực tiếp. **Thiết lập → Kết nối CLI thật & chạy thử** lưu cấu hình và chạy Dev → Audit → manager chỉ đọc bằng tài khoản đã đăng nhập.
+
+**Nhập luồng từ Markdown** đọc file hướng dẫn, kèm khối cấu hình nếu muốn đặt tài khoản/model/manager không cần chọn từng node. Xem [hướng dẫn](docs/QUICKSTART.md) và [file mẫu](docs/workflow.example.md). Console hỗ trợ chọn/kéo thả file, Ctrl+V dán ảnh, sao chép câu trả lời/báo cáo và ẩn/hiện các vùng. [Giới hạn file và lưu trữ](docs/CONSOLE.md).

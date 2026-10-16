@@ -2,7 +2,7 @@
   "name": "ai-team-workbench",
   "displayName": "RelayCrew",
   "description": "%description%",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "publisher": "local-ai-team",
   "license": "MIT",
   "engines": {
@@ -180,6 +180,42 @@
         "command": "aiTeam.projects",
         "title": "%command.projects%",
         "icon": "$(project)"
+      },
+      {
+        "command": "aiTeam.connectCli",
+        "title": "%command.connectCli%"
+      },
+      {
+        "command": "aiTeam.tryCli",
+        "title": "%command.tryCli%"
+      },
+      {
+        "command": "aiTeam.importWorkflow",
+        "title": "%command.importWorkflow%"
+      },
+      {
+        "command": "aiTeam.viewWorkflow",
+        "title": "%command.viewWorkflow%"
+      },
+      {
+        "command": "aiTeam.clearWorkflow",
+        "title": "%command.clearWorkflow%"
+      },
+      {
+        "command": "aiTeam.loginCli",
+        "title": "%command.loginCli%"
+      },
+      {
+        "command": "aiTeam.closeBoard",
+        "title": "%command.closeBoard%"
+      },
+      {
+        "command": "aiTeam.toggleSidebar",
+        "title": "%command.toggleSidebar%"
+      },
+      {
+        "command": "aiTeam.togglePanel",
+        "title": "%command.togglePanel%"
       }
     ],
     "viewsContainers": {

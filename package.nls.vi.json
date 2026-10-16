@@ -52,5 +52,14 @@
   "profile.quotaFile": "Đường dẫn đầy đủ đến file JSON quota chuẩn hóa do tích hợp của bạn ghi ra.",
   "command.projects": "RelayCrew: Dự án",
   "config.isolateTasks": "Tạo từng tác vụ mới trong Git worktree riêng từ HEAD đã commit. Source phải sạch. Giữ checkout để xem lại; không tự gộp thay đổi.",
-  "config.openTasksInCodex": "Chuẩn bị một chat Codex desktop tại thư mục mỗi tác vụ mới khi bắt đầu chạy. Cần ứng dụng desktop; không tự gửi yêu cầu hay đồng bộ task CLI."
+  "config.openTasksInCodex": "Chuẩn bị một chat Codex desktop tại thư mục mỗi tác vụ mới khi bắt đầu chạy. Cần ứng dụng desktop; không tự gửi yêu cầu hay đồng bộ task CLI.",
+  "command.connectCli": "RelayCrew: Kết nối CLI thật & chạy thử",
+  "command.tryCli": "RelayCrew: Chạy thử CLI chỉ đọc",
+  "command.importWorkflow": "RelayCrew: Nhập luồng từ Markdown",
+  "command.viewWorkflow": "RelayCrew: Xem hướng dẫn luồng",
+  "command.clearWorkflow": "RelayCrew: Bỏ hướng dẫn luồng cho tác vụ mới",
+  "command.loginCli": "RelayCrew: Mở đăng nhập CLI",
+  "command.closeBoard": "RelayCrew: Đóng bảng RelayCrew",
+  "command.toggleSidebar": "RelayCrew: Ẩn / hiện sidebar VS Code",
+  "command.togglePanel": "RelayCrew: Ẩn / hiện panel VS Code"
 }

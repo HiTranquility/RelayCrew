@@ -1,5 +1,13 @@
 # Validation · 0.3.1 · 16/10/2026
 
+## 0.6.0
+
+78 automated tests pass, including immutable attachment storage/tamper detection, limits and transport, controller task/reply deduplication, Markdown configuration validation, guide snapshots, account form validation and executable discovery. Browser QA passes English/Vietnamese in light/dark themes, including inline account saving/draft recovery, CLI detection messages, assignment actions, picker cancellation, file drop, attachment reload/retry/clear, copy actions, layout toggles and narrow Console/Setup layouts. Native smoke passes activation and all contributed commands.
+
+An explicitly authorized live integration test ran the real extension in an isolated VS Code profile against an already authenticated Codex CLI, medium effort and its default model. All three read-only stages completed (Dev → Audit → Lead); the lead returned `approved`, and 15 public events were recorded. Dev read the root package name/version; Audit verified that answer; Lead summarized the preceding evidence. This proves local Codex transport and the bounded trial lifecycle, not broad code-review quality or image understanding. Actual model identity was not supplied in the profile, so the UI correctly labels it CLI default. User/account identifiers and authentication data are excluded from committed evidence.
+
+Live Claude/Gemini model calls, provider image consumption, interactive login and Telegram/Zalo delivery were not exercised. Claude/Gemini image support follows documented image-read tools; the fixture tests verify payload/path wiring, not a model's successful image inspection. Live tests are opt-in through `scripts/live-trial.mjs`, never part of CI or the default unit suite.
+
 ## 0.5.0
 
 69 automated tests cover the existing suite plus console parsing, root validation, persistent task/reply deduplication, changed-question rejection, actual engine progression, HTML escaping and observed quota presentation. Native smoke also opens New Task without a blocking input dialog. Browser QA checks multiline Ctrl+Enter submission, inline errors, drafts through snapshot/reload, session replies, filters/search and narrow console layout in both languages/themes. All preview sessions are demo data; no paid provider or live messaging accounts were used.

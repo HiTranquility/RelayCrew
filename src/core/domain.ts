@@ -1,4 +1,6 @@
 import { CronExpressionParser } from 'cron-parser';
+import type { Attachment } from '../storage/attachments';
+import type { WorkflowDocument } from './workflow';
 
 export type Provider = 'codex' | 'claude' | 'gemini';
 export type Role = 'builder' | 'auditor' | 'worker' | 'lead';
@@ -62,6 +64,9 @@ export interface Job {
   codexLinkError?: string;
   consoleRequestId?: string;
   consoleReplyIds?: string[];
+  attachments?: Attachment[];
+  workflow?: WorkflowDocument;
+  connectionTrial?: boolean;
 }
 
 export function ownerQuestion(raw: string): string | undefined {

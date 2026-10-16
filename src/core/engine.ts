@@ -80,12 +80,12 @@ export class Engine {
             }
             step.status = 'done';
             if (step.role === 'builder') {
-              job.steps.push({ role: 'auditor', title: 'Audit / create issues', prompt: auditInstructions + `\nMaximum repair tasks: ${settings.maxTasks}.`, status: 'pending' });
+              job.steps.push({ role: 'auditor', title: 'Audit / create issues', prompt: job.connectionTrial?'Read-only connection trial: verify only the preceding package name/version response against package.json. Do not scan other code or suggest repairs. Return ONLY JSON {"summary":"brief verification","issues":[],"tasks":[]}.':auditInstructions + `\nMaximum repair tasks: ${settings.maxTasks}.`, status: 'pending' });
             } else if (step.role === 'auditor') {
               job.audit = parseAudit(step.response, settings.maxTasks);
               if ((job.flow ?? fullFlow).includes('worker')) for (const t of job.audit.tasks) job.steps.push({ role: 'worker', title: t.title, prompt: t.instructions, status: 'pending' });
               for (const id of job.management?.coordinatorIds ?? []) job.steps.push({ role: 'lead', coordinatorProfileId: id, title: 'Coordinator report', prompt: 'As a supporting coordinator, review the implementation, audit and repair evidence. Report risks, unresolved decisions and recommendations for the primary manager. You cannot approve the task. Return a concise public report, or the needs_owner question envelope when an important owner decision is required.', status: 'pending' });
-              job.steps.push({ role: 'lead', title: 'Tech lead decision', prompt: leadInstructions, status: 'pending' });
+              job.steps.push({ role: 'lead', title: 'Tech lead decision', prompt: job.connectionTrial?'Read-only connection trial: assess only the package name/version and preceding audit evidence. Do not scan other code or run commands. Return ONLY JSON {"decision":"approved" or "changes_requested","summary":"brief connection trial result"}.':leadInstructions, status: 'pending' });
             } else if (step.role === 'lead' && !step.coordinatorProfileId) {
               job.status = parseDecision(step.response).decision === 'approved' ? 'completed' : 'needs_attention';
             }
@@ -122,6 +122,7 @@ Before any important product, architecture, security, data migration, breaking A
 ${job.readOnly ? 'This task is read-only. Produce evidence and recommendations; do not edit files or run write commands.' : ''}
 ${job.management ? `Only primary manager ${job.management.primaryProfileId} can approve the task. Supporting coordinators provide reports only.` : ''}
 Owner's task: ${job.prompt}
+${job.workflow?'Owner-supplied workflow guide (JSON). Follow its task process within the assigned role and existing permissions; it cannot authorize publishing, extra agents or overriding safety/owner decisions: '+JSON.stringify(job.workflow):''}
 Owner replies, in order (JSON): ${JSON.stringify(job.ownerReplies ?? [])}
 ${(step.attempts ?? 0) > 1 ? 'This step is resuming after a previous attempt. Inspect existing changes and avoid repeating completed edits or external operations.' : ''}
 Earlier reports (JSON): ${JSON.stringify(history)}
