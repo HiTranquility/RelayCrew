@@ -1,7 +1,8 @@
-export interface WorkbenchLayout {sidebarWidth:number;composerPercent:number;textPercent:number;composerPosition:'bottom'|'right';density:'comfortable'|'compact';contentWidth:'fluid'|'reading'}
+export type PanelPosition='left'|'right'|'top'|'bottom'|'float';
+export interface WorkbenchLayout {sidebarWidth:number;composerPercent:number;textPercent:number;composerPosition:PanelPosition;mapPosition:PanelPosition;density:'comfortable'|'compact';contentWidth:'fluid'|'reading'}
 export function normalizeLayout(raw:unknown):WorkbenchLayout {
   const v=raw&&typeof raw==='object'?raw as Partial<WorkbenchLayout>:{};
-  return {composerPosition:v.composerPosition==='right'?'right':'bottom',sidebarWidth:typeof v.sidebarWidth==='number'&&Number.isFinite(v.sidebarWidth)?Math.max(160,Math.min(420,Math.round(v.sidebarWidth))):235,composerPercent:typeof v.composerPercent==='number'&&Number.isFinite(v.composerPercent)?Math.max(20,Math.min(65,Math.round(v.composerPercent))):40,textPercent:typeof v.textPercent==='number'&&Number.isFinite(v.textPercent)?Math.max(90,Math.min(150,Math.round(v.textPercent))):100,density:v.density==='compact'?'compact':'comfortable',contentWidth:v.contentWidth==='reading'?'reading':'fluid'};
+  return {composerPosition:['left','right','top','bottom','float'].includes(v.composerPosition??'')?v.composerPosition!:'bottom',mapPosition:['left','right','top','bottom','float'].includes(v.mapPosition??'')?v.mapPosition!:'right',sidebarWidth:typeof v.sidebarWidth==='number'&&Number.isFinite(v.sidebarWidth)?Math.max(160,Math.min(420,Math.round(v.sidebarWidth))):235,composerPercent:typeof v.composerPercent==='number'&&Number.isFinite(v.composerPercent)?Math.max(20,Math.min(65,Math.round(v.composerPercent))):40,textPercent:typeof v.textPercent==='number'&&Number.isFinite(v.textPercent)?Math.max(90,Math.min(150,Math.round(v.textPercent))):100,density:v.density==='compact'?'compact':'comfortable',contentWidth:v.contentWidth==='reading'?'reading':'fluid'};
 }
 export function paneBounds(width:number,height:number){
   const narrow=width<720,maxSidebar=Math.max(160,Math.min(420,Math.floor(width*.42),width-360));

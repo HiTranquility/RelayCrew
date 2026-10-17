@@ -2,7 +2,7 @@
   "name": "ai-team-workbench",
   "displayName": "RelayCrew",
   "description": "%description%",
-  "version": "0.9.9",
+  "version": "1.0.0",
   "publisher": "local-ai-team",
   "license": "MIT",
   "engines": {
@@ -33,7 +33,14 @@
     "releases:verify": "node scripts/releases.mjs verify",
     "release:stage": "node scripts/releases.mjs stage",
     "test:interactions": "node scripts/interaction-smoke.mjs",
-    "test:operations": "node scripts/operations-smoke.mjs"
+    "test:operations": "node scripts/operations-smoke.mjs",
+    "test:map": "node scripts/agent-map-smoke.mjs",
+    "test:panels": "node scripts/panel-smoke.mjs",
+    "test:experience": "node scripts/experience-smoke.mjs",
+    "test:map-editor": "node scripts/map-editor-smoke.mjs",
+    "test:delegation": "node scripts/delegation-smoke.mjs",
+    "test:review-session": "node scripts/review-session-smoke.mjs",
+    "test:directions": "node scripts/directions-smoke.mjs"
   },
   "dependencies": {
     "cron-parser": "^5.4.0",
@@ -51,6 +58,10 @@
   },
   "contributes": {
     "commands": [
+      {
+        "command": "aiTeam.agentMap",
+        "title": "%command.agentMap%"
+      },
       {
         "command": "aiTeam.newTask",
         "title": "%command.newTask%",
@@ -235,6 +246,14 @@
       {
         "command": "aiTeam.examples",
         "title": "%command.examples%"
+      },
+      {
+        "command": "aiTeam.changedFiles",
+        "title": "%command.changedFiles%"
+      },
+      {
+        "command": "aiTeam.liveSession",
+        "title": "%command.liveSession%"
       }
     ],
     "viewsContainers": {
@@ -282,7 +301,7 @@
           "default": [
             {
               "id": "codex-main",
-              "label": "Codex \u00b7 Main",
+              "label": "Codex · Account 1",
               "provider": "codex",
               "executable": "codex",
               "model": "",
@@ -293,7 +312,7 @@
             },
             {
               "id": "claude-main",
-              "label": "Claude \u00b7 Main",
+              "label": "Claude · Account 1",
               "provider": "claude",
               "executable": "claude",
               "model": "",
@@ -304,7 +323,7 @@
             },
             {
               "id": "gemini-main",
-              "label": "Gemini \u00b7 Main",
+              "label": "Gemini · Account 1",
               "provider": "gemini",
               "executable": "gemini",
               "model": "",
@@ -397,6 +416,10 @@
               "endpoint": {
                 "type": "string",
                 "description": "%profile.endpoint%"
+              },
+              "preferred": {
+                "type": "boolean",
+                "description": "%profile.preferred%"
               }
             },
             "additionalProperties": false
@@ -541,6 +564,16 @@
           "default": false,
           "scope": "application",
           "description": "%config.openTasksInCodex%"
+        },
+        "aiTeam.completionNotifications": {
+          "type": "string",
+          "enum": [
+            "steps-and-flow",
+            "flow",
+            "off"
+          ],
+          "default": "steps-and-flow",
+          "description": "%setting.completionNotifications%"
         }
       }
     },

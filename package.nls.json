@@ -1,4 +1,5 @@
 {
+  "command.agentMap": "RelayCrew: Open Agent Map in Separate Tab",
   "command.newTask": "RelayCrew: New Task",
   "command.schedule": "RelayCrew: Schedule Task or Reminder",
   "command.switch": "RelayCrew: Select Role / Switch Account",
@@ -70,5 +71,9 @@
   "profile.hosting": "Cloud by default. Local HTTP endpoints must use loopback; check the server model configuration for actual inference location.",
   "profile.transport": "CLI is the default. Compatible HTTP profiles provide read-only chat/review with explicit context.",
   "profile.endpoint": "OpenAI-compatible API base URL including /v1. HTTPS for cloud, loopback for local. API keys belong in SecretStorage.",
-  "command.examples": "RelayCrew: Browse Markdown examples"
+  "command.examples": "RelayCrew: Browse Markdown examples",
+  "setting.completionNotifications": "Completion notifications: each step and entire flow, entire flow only, or history without completion popups.",
+  "command.changedFiles": "RelayCrew: Open Session Files Changed",
+  "profile.preferred": "Prefer this account when creating a provider-based team preset. Existing task assignments stay unchanged.",
+  "command.liveSession": "RelayCrew: Open Live Session in Separate Tab"
 }

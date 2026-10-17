@@ -1,3 +1,5 @@
+import {validateAuditors} from './review-team';
+import {delegationPolicy} from './delegation';
 import { parseQuota, validateFlow, validateManagement, type Profile, type Role, type RoleOverrides } from './domain';
 import type { WorkflowConfiguration } from './workflow';
 
@@ -8,13 +10,15 @@ export function flowConfiguration(raw:unknown,profiles:Profile[]):WorkflowConfig
   for(const role of ['builder','auditor','worker','lead'] as Role[]){
     if(typeof value.roles?.[role]!=='string'||!ids.has(value.roles[role]))throw new Error('Choose an existing profile for every node.');
     roles[role]=value.roles[role];const item=value.overrides?.[role];
-    if(item!==undefined&&(!item||typeof item!=='object'||Array.isArray(item)||Object.keys(item).some(key=>!['model','effort'].includes(key))))throw new Error('Invalid model / reasoning value.');
+    if(item!==undefined&&(!item||typeof item!=='object'||Array.isArray(item)||Object.keys(item).some(key=>!['model','effort','modelPolicy'].includes(key))))throw new Error('Invalid model / reasoning value.');
     for(const field of ['model','effort'])if(item?.[field]!==undefined&&(typeof item[field]!=='string'||item[field].length>(field==='model'?200:40)||/[\r\n\0]/.test(item[field])))throw new Error('Invalid model / reasoning value.');
-    overrides[role]={model:item?.model?.trim()||undefined,effort:item?.effort?.trim()||undefined};
+    if(item?.modelPolicy!==undefined&&!['flagship','cli','custom'].includes(item.modelPolicy))throw new Error('Invalid model policy.');
+    if(item?.modelPolicy==='custom'&&!item.model?.trim())throw new Error('Enter a custom model or alias, or choose an automatic model policy.');
+    overrides[role]={...(item?.modelPolicy?{modelPolicy:item.modelPolicy}:{}),model:item?.modelPolicy&&item.modelPolicy!=='custom'?undefined:item?.model?.trim()||undefined,effort:item?.effort?.trim()||undefined};
   }
   const management=validateManagement(value.management??{primaryProfileId:roles.lead,coordinatorIds:[]},profiles);
   if(management.primaryProfileId!==roles.lead)throw new Error('Primary manager must match the Lead account.');
-  return {flow,roles,overrides,management};
+  const delegation=value.delegation===undefined?undefined:delegationPolicy(value.delegation);if(delegation&&(delegation.workflow==='plan-execute'||delegation.minWorkers>0)&&!flow.includes('worker'))throw new Error('This delegation policy requires the worker stage.');return {flow,roles,overrides,management,...(value.auditors===undefined?{}:{auditors:validateAuditors(value.auditors,profiles,roles.auditor)}),...(delegation?{delegation}:{})};
 }
 export function routingConfiguration(raw:unknown,profiles:Profile[],flow:Role[]):{mode:'selected'|'roundRobin';pools:Partial<Record<Role,string[]>>}{
   const value=raw as any,ids=new Set(profiles.map(p=>p.id));if(!value||!['selected','roundRobin'].includes(value.mode))throw new Error('Invalid routing configuration.');

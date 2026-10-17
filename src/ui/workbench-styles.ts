@@ -25,4 +25,6 @@ body{font-size:calc(13px * var(--rc-text-scale,1));line-height:1.55}button,selec
 .role-toggle-row input{min-width:14px;max-width:14px;width:14px;height:14px;flex:0 0 14px;margin:0}.role-toggle-row label{flex:1}.role-toggle-row label span{overflow-wrap:anywhere}.brand-lockup h1{display:flex;align-items:center;flex-wrap:wrap;gap:7px}.brand-lockup h1 .build-version{display:inline;margin:0}.installer-plan{font-size:calc(10px * var(--rc-text-scale,1));margin-top:9px}.installer-plan code{display:block;white-space:pre-wrap;overflow-wrap:anywhere;margin:8px 0}.console-workspace{min-height:0}.friendly-answer{flex:0 0 auto}
 
 .console-session{display:block;overflow:auto}.console-session>.console-activity{min-height:0}.console-session>.console-activity .console-output{max-height:340px;min-height:80px}.friendly-answer pre{max-height:240px;overflow:auto}.console-workspace>#console-sessions{overflow:auto}
+
+.account-preference{display:flex;gap:6px;align-items:center;font-size:.85em;margin-bottom:6px}.account-preference input{width:auto!important}.account-role-picker>small{display:block;font-size:.75em;line-height:1.5;color:var(--rc-muted);margin-bottom:12px}
 `;

@@ -1,0 +1,15 @@
+import * as vscode from 'vscode';
+import type {Job,Profile} from '../core/domain';
+import {translator,type Language} from '../core/i18n';
+import {liveSessionContent,renderLiveSessionWindow} from '../ui/live-session-window';
+interface LiveServices {jobs:()=>Job[];profiles:()=>Profile[];language:()=>Language;action:(message:any)=>Promise<void>;error:(error:unknown)=>void}
+export class LiveSessionPanel implements vscode.Disposable{
+ private panels=new Map<string,{panel:vscode.WebviewPanel;ready:boolean;language:Language}>();
+ constructor(private context:vscode.ExtensionContext,private services:LiveServices){}
+ async open(id?:string,newWindow=false){const job=this.services.jobs().find(j=>j.id===id)??this.services.jobs().find(j=>j.status==='running')??this.services.jobs().at(-1);if(!job)return;let item=this.panels.get(job.id);if(item)item.panel.reveal();else{const language=this.services.language(),panel=vscode.window.createWebviewPanel('aiTeam.liveSession','RelayCrew · '+translator(language)('Live session')+' · '+job.id.slice(0,8),vscode.ViewColumn.Beside,{enableScripts:true,retainContextWhenHidden:true});item={panel,ready:false,language};this.panels.set(job.id,item);panel.onDidDispose(()=>this.panels.delete(job.id),undefined,this.context.subscriptions);panel.webview.onDidReceiveMessage(m=>{if(m?.id!==job.id)return;if(m.action==='liveReady'){const current=this.panels.get(job.id);if(!current)return;current.ready=true;this.refresh();return;}if(m.action==='liveNewWindow'){void this.moveToWindow(panel);return;}void this.services.action(m).catch(error=>{void panel.webview.postMessage({type:'liveWindowMessage',message:String(error)});this.services.error(error);});},undefined,this.context.subscriptions);panel.webview.html=renderLiveSessionWindow(job,this.services.profiles(),language,this.services.jobs());}
+ if(newWindow)await this.moveToWindow(item.panel);
+ }
+ private async moveToWindow(panel:vscode.WebviewPanel){panel.reveal();const command='workbench.action.moveEditorToNewWindow';if((await vscode.commands.getCommands(true)).includes(command))await vscode.commands.executeCommand(command);else await panel.webview.postMessage({type:'liveWindowMessage',message:translator(this.services.language())('Drag this VS Code tab to another editor group or window.')});}
+ refresh(){for(const [id,item]of this.panels){const job=this.services.jobs().find(j=>j.id===id);if(!job)continue;const language=this.services.language();if(language!==item.language){item.language=language;item.ready=false;item.panel.webview.html=renderLiveSessionWindow(job,this.services.profiles(),language,this.services.jobs());}else if(item.ready)void item.panel.webview.postMessage({type:'liveSnapshot',html:liveSessionContent(job,this.services.profiles(),language,this.services.jobs())});}}
+ dispose(){for(const item of this.panels.values())item.panel.dispose();this.panels.clear();}
+}

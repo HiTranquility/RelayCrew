@@ -23,3 +23,27 @@ Preserve `aiTeam.*` command/configuration IDs and the current extension identity
 GitHub Actions checks Linux and Windows. A workflow file being present does not mean those remote checks have run; read the actual workflow results on a pull request.
 
 Keep existing `releases/vX.Y.Z/` artifacts immutable and run `npm run releases:verify` before committing. Follow [release instructions](releases/README.md) for future tags; never assign an old version tag to newer source.
+
+## Changing the team flow
+
+Read [user instructions](INSTRUCTIONS.md) first; keep the UI labels and guide consistent. The current engine supports delivery and plan/execute pipelines, sequential workers, extra auditors and configurable manager voting. Folder groups contain independent sequential jobs.
+
+| Change | Start here |
+|---|---|
+| Worker policy, bounds, automatic model overrides | `src/core/delegation.ts` |
+| Job transitions, handoffs and owner questions | `src/core/engine.ts` |
+| Import validation | `src/core/configuration.ts`, `src/core/workflow.ts` |
+| Direction proposals, validation and selected snapshots | `src/core/directions.ts`, `src/ui/direction-composer.ts` |
+| Independent session trees and opt-in follow-ups | `src/core/session-branches.ts`, `src/ui/session-branches.ts` |
+| Quota watch and maintenance stop gates | `src/ui/quota-watch.ts`, `src/ui/maintenance-controls.ts`, `src/core/daily-plan.ts` |
+| No-call simulation | `src/core/simulation.ts` |
+| Review seats, voting and owner resolution | `src/core/review-team.ts` |
+| Folder groups and per-folder permissions | `src/core/task-folders.ts`, `src/host/console-controller.ts`, `src/ui/task-batches.ts` |
+| Git change observation | `src/adapters/workspace-changes.ts` |
+| Detached observer tabs | `src/host/live-session-panel.ts`, `src/host/agent-map-panel.ts`, `src/host/file-changes-panel.ts` |
+| Team controls and draft synchronization | `src/ui/team-setup.ts`, `src/ui/map-team-editor.ts`, `src/ui/delegation-client.ts` |
+| CLI calls, catalogs and persistence | `src/host/extension-host.ts`, `src/adapters/cli/` |
+
+Model catalogs come from the connection, not a hard-coded latest-version list. Keep custom IDs optional and validate worker bounds before dispatch. Simulation must never call providers or produce real acceptance evidence. Persist new policy fields as optional for old jobs; snapshot them for new jobs. A Markdown guide supplies context, not extra permissions.
+
+Use fake transports for automated tests. Real CLI demos require explicit task scope and must be labelled as real quota-consuming runs. Keep preview captures, local CLI copies and demo results out of commits. Do not move an existing release tag to preview code.

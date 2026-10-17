@@ -2,6 +2,8 @@
 
 Copy these files into your own project before editing. They contain no credentials, account IDs or fixed model IDs. Use your existing account/role assignments.
 
+Local preview: [plan-and-execute workflow](workflows/plan-execute.md) includes optional account/model and worker-limit configuration. Replace profile IDs before import. The other starter guides keep your existing assignments.
+
 | Files | Where to use them |
 |---|---|
 | `roles/developer.md` | Setup → Input and response templates → Dev → Attach role .md |
@@ -29,3 +31,7 @@ Sao chép bộ mẫu vào project của bạn rồi sửa các phần `[điền 
 Điền `tasks/feature-brief.md`, rồi đính kèm vào Console cùng yêu cầu ngắn. Với `tasks/definition-of-done.md`, chép các dòng checklist vào ô **Tiêu chí hoàn thành** để có checkbox nghiệm thu; chỉ đính kèm file sẽ cung cấp ngữ cảnh, không tự điền bảng nghiệm thu.
 
 Nút **Mẫu Markdown** mở thư mục mẫu đi kèm extension. Không có mẫu nào tự chạy. Dùng ngôn ngữ của người giao việc khi báo cáo; nêu rõ kết quả, bằng chứng, phần còn thiếu và việc tiếp theo. Quyết định quan trọng phải hỏi người dùng trước.
+
+## Daily maintenance stop gates
+
+Import [STOP-GATES.md](maintenance/STOP-GATES.md) or [STOP-GATES.vi.md](maintenance/STOP-GATES.vi.md) in the Daily quota panel. These editable guides require owner decisions before consequential changes and never increase permissions or quota limits.

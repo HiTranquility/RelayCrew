@@ -1,4 +1,5 @@
 {
+  "command.agentMap": "RelayCrew: Mở bản đồ agent ở tab riêng",
   "command.newTask": "RelayCrew: Giao việc mới",
   "command.schedule": "RelayCrew: Lên lịch tác vụ hoặc nhắc việc",
   "command.switch": "RelayCrew: Chọn vai trò / đổi tài khoản",
@@ -70,5 +71,9 @@
   "profile.hosting": "Mặc định Cloud. Endpoint Local dùng địa chỉ loopback; kiểm tra máy chủ để biết mô hình có thực sự chạy cục bộ.",
   "profile.transport": "Mặc định CLI. HTTP tương thích hỗ trợ chat/review chỉ đọc với tài liệu được cung cấp.",
   "profile.endpoint": "URL gốc API tương thích OpenAI, gồm /v1. Cloud dùng HTTPS, Local dùng loopback. Lưu khóa API trong SecretStorage.",
-  "command.examples": "RelayCrew: Mở bộ mẫu Markdown"
+  "command.examples": "RelayCrew: Mở bộ mẫu Markdown",
+  "setting.completionNotifications": "Thông báo hoàn tất: từng bước và flow, chỉ toàn bộ flow, hoặc chỉ lưu lịch sử không bật thông báo hoàn tất.",
+  "command.changedFiles": "RelayCrew: Mở file thay đổi trong phiên",
+  "profile.preferred": "Ưu tiên tài khoản này khi tạo đội theo nhà cung cấp. Không đổi phân công của task đã có.",
+  "command.liveSession": "RelayCrew: Mở Live session trong tab riêng"
 }

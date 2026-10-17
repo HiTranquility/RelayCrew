@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.0 — 2026-10-17
+
+- AI proposes editable directions A/B/C with scope, implementation plan, file structure and acceptance; selection is snapshotted before execution.
+- Persistent usage/limit bar and task-specific account switching, including independent auditors and manager votes. Unknown quota remains unknown.
+- Named review seats, configurable unanimous/majority/chair decisions, bounded planner workers and optional current model catalogs.
+- Multiple-folder task groups, independent task/chat branches with bounded public context and opt-in follow-up sessions after parent approval.
+- Draggable/detached live sessions, agent maps and Git-observed file changes; canvas/list/table/dependency views, public handoffs and completion controls.
+- Useful maintenance catalog, Markdown stop gates, per-account/model budgets and fresh-quota gating; no dummy token spending.
+- English/Vietnamese instructions, reusable stop-gates guides, keyboard controls, preserved drafts and source/release archives.
+- Validation: 160 automated tests, strict type checking, bilingual light/dark/narrow UI and native VS Code host; local fake transports for release checks.
+- Provider-native recursive agents, exact quota APIs for every provider, simultaneous execution and automatic cross-repo merges are not provided.
+
 ## 0.9.9 — 2026-10-17
 
 Operational polish and privacy fixes

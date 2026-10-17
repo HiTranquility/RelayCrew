@@ -1,3 +1,4 @@
+import type {DelegationPolicy} from './delegation';
 import type { PromptTemplateSnapshot } from './prompt-templates';
 import { CronExpressionParser } from 'cron-parser';
 import type { Attachment } from '../storage/attachments';
@@ -5,15 +6,21 @@ import type { WorkflowDocument } from './workflow';
 
 export type Provider = 'codex' | 'claude' | 'gemini' | 'antigravity' | 'compatible';
 export type Role = 'builder' | 'auditor' | 'worker' | 'lead';
-export type RoleOverrides = Partial<Record<Role, { model?: string; effort?: string }>>;
-export interface Management { primaryProfileId: string; coordinatorIds: string[] }
+export type RoleOverrides = Partial<Record<Role, { model?: string; effort?: string;modelPolicy?:'flagship'|'cli'|'custom' }>>;
+export type DecisionPolicy='ask'|'all'|'majority'|'chair';
+export interface AuditReviewer {profileId:string;name:string}
+export interface Management { primaryProfileId: string; coordinatorIds: string[];deciderIds?:string[];decisionPolicy?:DecisionPolicy;names?:Record<string,string> }
 export function validateManagement(value: unknown, profiles: Profile[]): Management {
   const m = value as Management, ids = new Set(profiles.map(p => p.id));
   if (!m || !ids.has(m.primaryProfileId) || !Array.isArray(m.coordinatorIds) || m.coordinatorIds.length > 4
     || new Set(m.coordinatorIds).size !== m.coordinatorIds.length || m.coordinatorIds.some(id => id === m.primaryProfileId || !ids.has(id))) {
     throw new Error('Choose one primary manager and up to four different supporting coordinators.');
   }
-  return { primaryProfileId: m.primaryProfileId, coordinatorIds: [...m.coordinatorIds] };
+  const allowed=new Set([m.primaryProfileId,...m.coordinatorIds]);
+  if(m.decisionPolicy!==undefined&&!['ask','all','majority','chair'].includes(m.decisionPolicy))throw new Error('Choose a valid manager decision policy.');
+  if(m.deciderIds!==undefined&&(!Array.isArray(m.deciderIds)||!m.deciderIds.includes(m.primaryProfileId)||new Set(m.deciderIds).size!==m.deciderIds.length||m.deciderIds.some(id=>!allowed.has(id))))throw new Error('Decision makers must belong to the manager team and include its chair.');
+  if(m.names!==undefined&&(!m.names||typeof m.names!=='object'||Array.isArray(m.names)||Object.entries(m.names).some(([id,name])=>!allowed.has(id)||typeof name!=='string'||!name.trim()||name.length>80||/[\r\n\0]/.test(name))))throw new Error('Use manager names up to 80 characters.');
+  return { primaryProfileId: m.primaryProfileId, coordinatorIds: [...m.coordinatorIds],...(m.deciderIds?{deciderIds:[...m.deciderIds]}:{}),...(m.decisionPolicy?{decisionPolicy:m.decisionPolicy}:{}),...(m.names?{names:{...m.names}}:{}) };
 }
 export const fullFlow: Role[] = ['builder', 'auditor', 'worker', 'lead'];
 export function validateFlow(value: unknown): Role[] {
@@ -22,6 +29,7 @@ export function validateFlow(value: unknown): Role[] {
 }
 export interface Profile {
   id: string; label: string; provider: Provider; executable: string;
+  preferred?:boolean;
   hosting?: 'cloud' | 'local'; transport?: 'cli' | 'http'; endpoint?: string;
   modelPolicy?:'flagship'|'cli'|'custom'; quotaCeiling?:number;
   model?: string; effort?: string; env?: Record<string, string>; secretEnv?: string[]; quotaFile?: string;
@@ -54,9 +62,20 @@ export interface Step {
   backupPath?: string;
   timeoutAt?: string; phase?: 'backing_up' | 'cli';
   coordinatorProfileId?: string;
+  reviewProfileId?:string;reviewName?:string;decisionMaker?:boolean;
+  parentStepIndex?:number;
   modelSource?:'custom'|'alias'|'catalog'|'cli-default';
 }
+export interface ObservedFileChange {path:string;kind:'added'|'modified'|'deleted'|'renamed';at:string;stepIndex:number;reverted?:boolean;previousPath?:string;fingerprint?:string}
 export interface Job {
+  direction?:import('./directions').TaskDirection;
+  directionRequest?:{brief:string;folders?:string[]};
+  parentSessionId?:string;branchOrigin?:'manual'|'direction';branchContext?:{prompt:string;status:string;summary:string;question?:string};
+  sessionBranching?:{maxBranches:number;scopes:import('./task-folders').TaskFolderScope[];createdIds?:string[]};
+  batch?:{id:string;prompt:string;folders:string[];index:number};
+  fileChanges?:ObservedFileChange[];fileChangeBaseline?:Record<string,string>;fileChangeRoot?:string;fileTracking?:'active'|'complete'|'unavailable'|'limited';
+  delegation?:DelegationPolicy; simulation?:boolean;
+  auditors?:AuditReviewer[];decisionPolicyPending?:boolean;reviewDecision?:import('./review-team').ReviewDecision;
   permission?:import('./daily-workspaces').TaskPermission;
   acceptance?: {id:string;text:string;checked:boolean;checkedAt?:string}[];
   kind?:'chat';
@@ -123,6 +142,7 @@ export function validateProfiles(value: unknown): Profile[] {
       throw new Error('Each profile needs a unique id, label, provider and executable.');
     }
     ids.add(p.id);
+    if(p.preferred!==undefined&&typeof p.preferred!=='boolean')throw new Error('Invalid account preference.');
     if(p.hosting!==undefined&&!['cloud','local'].includes(p.hosting))throw new Error('Invalid hosting location.');
     if(p.transport!==undefined&&!['cli','http'].includes(p.transport))throw new Error('Invalid transport.');
     if(p.provider==='compatible'){
@@ -143,6 +163,7 @@ export function validateProfiles(value: unknown): Profile[] {
       throw new Error('Invalid secretEnv.');
     }
   }
+  const preferred=new Set<string>();for(const p of value){const group=[p.provider,p.transport??'cli',p.hosting??'cloud'].join('-');if(p.preferred){if(preferred.has(group))throw new Error('Choose one preferred account per provider and connection type.');preferred.add(group);}}
   return value as Profile[];
 }
 
@@ -174,11 +195,13 @@ export function fresh(q: Quota | undefined, now = Date.now()): q is Quota {
 export function assignTaskProfile(job:Job,role:Role,profileId:string,profiles:Profile[]):void{
   if(!['queued','waiting_quota','waiting_owner'].includes(job.status)||job.steps.some(s=>s.status==='running'))throw new Error('Pause the running task before changing its account.');
   if(!profiles.some(p=>p.id===profileId))throw new Error('Choose an existing account profile.');
-  if(!(job.flow??fullFlow).includes(role))throw new Error('This role is not in the task flow.');
-  if(job.steps.some(s=>s.role===role)&&job.steps.filter(s=>s.role===role).every(s=>s.status==='done'))throw new Error('This role already finished. Its account history is preserved.');
+  if(!(job.kind==='chat'?['builder']:job.flow??fullFlow).includes(role))throw new Error('This role is not in the task flow.');
+  const primarySteps=job.steps.filter(s=>s.role===role&&!s.coordinatorProfileId&&!s.reviewProfileId);
+  if(primarySteps.length&&primarySteps.every(s=>s.status==='done'))throw new Error('This role already finished. Its account history is preserved.');
+  if(role==='auditor'&&job.auditors?.some(a=>a.profileId===profileId))throw new Error('Auditor accounts must remain distinct.');
   if(role==='lead'&&job.steps.some(s=>s.coordinatorProfileId===profileId&&s.status!=='done'))throw new Error('Reassign the unfinished coordinator before making that account the primary manager.');
-  job.roles[role]=profileId;(job.profilePins??={})[role]=profileId;
-  if(role==='lead'&&job.management){job.management.primaryProfileId=profileId;job.management.coordinatorIds=job.management.coordinatorIds.filter(id=>id!==profileId);}
+  const previous=job.roles[role];job.roles[role]=profileId;(job.profilePins??={})[role]=profileId;
+  if(role==='lead'&&job.management){job.management.primaryProfileId=profileId;job.management.coordinatorIds=job.management.coordinatorIds.filter(id=>id!==profileId);replaceManagerIdentity(job,previous,profileId);}
   if(job.overrides)delete job.overrides[role];
   (job.timeline??=[]).push({at:new Date().toISOString(),from:'owner',to:role,kind:'account_switch',text:`Use profile ${profileId} for remaining work; completed steps retain their recorded profile.`});
 }
@@ -188,8 +211,14 @@ export function assignCoordinatorProfile(job: Job, index: number, profileId: str
   if(!step?.coordinatorProfileId||step.status==='done'||!profiles.some(p=>p.id===profileId))throw new Error('Choose an unfinished coordinator step and an existing account.');
   if(job.management?.primaryProfileId===profileId||job.steps.some((s,i)=>i!==index&&s.coordinatorProfileId===profileId))throw new Error('Coordinator accounts must be distinct from the primary manager and other coordinators.');
   const previous=step.coordinatorProfileId;step.coordinatorProfileId=profileId;
-  if(job.management)job.management.coordinatorIds=job.management.coordinatorIds.map(id=>id===previous?profileId:id);
+  if(job.management){job.management.coordinatorIds=job.management.coordinatorIds.map(id=>id===previous?profileId:id);replaceManagerIdentity(job,previous,profileId);}
   (job.timeline??=[]).push({at:new Date().toISOString(),from:'owner',to:'coordinator',kind:'account_switch',text:`Use profile ${profileId} for the unfinished coordinator step. Primary manager authority is unchanged.`});
+}
+function replaceManagerIdentity(job:Job,previous:string,next:string):void{const management=job.management;if(!management||previous===next)return;if(management.deciderIds)management.deciderIds=management.deciderIds.map(id=>id===previous?next:id);if(management.names?.[previous]){management.names[next]=management.names[previous];delete management.names[previous];}}
+export function assignReviewerProfile(job:Job,index:number,profileId:string,profiles:Profile[]):void{
+ const step=job.steps[index];if(!['queued','waiting_quota','waiting_owner'].includes(job.status)||job.steps.some(s=>s.status==='running'))throw new Error('Pause the running task before changing its account.');
+ if(!step?.reviewProfileId||step.status==='done'||!profiles.some(p=>p.id===profileId)||profileId===job.roles.auditor||job.steps.some((s,i)=>i!==index&&s.reviewProfileId===profileId))throw new Error('Choose a distinct account for an unfinished auditor.');
+ const previous=step.reviewProfileId;step.reviewProfileId=profileId;job.auditors=job.auditors?.map(a=>a.profileId===previous?{...a,profileId}:a);(job.timeline??=[]).push({at:new Date().toISOString(),from:'owner',to:'auditor',kind:'account_switch',text:'Use profile '+profileId+' for unfinished '+(step.reviewName??'audit')+'. Completed history is preserved.'});
 }
 export function routeProfile(id: string, profiles: Profile[], quotas: Record<string, Quota>, auto: boolean, threshold: number, now = Date.now()): Profile {
   const selected = profiles.find(p => p.id === id);

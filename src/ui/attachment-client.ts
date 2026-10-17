@@ -8,7 +8,7 @@ function renderAttachments(){
   attachmentList.replaceChildren();for(const a of consoleAttachments){const chip=document.createElement('div');chip.className='attachment-chip';if(a.preview){const image=document.createElement('img');image.src=a.preview;image.alt='';chip.append(image);}const label=document.createElement('span');label.textContent=a.name+' · '+Math.ceil(a.bytes/1024)+' KB';chip.append(label);const remove=document.createElement('button');remove.type='button';remove.textContent='×';remove.title=attachmentHint.dataset.remove+' '+a.name;remove.setAttribute('aria-label',remove.title);remove.disabled=consolePending;remove.onclick=()=>{if(consolePending)return;consoleAttachments=consoleAttachments.filter(b=>b.id!==a.id);consoleRequest='';renderAttachments();persist();};chip.append(remove);attachmentList.append(chip);}
   consoleSend.textContent=consolePending?consoleSend.dataset.pending:consoleSend.dataset.ready;
   attachButton.disabled=consolePending||attachmentUploads.size>0;consoleSend.disabled=consolePending||attachmentUploads.size>0;
-  attachmentHint.textContent=attachmentUploads.size?attachmentHint.dataset.loading:attachmentHint.dataset.hint;
+  attachmentHint.textContent=attachmentUploads.size?attachmentHint.dataset.loading:attachmentHint.dataset.hint;if(typeof updateComposerExperience==='function')updateComposerExperience();
 }
 function uploadId(){return 'upload-'+crypto.randomUUID();}
 async function attachFiles(files){

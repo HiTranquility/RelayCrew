@@ -1,5 +1,7 @@
 # Connect accounts and import workflows / Kết nối tài khoản và nhập luồng
 
+For the current local preview, start with [user instructions](../INSTRUCTIONS.md) / [hướng dẫn sử dụng](../INSTRUCTIONS.vi.md): editable planning flows, worker limits and simulation.
+
 ## Run with a real CLI
 
 1. Open a trusted local project in VS Code, then **RelayCrew → Accounts & quota → Add account** (or **Connect local CLI**).

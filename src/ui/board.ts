@@ -1,3 +1,21 @@
+import {maintenanceClient,maintenanceStyles} from './maintenance-controls';
+import {branchClient,branchStyles} from './session-branches';
+import {quotaWatch,quotaWatchClient,quotaWatchStyles} from './quota-watch';
+import {directionClient,directionStyles} from './direction-composer';
+import {taskBatchStyles} from './task-batches';
+import {fileChangesClient,fileChangesStyles} from './file-changes';
+import {reviewTeamClient,reviewTeamStyles} from './review-team-controls';
+import {delegationControlStyles} from './delegation-controls';
+import {mapViewStyles} from './map-views';
+import {headerChrome,headerChromeClient,headerChromeStyles} from './header-chrome';
+import {mapCommunicationStyles} from './map-communication';
+import {mapTeamEditorClient,mapTeamEditorStyles} from './map-team-editor';
+import {renderCompletionCenter,completionCenterStyles} from './completion-center';
+import {composerExperienceClient,composerExperienceStyles} from './composer-experience';
+import type {CompletionNotice} from '../core/completion-notices';
+import {agentCanvasClient,agentCanvasStyles} from './agent-canvas';
+import {movablePanelClient,movablePanelStyles} from './movable-panels';
+import {agentMapClient,agentMapStyles} from './agent-map';
 import {backlogClient,renderBacklog} from './backlog-panel';
 import {scopedClient} from './scoped-filters';
 import {voiceClient} from './voice-input';
@@ -31,6 +49,9 @@ import { connectionsClient } from './connections-panel';
 import type { Connection } from '../adapters/messaging/messaging';
 import { type DailyPlan } from '../core/daily-plan';
 export interface BoardOptions {
+  auditors?:import('../core/domain').AuditReviewer[];
+  delegation?:import('../core/delegation').DelegationPolicy;
+  completionNotices?:CompletionNotice[];completionNotificationLevel?:string;
   schedules?:import('../core/domain').Schedule[];
   cliStatuses?:Record<string,import('../adapters/cli/setup').CliStatus>;
   queuePaused: boolean; autoSwitch: boolean; resumeAfterQuota: boolean; resumeProviderLimited: boolean;
@@ -56,13 +77,26 @@ export function renderBoard(jobs: Job[], profiles: Profile[], quotas: Record<str
   const page = ['console', 'overview', 'tasks', 'accounts', 'setup', 'daily', 'schedules', 'projects'].includes(options?.requestedPage ?? '') ? options!.requestedPage! : 'console';
   const pageRequest = Number.isFinite(options?.pageRequest) ? options!.pageRequest! : 0;
   return `<!doctype html><html lang="${language}"><head><meta charset="UTF-8"><title>RelayCrew · ${tr('Assignment board')}</title><meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; style-src 'unsafe-inline'; script-src 'nonce-${nonce}';"><meta name="viewport" content="width=device-width,initial-scale=1"><style>
-    ${boardStyles}
+    ${boardStyles}${quotaWatchStyles}${directionStyles}${branchStyles}${maintenanceStyles}
     ${workbenchStyles}
     ${missionStyles}
     ${interactionStyles}
     ${visualStyles}
+    ${agentMapStyles}
+    ${movablePanelStyles}
+    ${agentCanvasStyles}
+    ${completionCenterStyles}
+    ${composerExperienceStyles}
+    ${mapTeamEditorStyles}
+    ${mapCommunicationStyles}
+    ${headerChromeStyles}
+    ${mapViewStyles}
+    ${delegationControlStyles}
+${reviewTeamStyles}
+${fileChangesStyles}
+${taskBatchStyles}
     </style></head><body>
-    <header class="toolbar"><div class="brand-lockup"><span class="brand-mark" aria-hidden="true">R<span>↗</span></span><div><h1>RelayCrew <small class="build-version">0.9.9</small> <span class="workspace-label">${tr('Assignment board')}</span></h1><span class="brand-subtitle">${tr('Your AI team workspace')}</span></div></div><div class="toolbar-actions"><button class="primary" data-action="newTask">${tr('New task')}</button>${button('pause',t(options?.queuePaused?'Resume queue':'Pause immediately'))}<select class="language-select" data-language aria-label="${tr('Language')}"><option value="en" ${language==='en'?'selected':''}>EN</option><option value="vi" ${language==='vi'?'selected':''}>VI</option></select><details class="layout-menu" data-detail="layout-menu"><summary title="${tr('Controls')}">⋯</summary><div><button type="button" data-layout-open>${tr('Layout and shortcuts')}</button>${button('toggleSidebar',t('Toggle VS Code sidebar'))}${button('togglePanel',t('Toggle VS Code panel'))}${button('closeBoard',t('Close RelayCrew board'))}</div></details></div></header>
+    ${headerChrome(language)}${quotaWatch(profiles,quotas,jobs,options?.settings?.quotaThreshold??95,language)}<header class="toolbar"><div class="brand-lockup"><span class="brand-mark" aria-hidden="true">R<span>↗</span></span><div><h1>RelayCrew <small class="build-version">1.0.0</small> <span class="workspace-label">${tr('Assignment board')}</span></h1><span class="brand-subtitle">${tr('Your AI team workspace')}</span></div></div><div class="toolbar-actions"><button class="primary" data-action="newTask">${tr('New task')}</button>${button('pause',t(options?.queuePaused?'Resume queue':'Pause immediately'))}${renderCompletionCenter(options?.completionNotices??[],jobs,profiles,language,options?.completionNotificationLevel)}<select class="language-select" data-language aria-label="${tr('Language')}"><option value="en" ${language==='en'?'selected':''}>EN</option><option value="vi" ${language==='vi'?'selected':''}>VI</option></select><details class="layout-menu" data-detail="layout-menu"><summary title="${tr('Controls')}">⋯</summary><div><button type="button" data-layout-open>${tr('Layout and shortcuts')}</button>${button('toggleSidebar',t('Toggle VS Code sidebar'))}${button('togglePanel',t('Toggle VS Code panel'))}${button('closeBoard',t('Close RelayCrew board'))}</div></details></div></header>
     <nav class="tabs" role="tablist" aria-label="RelayCrew">${[['console','Live console'],['overview','Overview'],['tasks','Tasks'],['accounts','Accounts & quota'],['setup','Setup'],['daily','Daily quota tasklist'],['schedules','Schedules'],['projects','Projects']].map(([id,label])=>`<button id="tab-${id}" role="tab" aria-controls="page-${id}" aria-selected="${page===id}" tabindex="${page===id?'0':'-1'}" data-tab="${id}">${tr(label)}</button>`).join('')}</nav>
     <main>${interactionPanel(language)}${renderInlineTools(jobs,profiles,{...options,quotaSnapshots:quotas} as BoardOptions,language)}<div class="metrics" id="task-metrics"><span><b>${jobs.filter(j=>['running','queued'].includes(j.status)).length}</b> ${tr('Running / queued')}</span><span><b>${jobs.filter(j=>['waiting_owner','waiting_quota','needs_attention'].includes(j.status)).length}</b> ${tr('Needs attention / waiting')}</span><span><b>${jobs.filter(j=>j.status==='completed').length}</b> ${tr('Completed')}</span><span>${tr(options?.queuePaused?'Queue paused':'Queue active')}</span></div>
     <div id="page-console" data-page="console" role="tabpanel" aria-labelledby="tab-console" ${page!=='console'?'hidden':''}>${renderLiveConsole(jobs,profiles,options,language)}</div>
@@ -81,20 +115,32 @@ export function renderBoard(jobs: Job[], profiles: Profile[], quotas: Record<str
     var taskExclude=typeof saved.taskExclude==='string'?saved.taskExclude:'',taskPage=Number(saved.taskPage)||1,taskPageSize=[10,20,50,100].includes(saved.taskPageSize)?saved.taskPageSize:20;
     for(const input of document.querySelectorAll('[data-number-setting]'))if(typeof drafts[input.dataset.numberSetting]==='string')input.value=drafts[input.dataset.numberSetting];
     for(const d of document.querySelectorAll('details[data-detail]')){if(Object.hasOwn(saved.details||{},d.dataset.detail))d.open=saved.details[d.dataset.detail];d.addEventListener('toggle',persist);}
-    function persist(){const state={tab,pageRequest:request,scroll:window.scrollY,drafts,taskFilter,taskQuery,accountDraft,...planningState(),...configurationState(),...consoleState(),...interactionState(),...scopedState(),...backlogState(),taskExclude,taskPage,taskPageSize,searchFocus:document.activeElement?.id==='task-search',details:Object.fromEntries([...document.querySelectorAll('details[data-detail]')].map(d=>[d.dataset.detail,d.open]))};vscode.setState(state);vscode.postMessage({action:'boardState',state});}
-    function showPage(next,focus=false){if(!pages.includes(next))return;tab=next;document.getElementById('task-metrics').hidden=['overview','console'].includes(tab);for(const p of document.querySelectorAll('[data-page]'))p.hidden=p.dataset.page!==tab;for(const b of document.querySelectorAll('[data-tab]')){const active=b.dataset.tab===tab;b.setAttribute('aria-selected',String(active));b.tabIndex=active?0:-1;if(active&&focus){b.focus();b.scrollIntoView({block:'nearest',inline:'nearest'});}}queueWorkbenchLayout();}
+    function persist(){const state={tab,pageRequest:request,scroll:window.scrollY,drafts,taskFilter,taskQuery,accountDraft,...planningState(),...configurationState(),...consoleState(),...directionState(),...branchState(),...maintenanceState(),quotaWatch:quotaWatchChoice,...interactionState(),...scopedState(),...backlogState(),taskExclude,taskPage,taskPageSize,searchFocus:document.activeElement?.id==='task-search',details:Object.fromEntries([...document.querySelectorAll('details[data-detail]')].map(d=>[d.dataset.detail,d.open]))};vscode.setState(state);vscode.postMessage({action:'boardState',state});}
+    function showPage(next,focus=false){if(!pages.includes(next))return;tab=next;document.getElementById('task-metrics').hidden=['overview','console'].includes(tab);for(const p of document.querySelectorAll('[data-page]'))p.hidden=p.dataset.page!==tab;for(const b of document.querySelectorAll('[data-tab]')){const active=b.dataset.tab===tab;b.setAttribute('aria-selected',String(active));b.tabIndex=active?0:-1;if(active&&focus){b.focus();b.scrollIntoView({block:'nearest',inline:'nearest'});}}if(typeof updateHeaderChrome==='function')updateHeaderChrome();queueWorkbenchLayout();}
     ${planningClient}
     ${consoleClient}
     ${attachmentClient}
     ${accountClient}
-    ${configurationClient}
+    ${fileChangesClient}
+${reviewTeamClient}
+${configurationClient}
     ${connectionsClient}
     ${promptTemplateClient}
     ${interactionClient}
     ${dailyMonitorClient}
+${maintenanceClient}
     ${voiceClient}
+    ${agentCanvasClient}
+    ${agentMapClient}
+    ${movablePanelClient}
+    ${directionClient}
+${branchClient}
+    ${quotaWatchClient}
+    ${composerExperienceClient}
     ${scopedClient}
     ${backlogClient}
+    ${mapTeamEditorClient}
+    ${headerChromeClient}
     let search=document.getElementById('task-search');search.value=taskQuery;
     function filterTasks(){const groups={active:['running','queued'],attention:['waiting_owner','waiting_quota','needs_attention','failed','interrupted'],finished:['completed','cancelled']},cards=[...document.querySelectorAll('[data-task-status]')],excluded=taskExclude.toLocaleLowerCase().split(',').map(s=>s.trim()).filter(Boolean),matched=cards.filter(card=>{const text=card.dataset.taskSearch.toLocaleLowerCase();return (taskFilter==='all'||groups[taskFilter].includes(card.dataset.taskStatus))&&text.includes(taskQuery.toLocaleLowerCase())&&!excluded.some(t=>text.includes(t));});taskPage=Math.max(1,Math.min(Math.ceil(matched.length/taskPageSize)||1,taskPage));cards.forEach(c=>c.hidden=true);matched.slice((taskPage-1)*taskPageSize,taskPage*taskPageSize).forEach(c=>c.hidden=false);for(const b of document.querySelectorAll('[data-filter]'))b.setAttribute('aria-pressed',String(b.dataset.filter===taskFilter));document.getElementById('task-count').textContent=matched.length+' / '+cards.length;document.getElementById('task-page-label').textContent=taskPage+' / '+(Math.ceil(matched.length/taskPageSize)||1);document.getElementById('task-exclude').value=taskExclude;document.getElementById('task-page-size').value=String(taskPageSize);for(const b of document.querySelectorAll('[data-task-page]'))b.disabled=Number(b.dataset.taskPage)<0?taskPage===1:taskPage*taskPageSize>=matched.length;document.getElementById('no-task-matches').hidden=matched.length>0||cards.length===0;}
     document.addEventListener('input',e=>{if(e.target.id==='task-exclude'){taskExclude=e.target.value;taskPage=1;filterTasks();persist();}});document.addEventListener('change',e=>{if(e.target.id==='task-page-size'){taskPageSize=Number(e.target.value);taskPage=1;filterTasks();persist();}});document.addEventListener('click',e=>{const b=e.target.closest('[data-task-page]');if(b){taskPage+=Number(b.dataset.taskPage);filterTasks();persist();}});

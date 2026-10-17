@@ -5,7 +5,7 @@ import { homedir } from 'node:os';
 import { delimiter, isAbsolute, join } from 'node:path';
 import type { Provider } from '../../core/domain';
 
-export async function findLocalCli(provider:Provider,preferred?:string):Promise<string|undefined>{
+export async function findLocalCli(provider:Provider,preferred?:string,onFailure?:(code:string)=>void):Promise<string|undefined>{
   if(provider==='compatible')return;
   const suffixes=process.platform==='win32'?['.exe','.cmd','.bat','']:[''];
   const candidates:string[]=[];
@@ -19,7 +19,7 @@ export async function findLocalCli(provider:Provider,preferred?:string):Promise<
     const root=join(process.env.LOCALAPPDATA,'OpenAI','Codex','bin');
     try {const dirs=await Promise.all((await readdir(root,{withFileTypes:true})).filter(d=>d.isDirectory()).map(async d=>({path:join(root,d.name,'codex.exe'),time:(await stat(join(root,d.name))).mtimeMs})));candidates.push(...dirs.sort((a,b)=>b.time-a.time).map(d=>d.path));}catch{/* optional desktop installation */}
   }
-  for(const path of candidates)try{await access(path,process.platform==='win32'?constants.F_OK:constants.X_OK);if((await stat(path)).isFile())return path;}catch{/* next candidate */}
+  for(const path of candidates)try{await access(path,process.platform==='win32'?constants.F_OK:constants.X_OK);if((await stat(path)).isFile())return path;if(path===preferred)onFailure?.('NOT_FILE');}catch(error){if(path===preferred)onFailure?.((error as NodeJS.ErrnoException).code??String(error));}
   return;
 }
 export async function cliVersion(executable:string):Promise<string>{

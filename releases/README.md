@@ -24,6 +24,8 @@ Keep each version in its own immutable directory. Never replace an existing VSIX
 | [0.9.8](v0.9.8/NOTES.md) | `relaycrew-0.9.8.vsix` | Split prompt panel, document formats and dictation |
 | [0.9.9](v0.9.9/NOTES.md) | `relaycrew-0.9.9.vsix` | Account checks, filters/pagination, inline backlog and privacy fixes |
 
+| [1.0.0](v1.0.0/NOTES.md) | `relaycrew-1.0.0.vsix` | Editable AI directions, live quota, observable session branches and useful-work stop gates |
+
 0.9.6 remains reserved for remote repository authentication; no tag is backfilled.
 
 Each directory contains the exact VSIX, a source ZIP, `release.json`, `SHA256SUMS` and release notes. Run `npm run releases:verify` to verify every archived asset. These archives are retained in Git but excluded from the installed extension package. The original 0.1/0.2 package names are preserved; their display name was AI Team Workbench.
@@ -32,7 +34,7 @@ The older source ZIPs contain only original `src/` files recovered from `sources
 
 ## GitHub release process
 
-The local archives do not mean releases have already been published to GitHub. Current source is 0.9.9; do not point older tags at this source. GitHub's automatic source ZIP for such a tag would misrepresent those versions.
+The local archives do not mean releases have already been published to GitHub. Current source is 1.0.0; do not point older tags at this source. GitHub's automatic source ZIP for such a tag would misrepresent those versions.
 
 For a new source release:
 
@@ -41,12 +43,12 @@ For a new source release:
 3. Create an annotated tag matching the manifest, then push the commit and tag. For the current source:
 
    ```sh
-   git tag -a v0.9.9 -m "RelayCrew 0.9.9"
+   git tag -a v1.0.0 -m "RelayCrew 1.0.0"
    git push origin main
-   git push origin v0.9.9
+   git push origin v1.0.0
    ```
 
-4. The release workflow checks/tests the tagged source, verifies retained archives, builds a fresh VSIX, checks the tag/version match and publishes a GitHub **prerelease** with the VSIX and its SHA-256 checksum. It never publishes to the VS Code Marketplace. A duplicate release fails rather than replacing existing assets.
+4. The release workflow checks/tests the tagged source, verifies retained archives, builds a fresh VSIX, checks the tag/version match and publishes a GitHub release (**stable** for 1.x+, prerelease for 0.x) with the VSIX and its SHA-256 checksum. It never publishes to the VS Code Marketplace. A duplicate release fails rather than replacing existing assets.
 
 GitHub's generated source download represents the tagged commit. A CI-built VSIX may have different ZIP timestamps/checksums from the locally archived build; use the checksum supplied with the particular asset you download. The archived original is never replaced.
 

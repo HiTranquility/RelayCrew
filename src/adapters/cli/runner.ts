@@ -56,6 +56,8 @@ function jsonEvents(stdout: string): any[] {
 }
 export function providerLimited(stdout: string): boolean {
   return jsonEvents(stdout).some(e => {
+    if(e.type==='rate_limit_event'&&e.rate_limit_info?.status==='rejected')return true;
+    if(e.api_error_status===429||e.is_api_error_message&&e.error==='rate_limit'||e.is_error&&e.api_error_code==='credits_required')return true;
     const error = e.error ?? e.result?.error ?? (e.is_error ? { message: e.result } : undefined);
     return error && (Number(error.code) === 429 || ['RESOURCE_EXHAUSTED', 'rate_limit_error', 'usage_limit_reached'].includes(error.type ?? error.status)
       || /(?:you(?:'ve| have) hit your usage limit|rate.?limit exceeded|quota (?:has been )?exhausted|usage limit (?:has been )?reached)/i.test(error.message ?? ''));
@@ -171,7 +173,11 @@ export async function execute(o: ExecuteOptions): Promise<string> {
       child.stderr?.on('data', c => collect(c, 'err'));
       child.stdin?.on('error', () => { /* early provider exit is reported by close */ });
       child.stdin?.end(command.stdin);
-      const cleanup = () => { clearTimeout(timeout); o.signal.removeEventListener('abort', abort); };
+      // A Windows helper can inherit the CLI pipes and outlive the CLI itself.
+      // Drain buffered output briefly after exit, then release inherited handles.
+      let drainTimer: ReturnType<typeof setTimeout> | undefined;
+      child.once('exit', () => { drainTimer=setTimeout(()=>{child.stdout?.destroy();child.stderr?.destroy();},1000); });
+      const cleanup = () => { clearTimeout(timeout);clearTimeout(drainTimer); o.signal.removeEventListener('abort', abort); };
       child.on('error', e => { cleanup(); reject(new Error(clean(e.message))); });
       child.on('close', async code => {
         cleanup();
