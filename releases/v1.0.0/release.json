@@ -1,0 +1,23 @@
+{
+  "version": "1.0.0",
+  "extensionId": "local-ai-team.ai-team-workbench",
+  "displayName": "RelayCrew",
+  "artifact": {
+    "file": "relaycrew-1.0.0.vsix",
+    "sha256": "fdbe0a8248d66ca6563a3a5d11f296997da199a63caaa383c95875721b7cc0ae",
+    "bytes": 889107
+  },
+  "source": {
+    "file": "relaycrew-1.0.0-source.zip",
+    "sha256": "2b444c942e647db2c5f058a18c4b4569acf1da0d392aed9a75534ffa96e6f2d3",
+    "bytes": 544701,
+    "kind": "repository-source-snapshot",
+    "commit": "5430ba02630ee3808d60819538dfdfef3adb6daf",
+    "includesTests": true,
+    "includesLockfile": true,
+    "includesGitHistory": false,
+    "includesReleaseCatalog": false,
+    "files": 207
+  },
+  "provenance": "VSIX and tracked source snapshot from 5430ba02630ee3808d60819538dfdfef3adb6daf. Type checking, 160 automated tests, bilingual browser UI and isolated native VS Code host validated. Private state, previews and local demo/CLI artifacts excluded."
+}
