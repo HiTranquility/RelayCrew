@@ -1,0 +1,23 @@
+{
+  "version": "1.1.0",
+  "extensionId": "local-ai-team.ai-team-workbench",
+  "displayName": "RelayCrew",
+  "artifact": {
+    "file": "relaycrew-1.1.0.vsix",
+    "sha256": "ba67df8d194a9c7b023cd45267734cb57bc54d500ddf4170839ddfe3883b2c70",
+    "bytes": 1059239
+  },
+  "source": {
+    "file": "relaycrew-1.1.0-source.zip",
+    "sha256": "36a150c0afc09565a3d9c10237ba2c4d13d540b3f3a333b190c6c075d4cc9e13",
+    "bytes": 714843,
+    "kind": "repository-source-snapshot",
+    "commit": "7509a1183e6bfa85ea656cf60ff28b8e6df8faa5",
+    "includesTests": true,
+    "includesLockfile": true,
+    "includesGitHistory": false,
+    "includesReleaseCatalog": false,
+    "files": 271
+  },
+  "provenance": "VSIX and tracked source snapshot from 7509a1183e6bfa85ea656cf60ff28b8e6df8faa5. Type checking, 212 automated tests, bilingual dark/light/narrow browser readiness/observer checks and isolated native VS Code smoke with one local fake API chat passed. No paid CLI calls or real messaging deliveries used in this validation. Personal state, auth, previews and local backups excluded. CI publication is verified separately."
+}
