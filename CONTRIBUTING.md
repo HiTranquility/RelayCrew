@@ -41,6 +41,9 @@ Read [user instructions](INSTRUCTIONS.md) first; keep the UI labels and guide co
 | Folder groups and per-folder permissions | `src/core/task-folders.ts`, `src/host/console-controller.ts`, `src/ui/task-batches.ts` |
 | Git change observation | `src/adapters/workspace-changes.ts` |
 | Detached observer tabs | `src/host/live-session-panel.ts`, `src/host/agent-map-panel.ts`, `src/host/file-changes-panel.ts` |
+| Public output/code rendering and copy | `src/ui/response-format.ts`, `src/ui/task-workbench.ts` |
+| Live activity, journey and updating agent details | `src/ui/execution-trace.ts`, `src/ui/agent-canvas.ts` |
+| Read-only native child lifecycle/progress/tools | `src/adapters/cli/codex-children.ts`, `src/core/native-agents.ts` |
 | Team controls and draft synchronization | `src/ui/team-setup.ts`, `src/ui/map-team-editor.ts`, `src/ui/delegation-client.ts` |
 | CLI calls, catalogs and persistence | `src/host/extension-host.ts`, `src/adapters/cli/` |
 

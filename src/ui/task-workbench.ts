@@ -1,3 +1,4 @@
+import {formatPublicText} from './response-format';
 import {selectedDirectionPanel} from './direction-composer';
 import {agentRoleName} from './agent-role-name';
 import {taskBatchPanel} from './task-batches';
@@ -8,17 +9,20 @@ import { roleLabel, statusLabel, translator, type Language } from '../core/i18n'
 import { escapeHtml as h } from './html';
 
 // Small, escaped presentation subset. Provider Markdown/HTML is never executed.
-export function readableText(raw:string):string {
-  return raw.split(/\r?\n/).map(line=>{
-    const safe=h(line).replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>').replace(/`([^`]+)`/g,'<code>$1</code>');
-    return /^#{1,4}\s/.test(line)?`<h4>${safe.replace(/^#{1,4}\s/,'')}</h4>`:/^\s*[-*]\s/.test(line)?`<p class="answer-bullet">• ${safe.replace(/^\s*[-*]\s/,'')}</p>`:`<p>${safe||'<br>'}</p>`;
-  }).join('');
-}
+export function readableText(raw:string):string {return formatPublicText(raw);}
+
 export function renderResponse(raw:string|undefined,language:Language):string {
-  const t=translator(language);if(!raw)return `<p class="muted">${h(t('Waiting for a response…'))}</p>`;
-  let extra='';try{const v=JSON.parse(raw);if(v.decision)extra+=`<span class="status-pill">${h(v.decision==='approved'?t('Approved'):t('Changes requested'))}</span>`;if(Array.isArray(v.issues)&&v.issues.length)extra+=`<h4>${h(t('Findings'))}</h4><ul>${v.issues.slice(0,20).map((i:any)=>`<li><strong>${h(String(i.title??''))}</strong> — ${h(String(i.body??'').slice(0,1500))}</li>`).join('')}</ul>`;if(Array.isArray(v.tasks)&&v.tasks.length)extra+=`<h4>${h(t('Next actions'))}</h4><ul>${v.tasks.slice(0,20).map((i:any)=>`<li><strong>${h(String(i.title??''))}</strong> — ${h(String(i.instructions??'').slice(0,1500))}</li>`).join('')}</ul>`;}catch{if(raw.trim().startsWith('{'))return `<p class="muted">${h(t('Receiving a structured result…'))}</p>`;}
-  return `<div class="readable-response">${readableText(publicSummary(raw).slice(0,16000))}${extra}</div>`;
+ const t=translator(language);if(!raw)return `<p class="muted">${h(t('Waiting for a response…'))}</p>`;
+ let value:any;try{value=JSON.parse(raw.trim().replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,''));}catch{if(raw.trim().startsWith('{'))return `<p class="muted">${h(t('Receiving a structured result…'))}</p>`;}
+ const originalSummary=publicSummary(raw),summary=originalSummary.slice(0,16000);let header='',extra='';
+ if(value?.decision)header=`<span class="status-pill" data-status="${value.decision==='approved'?'done':'waiting_owner'}">${h(value.decision==='approved'?t('Approved'):t('Changes requested'))}</span>`;
+ for(const [field,title,body]of [['issues','Findings','body'],['tasks','Next actions','instructions']] as const)if(Array.isArray(value?.[field])&&value[field].length)extra+=`<h4>${h(t(title))}</h4><ul class="response-findings">${value[field].slice(0,20).map((item:any)=>`<li class="response-finding"><strong>${h(String(item?.title??''))}</strong><div class="readable-response">${formatPublicText(String(item?.[body]??'').slice(0,4000))}</div></li>`).join('')}</ul>`;
+ let content=readableText(summary);
+ if(summary.length>1500&&!/^\s*(?:`{3,}|~{3,})/m.test(summary)){let hash=2166136261;for(const char of summary.slice(0,200))hash=Math.imul(hash^char.charCodeAt(0),16777619);content=`${readableText(summary.slice(0,420)+'…')}<details class="response-full-report" data-detail="response:${hash>>>0}" data-map-detail="response:${hash>>>0}"><summary>${h(t('Read the full report'))}</summary>${readableText(summary)}</details>`;}
+ if(value&&typeof value==='object'&&!Array.isArray(value)&&!['summary','question','decision','issues','tasks'].some(k=>k in value))content=readableText('```json\n'+JSON.stringify(value,null,2).slice(0,16000)+'\n```');
+ return `<div class="readable-response">${header}${content}${originalSummary.length>16000?`<p class="muted">${h(t('Display shortened; the original response is retained in the report.'))}</p>`:''}${extra}</div>`;
 }
+
 function actor(value:string,profiles:Profile[],language:Language,job:Job,at:string):string {
   const t=translator(language);if(value==='orchestrator')return 'RelayCrew';if(value==='owner')return t('You');if(value.includes('observer'))return t('Observer');
   const [role,id]=value.split(':');if(!id)return profiles.find(p=>p.id===value)?.label??value;

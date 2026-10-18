@@ -142,3 +142,17 @@ Trong phòng demo trên trình duyệt, nút **Tách Live** / **Tách Map** nằ
 Nút **Thư mục** cho xem đường dẫn thực thi, thư mục gốc, nhánh worktree và chính sách quyền đã giao; có thể chuyển phiên theo folder. Trang trình duyệt chỉ quan sát, không cấp quyền truy cập file.
 
 Trong VS Code, mở **Thư mục & quyền** ngay trong Live. **Mở thư mục trong Explorer** mở đường dẫn thực thi của phiên. **Task mới / chọn thư mục** mở composer và bung sẵn phần nhiều folder; chọn **Chọn thêm thư mục**, đánh dấu folder và quyền trước khi gửi. Việc này chuẩn bị task mới, giữ nguyên phạm vi của phiên đang chạy và bản nháp đang soạn.
+
+### Bố trí sơ đồ và agent con thật (preview.5)
+
+Trong Sơ đồ, chọn **Bố trí → Tự động / Ngang / Dọc**. Mỗi phiên lưu hướng riêng. Đổi hướng sẽ xếp lại các thẻ; cập nhật Live giữ vị trí bạn đã kéo. Mũi tên thể hiện cả phụ thuộc thực thi và agent cha thực tế. Có thể kéo thẻ, dùng Alt+phím mũi tên hoặc Vừa khung để quan sát.
+
+Một số CLI Codex lưu hoạt động con trong phiên nhưng không gửi collaboration item qua exec JSON. Với lượt đã bật agent con thật, RelayCrew đọc thêm lịch sử đúng ID phiên bằng `thread/read`; không resume hay tạo lượt model. Chỉ hiện ID con, trạng thái, model/mức suy luận và giao việc/câu trả lời công khai đã xác minh. Không hiển thị reasoning; thiếu dữ liệu thì ghi nhận thiếu. Vẫn giữ trần agent con đã thiết lập.
+
+### Xem rõ quy trình và chi tiết Live
+
+**Quy trình thực thi** trong Live thể hiện các bước và bàn giao đã ghi nhận. Bấm đúp agent trong Sơ đồ, Danh sách, Bảng hoặc Phụ thuộc để mở chi tiết tự cập nhật. **Đang xử lý gì** cho xem nhiệm vụ, thư mục thật, thông báo công khai gần nhất, file được nhắc và lệnh được ghi nhận. File được nhắc chưa đồng nghĩa đã sửa; xem **File thay đổi** để đối chiếu dữ liệu Git.
+
+Popup giữ tab, vị trí cuộn và báo cáo đang mở khi có snapshot mới. **Tạm dừng xem** chỉ giữ khung quan sát, tác vụ vẫn chạy. **Tiếp tục xem** nhận dữ liệu mới nhất. **Kết quả / Đầu vào / Hoạt động** tách câu trả lời, giao việc chính xác và tiến trình/công cụ công khai. Độ chi tiết nhánh con tùy dữ liệu CLI ghi nhận; không hiển thị suy luận riêng.
+
+Code có nhãn ngôn ngữ/file, số dòng và nút sao chép nguyên code, không kèm số dòng. Báo cáo dài có nút **Đọc toàn bộ báo cáo**; quyết định và vấn đề audit được trình bày riêng. Bản phản hồi CLI gốc và báo cáo tải xuống được giữ nguyên.

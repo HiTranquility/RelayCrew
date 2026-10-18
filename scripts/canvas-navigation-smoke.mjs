@@ -15,6 +15,13 @@ try{for(const language of ['en','vi']){
  assert.equal(await panel.evaluate(e=>e.classList.contains('is-map-expanded')),true);
  const box=await panel.boundingBox();assert.ok(box.x<=1&&box.y<=1&&box.width>=1439&&box.height>=999,JSON.stringify(box));
  assert.ok((await viewport.boundingBox()).height>450);
+
+ const geometry=()=>panel.locator('[data-map-node]').evaluateAll(nodes=>Object.fromEntries(nodes.map(n=>[n.dataset.mapNode,{x:parseFloat(n.style.left),y:parseFloat(n.style.top)}])));
+ await panel.locator('[data-canvas-layout]').selectOption('horizontal');const horizontal=await geometry();assert.ok(horizontal['auditor:primary:0'].x>horizontal['builder:primary:0'].x);assert.equal(await panel.getAttribute('data-canvas-layout'),'horizontal');
+ await panel.locator('[data-canvas-layout]').selectOption('vertical');const vertical=await geometry();assert.ok(vertical['auditor:primary:0'].y>vertical['builder:primary:0'].y);assert.equal(await panel.getAttribute('data-canvas-layout'),'vertical');
+ const movable=panel.locator('[data-map-node="builder:primary:0"]');await movable.focus();await page.keyboard.press('Alt+ArrowRight');const moved=await geometry();assert.equal(moved['builder:primary:0'].x,vertical['builder:primary:0'].x+12);
+ await page.evaluate(()=>window.dispatchEvent(new MessageEvent('message',{data:{type:'consoleSnapshot',html:document.documentElement.outerHTML}})));assert.equal(await panel.locator('[data-canvas-layout]').inputValue(),'vertical');assert.deepEqual(await geometry(),moved,'live snapshots must preserve dragged cards and orientation');
+ await page.reload();assert.equal(await panel.locator('[data-canvas-layout]').inputValue(),'vertical');assert.deepEqual(await geometry(),moved,'reload must retain per-session layout');await panel.locator('[data-canvas-layout]').selectOption('auto');await panel.locator('[data-canvas-action=expand]').click();if(!(await panel.evaluate(e=>e.classList.contains('is-map-expanded'))))await panel.locator('[data-canvas-action=expand]').click();
  await viewport.focus();await page.keyboard.press('1');assert.equal(await zoom.textContent(),'100%');
  await page.keyboard.press('+');assert.equal(await zoom.textContent(),'115%');
  const before=await stage.evaluate(e=>e.style.transform);await page.keyboard.press('ArrowRight');assert.notEqual(await stage.evaluate(e=>e.style.transform),before);

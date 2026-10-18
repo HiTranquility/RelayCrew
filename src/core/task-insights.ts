@@ -24,6 +24,6 @@ export function conversationEvents(job:Job) {
   const events=(job.timeline??[]).filter(e=>['assignment','response','owner_reply','account_switch','handoff','owner_decision'].includes(e.kind));
   // Current public output stays visible while its response is in flight.
   const running=job.steps.find(s=>s.status==='running');
-  if(running){const from=`${running.role}:${running.profileId}`,streams=(job.timeline??[]).filter(e=>e.kind==='stream'&&e.from===from&&e.at>=(running.startedAt??''));if(streams.length)events.push({...streams.at(-1)!,text:streams.map(e=>e.text).join('').slice(-12000)});}
+  if(running){const from=`${running.role}:${running.profileId}`,streams=(job.timeline??[]).filter(e=>['stream','assistant'].includes(e.kind)&&e.from===from&&e.at>=(running.startedAt??''));if(streams.length)events.push({...streams.at(-1)!,kind:'stream',text:streams.map(e=>e.text).join('').slice(-12000)});}
   return events.slice(-40);
 }

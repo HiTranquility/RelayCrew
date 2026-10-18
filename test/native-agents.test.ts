@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {nativeAgentEvent,recordNativeAgents,nativeAgentLimit,nativeAgentInstructions} from '../src/core/native-agents';
+import {nativeAgentEvent,recordNativeAgents,nativeAgentLimit,nativeAgentInstructions,withinNativeChildBudget} from '../src/core/native-agents';
 import {newJob,stepPrompt} from '../src/core/engine';
 import {agentNodes,renderAgentMap} from '../src/ui/agent-map';
 import {nativeAgentsPanel} from '../src/ui/native-agents';
@@ -26,4 +26,10 @@ test('failed or unreported child completion is not presented as successful',()=>
 
 test('an explicitly reported child question remains waiting for the owner under its actual parent',()=>{
  const j=job(),step=j.steps[0];recordNativeAgents(j,step,JSON.stringify({tool:'wait',sender:'root',receivers:['child-question'],states:{'child-question':{status:'awaiting_input',message:'Choose the bounded scope.'}}}));step.status='waiting_owner';j.status='waiting_owner';const child=agentNodes(j).find(n=>n.native)!;assert.equal(child.status,'waiting_owner');assert.equal(child.parentKey,'builder:primary:0');assert.match(nativeAgentsPanel(j,'en'),/Waiting for your reply/);assert.doesNotMatch(nativeAgentsPanel(j,'en'),/Final status not reported/);
+});
+
+test('the saved child ceiling applies to direct events and counts closed children in the run budget',()=>{
+ const j=job();j.nativeAgents={maxAgents:2};const seen=new Set<string>(),event=(id:string,status='running')=>JSON.stringify({tool:'spawn_agent',sender:'root',receivers:[id],states:{[id]:{status}}});
+ for(const id of ['a','b']){assert.equal(withinNativeChildBudget(event(id),seen,2),true);recordNativeAgents(j,j.steps[0],event(id));}
+ recordNativeAgents(j,j.steps[0],event('a','completed'));assert.equal(withinNativeChildBudget(event('a','completed'),seen,2),true);assert.equal(withinNativeChildBudget(event('c'),seen,2),false);recordNativeAgents(j,j.steps[0],event('c'));assert.equal(j.nativeAgentRuns!.length,2);assert.equal(j.nativeAgentRuns![0].status,'done');
 });

@@ -136,3 +136,17 @@ From a source checkout, run `npm run demo` and open the printed localhost URL. T
 The browser walkthrough has **More → Theme** (dark, light or system), synchronized across its panes. Its embedded layout uses one owner composer above the panes; a standalone Live window keeps its own input. Large maps focus on readable cards; use Fit for the whole graph. **Detach Live** and **Detach Map** sit directly above their panes. They open the selected session in a separate browser window (or tab, depending on the browser). If popups are blocked, use the fallback link. Hide a pane with × and restore it with Both panes / Map / Live. **More** contains theme and report download. The **Folders** button shows the effective folder, original folder/worktree and saved permission policy; the browser is observation only. To follow an independently running read-only CLI job, pass `--live-recording path.json`: this is an observer and cannot stop or answer the runner. The source file is never executed or modified by that observer.
 
 In VS Code, expand **Folders & permissions** in any Live session. **Show folder in Explorer** reveals that task’s effective folder. **New task / folders** opens the team composer with the multi-folder section expanded; use **Choose more folders**, check folders and choose permissions before sending. This prepares a new task and preserves the current session’s scope and any composer draft.
+
+### Map direction and native child visibility (preview.5)
+
+In Canvas, use **Arrange → Automatic layout / Horizontal / Vertical**. The selection belongs to the current session. Changing direction rearranges its cards; incoming activity preserves your dragged positions. Arrows follow both recorded execution prerequisites and the actual parent. Drag a card, use Alt+arrows, or use Fit to see the whole graph.
+
+Some Codex CLI versions persist child activity without emitting collaboration items in exec JSON. Authorized native-child runs also poll the recorded thread through read-only `thread/read`, without resuming it or starting a turn. Only observed child IDs, lifecycle, model/effort and public assignment/answer are displayed. Reasoning is discarded, and unavailable child data remains unavailable. This applies only to the separately enabled native-child run and its configured child ceiling. [Official read-only thread API](https://learn.chatgpt.com/docs/app-server#read-a-stored-thread-without-resuming).
+
+### Understand a run and inspect live output
+
+**Execution journey** in Live shows the recorded steps and handoffs. Double-click an agent in Canvas, List, Table or Dependencies to open updating details. **What is happening** shows its assignment, real workspace, latest public progress, referenced files and recorded commands. Mentioning a path does not prove an edit; use **Changed files** for Git-observed changes.
+
+The popup keeps your tab, scroll and expanded reports during snapshots. **Pause view** freezes this observer only; the task continues. **Resume view** loads the latest data. **Result / Input / Activity** separate the answer, exact assignment and public progress/tools. Native child detail availability depends on what the CLI records. Private reasoning is never displayed.
+
+Code blocks have language/file captions, line numbers and a copy button that excludes line numbers. Long reports expand with **Read the full report**; audit findings and decisions have their own presentation. Original CLI responses and downloaded reports remain unchanged.

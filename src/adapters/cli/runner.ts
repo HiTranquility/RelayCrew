@@ -1,5 +1,6 @@
 import {secretEvents} from '../../core/stream-redaction';
-import {nativeAgentEvent} from '../../core/native-agents';
+import {nativeAgentEvent,withinNativeChildBudget} from '../../core/native-agents';
+import {CodexChildObserver} from './codex-children';
 import { assertAntigravityReadOnly } from './antigravity';
 import spawn from 'cross-spawn';
 import { execFile } from 'node:child_process';
@@ -139,6 +140,7 @@ export async function execute(o: ExecuteOptions): Promise<string> {
   const output = join(temp, 'final.txt');
   const secretList = Object.values(o.secretValues);
   const clean = (s: string) => redact(s, secretList);
+  let childObserver:CodexChildObserver|undefined;
   try {
     const command = await attachmentInvocation(o.profile,o.prompt,o.edits,output,temp,o.attachments??[],o.permission);
     if(o.nativeAgentLimit!==undefined){
@@ -153,11 +155,15 @@ export async function execute(o: ExecuteOptions): Promise<string> {
       let out = '', err = '', stopReason = '', stopping: Promise<void> | undefined;
       let pendingLine = '';
       const publicEvent=publicEventStream(),safeEvents=secretEvents(secretList,e=>o.onEvent?.({...e,text:e.text.slice(0,e.kind==='native_agent'?100000:3000)}));
+      const childIds=new Set<string>();let budgetExceeded=false;
+      const forward=(event:{kind:string;text:string})=>{if(o.nativeAgentLimit&&(event.kind==='native_agent_limit'||event.kind==='native_agent'&&!withinNativeChildBudget(event.text,childIds,o.nativeAgentLimit))){if(!budgetExceeded){budgetExceeded=true;safeEvents.write({kind:'error',text:'Native Codex child budget exceeded; stopping this CLI run.'});}stop('Native Codex child budget exceeded ('+o.nativeAgentLimit+'). Inspect the recorded work before starting another task.');return;}safeEvents.write(event);};
+      if(o.nativeAgentLimit)childObserver=new CodexChildObserver(o.profile,o.nativeAgentLimit,o.signal,forward);
       const outDecoder = new StringDecoder('utf8'), errDecoder = new StringDecoder('utf8');
       const eventLine = (line: string) => {
         try {
-          const event = publicEvent(JSON.parse(line));
-          if (event?.text) safeEvents.write({kind:event.kind,text:event.text});
+          const raw=JSON.parse(line);if(raw.type==='thread.started')childObserver?.start(raw.thread_id);
+          const event = publicEvent(raw);
+          if (event?.text) forward({kind:event.kind,text:event.text});
         } catch { /* non-JSON diagnostic line remains in sanitized final log */ }
       };
       const stop = (reason: string) => {
@@ -189,6 +195,7 @@ export async function execute(o: ExecuteOptions): Promise<string> {
       child.on('close', async code => {
         cleanup();
         await stopping;
+        await childObserver?.finish();
         out += outDecoder.end(); err += errDecoder.end();
         if (pendingLine) eventLine(pendingLine);safeEvents.finish();
         // Redact complete buffers, so a secret split across output chunks is still masked.

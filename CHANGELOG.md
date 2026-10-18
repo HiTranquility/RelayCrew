@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.0.2-preview.5 — Unreleased
+
+- Live execution journey and per-agent public activity show the recorded stage, workspace, mentioned files, latest progress and commands without attributing unobserved file edits.
+- Double-click details refresh during execution while preserving tabs, scroll and expanded reports. Pause view freezes only the observer, then catches up on resume.
+- Escaped Markdown code fences (including partial streams), language/file captions, line numbers, syntax accents, exact code copy, tables and expandable long reports; structured findings and decisions are separated from raw JSON.
+- Refresh public child progress throughout native runs. Count unique children across both live/history sources, stop a run when reported children exceed its budget and apply the saved ceiling to displayed records.
+
+- Per-session automatic, horizontal and vertical agent layouts with direction-aware arrows. Respect execution dependencies and actual parent ownership; preserve dragged positions and view preferences across live updates/reopening. Changing direction explicitly rearranges the selected session.
+- Read native Codex child lifecycle metadata from the authorized exec thread when newer CLI versions persist subAgentActivity without streaming collaboration items. Poll only read-only thread/read; emit observed child IDs, names, models and public assignment/results. Never resume a thread or expose reasoning.
+- Clear blocked-popup fallback links when switching sessions so a link cannot silently keep pointing to the preceding task.
+
 ## 1.0.2-preview.4 — Unreleased
 
 - Put detach/hide controls directly on both browser observer panes, with a session-bound separate window and a fallback link when popups are blocked. Closing an observer preserves execution and other drafts.

@@ -5,7 +5,7 @@ import type {Profile} from '../../core/domain';
 import {version} from '../../../package.json';
 
 /** A short-lived, read-only connection. Never starts a turn or changes authentication. */
-export async function codexRead(profile:Profile,env:Record<string,string>,requests:{method:'model/list'|'account/read'|'account/rateLimits/read';params:unknown;optional?:boolean}[],signal=new AbortController().signal):Promise<unknown[]> {
+export async function codexRead(profile:Profile,env:Record<string,string>,requests:{method:'model/list'|'account/read'|'account/rateLimits/read'|'thread/read';params:unknown;optional?:boolean}[],signal=new AbortController().signal):Promise<unknown[]> {
  if(signal.aborted)throw new Error('Cancelled.');
  return new Promise((resolve,reject)=>{
   const child=spawn(profile.executable,['app-server'],{cwd:homedir(),windowsHide:true,env:{...process.env,...profile.env,...env},stdio:['pipe','pipe','pipe']});

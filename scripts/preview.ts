@@ -22,7 +22,7 @@ const roles={builder:'codex-dev',auditor:'claude-support',worker:'gemini-worker'
 const management={primaryProfileId:'claude-manager',coordinatorIds:['claude-support']};
 const job=newJob('Add bounded API retries and report the result to the owner','/demo/relay-app',roles,undefined,{},management);
 job.status='running';job.steps=[
-  {role:'builder',title:'Implement',prompt:'Implement bounded retries with tests.',profileId:'codex-dev',model:'configured-dev-model',effort:'medium',status:'done',response:'Added bounded retries and timeout coverage. Tests passed.'},
+  {role:'builder',title:'Implement',prompt:'Implement bounded retries with tests.',profileId:'codex-dev',model:'configured-dev-model',effort:'medium',status:'done',response:'Added bounded retries and timeout coverage. Tests passed.\n\n```ts src/retry.ts\nexport const maxRetries = 3;\n  // PUBLIC PREVIEW FIXTURE ONLY\n```'},
   {role:'auditor',title:'Audit / create issues',prompt:'Audit the implementation and return evidence.',profileId:'claude-support',model:'configured-review-model',status:'running',startedAt:new Date(Date.now()-82_000).toISOString(),phase:'cli',timeoutAt:new Date(Date.now()+25*60_000).toISOString()},
   {role:'lead',coordinatorProfileId:'claude-support',title:'Coordinator report',prompt:'Report findings to the primary manager.',status:'pending'},
   {role:'lead',title:'Tech lead decision',prompt:'Review the evidence and decide.',status:'pending'}
