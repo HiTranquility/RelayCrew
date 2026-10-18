@@ -7,6 +7,7 @@ interface Entry {path:string;category:string;bytes:number;modified:number}
 export interface StoragePreview {token:string;options:RetentionOptions;entries:Entry[];totalBytes:number;reclaimBytes:number;expiresAt:number}
 interface References {attachments:Set<string>;jobs:Set<string>}
 const uuid='[a-f0-9-]{36}', backupPattern=/^\d+-[a-f0-9-]+\.json$/;
+const samePath=(a:string,b:string)=>process.platform==='win32'?resolve(a).toLowerCase()===resolve(b).toLowerCase():resolve(a)===resolve(b);
 
 /** Retention is confined to disposable files in this workspace's extension storage. */
 export class StorageMaintenance {
@@ -16,7 +17,7 @@ export class StorageMaintenance {
     const directory=join(this.root,folder);
     try {
       const info=await lstat(directory);
-      if(info.isSymbolicLink()||!info.isDirectory()||resolve(await realpath(directory))!==resolve(directory))return [];
+      if(info.isSymbolicLink()||!info.isDirectory()||!samePath(await realpath(directory),directory))return [];
       const entries:Entry[]=[];
       for(const name of await readdir(directory)){
         const file=join(directory,name),metadata=await lstat(file);
@@ -27,6 +28,9 @@ export class StorageMaintenance {
   }
   async preview(options:RetentionOptions,refs:References,now=Date.now()):Promise<StoragePreview> {
     if(!Number.isInteger(options.keepBackups)||options.keepBackups<5||options.keepBackups>50||!Number.isInteger(options.orphanDays)||options.orphanDays<7||options.orphanDays>365)throw new Error('Keep 5–50 state backups and use an orphan age of 7–365 days.');
+    // Windows TEMP can use an 8.3 alias (RUNNER~1). Canonicalize the trusted
+    // storage root first, then continue rejecting linked child directories.
+    this.root=resolve(await realpath(this.root));
     const [backups,attachments,reports,temporary]=await Promise.all([this.files('state.json.backups'),this.files('attachments'),this.files('reports'),this.files('')]);
     const cutoff=now-options.orphanDays*86400000;
     const oldBackups=backups.filter(e=>backupPattern.test(e.path.split('/').at(-1)!)).sort((a,b)=>b.path.localeCompare(a.path)).slice(options.keepBackups).filter(e=>e.modified<cutoff);
@@ -53,7 +57,7 @@ export class StorageMaintenance {
       if(!latest||latest.bytes!==entry.bytes||latest.modified!==entry.modified){skipped++;continue;}
       const file=resolve(this.root,entry.path);
       if(!file.startsWith(this.root+'/')&&!file.startsWith(this.root+'\\'))throw new Error('Invalid retention path.');
-      if(resolve(await realpath(dirname(file)))!==resolve(dirname(file)))throw new Error('Linked storage directory is protected.');
+      if(!samePath(await realpath(dirname(file)),dirname(file)))throw new Error('Linked storage directory is protected.');
       try{const metadata=await lstat(file);if(!metadata.isFile()||metadata.isSymbolicLink()||metadata.size!==entry.bytes||metadata.mtimeMs!==entry.modified){skipped++;continue;}await unlink(file);removed++;bytes+=entry.bytes;}
       catch(error:any){if(error.code==='ENOENT'){skipped++;continue;}throw error;}
     }

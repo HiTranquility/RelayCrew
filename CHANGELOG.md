@@ -7,6 +7,7 @@
 - Account cards distinguish configuration, installed connection, fresh verification and unknown/stale quota; native shared-login limitations remain explicit.
 - Interrupted hosts pause queue, daily and backlog dispatch. Explicit inspected retry preserves completed work, permissions and saved review/provider retry budgets.
 - Portable public session JSON export and richer Markdown evidence reports; exclude account configuration, internal fingerprints and private reasoning.
+- Canonicalize trusted Windows storage roots (including 8.3 aliases and casing) while rejecting linked child directories; validate dialog closure after its actual event.
 - Workspace-local storage inspection and expiring confirmed retention previews; preserve referenced data, current state, source snapshots, secrets and repository files.
 - Updated current-behavior/support matrix, bilingual guides and release-readiness regression checks. Includes the previously unreleased interactive observer, layout, child metadata and report-formatting improvements below.
 

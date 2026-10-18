@@ -13,7 +13,7 @@ test('retention previews exact candidates and preserves referenced, recent and p
     await put('state.json');await put('source-backups/keep.txt');
     for(const uid of [id,kept]){await put(`attachments/${uid}.data`);await put(`attachments/${uid}.json`);await put(`reports/${uid}.md`);}
     for(let i=0;i<7;i++)await put(`state.json.backups/${now-i}-${id}.json`);
-    const refs={attachments:new Set([kept]),jobs:new Set([kept])},store=new StorageMaintenance(root),plan=await store.preview({keepBackups:5,orphanDays:30},refs,now);
+    const refs={attachments:new Set([kept]),jobs:new Set([kept])},store=new StorageMaintenance(process.platform==='win32'?root.toUpperCase():root),plan=await store.preview({keepBackups:5,orphanDays:30},refs,now);
     assert.equal(plan.entries.length,5);assert.ok(!plan.entries.some(e=>e.path.includes(kept)||e.path==='state.json'||e.path.startsWith('source-backups')));
     await assert.rejects(store.apply(plan.token,refs,false,false,now),/Pause/);
     await assert.rejects(store.apply(plan.token,refs,true,true,now),/Pause/);

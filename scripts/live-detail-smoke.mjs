@@ -17,7 +17,7 @@ try{for(const language of ['en','vi']){
  await snapshot('PUBLIC UPDATE ONE · reading src/demo.ts');await popup.locator('[data-inspector-pane=events] [data-test-progress]').filter({hasText:'UPDATE ONE'}).waitFor();assert.equal(await popup.locator('[data-map-tab=events]').getAttribute('aria-pressed'),'true');assert.ok(Math.abs((await body.evaluate(el=>el.scrollTop))-scroll)<10);
  await popup.locator('[data-popup-freeze]').click();await snapshot('PUBLIC UPDATE TWO · command completed');assert.equal(await popup.locator('[data-inspector-pane=events] [data-test-progress]').innerText(),'PUBLIC UPDATE ONE · reading src/demo.ts');
  await popup.locator('[data-popup-freeze]').click();await popup.locator('[data-inspector-pane=events] [data-test-progress]').filter({hasText:'UPDATE TWO'}).waitFor();
- assert.match(await popup.locator('.popup-live-label').innerText(),/Live/);await popup.locator('[data-popup-close]').click();assert.equal(await popup.count(),0);
+ assert.match(await popup.locator('.popup-live-label').innerText(),/Live/);await popup.locator('[data-popup-close]').click();await popup.waitFor({state:'detached'});assert.equal(await popup.count(),0);
  await page.goto(pathToFileURL(resolve('docs/previews','live-session'+(language==='vi'?'.vi':'')+'.html')).href);assert.equal(await page.locator('.execution-journey').isVisible(),true);assert.ok(await page.locator('.execution-journey li').count()>=3);
  assert.deepEqual(errors,[]);console.log(language+': live popup refresh, tab/scroll preservation, pause/resume view, exact code copying and recorded execution journey passed.');await context.close();
 }}finally{await browser.close();}
