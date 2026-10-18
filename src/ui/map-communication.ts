@@ -7,7 +7,7 @@ import type {AgentNode} from './agent-map';
 export function mapCommunication(job:Job,nodes:AgentNode[],language:Language):string{
  const t=translator(language),tr=(s:string)=>h(t(s));
  const roleName=(n:AgentNode)=>agentRoleName(job,n,language);
- const actor=(address:string,at:string)=>{const matches=nodes.filter(n=>address===n.role+':'+n.profileId||address===n.role),node=matches.find(n=>n.step?.startedAt&&n.step.startedAt<=at&&(!n.step.finishedAt||n.step.finishedAt>=at))??matches.at(-1);return {node,label:node?roleName(node):address==='owner'?t('You'):/observer/.test(address)?t('Observer'):/orchestrator/.test(address)?'RelayCrew':address.slice(0,80)};};
+ const actor=(address:string,at:string)=>{const matches=nodes.filter(n=>address===n.key||address===n.role+':'+n.profileId||address===n.role),node=matches.find(n=>n.step?.startedAt&&n.step.startedAt<=at&&(!n.step.finishedAt||n.step.finishedAt>=at))??matches.at(-1);return {node,label:node?roleName(node):address==='owner'?t('You'):/observer/.test(address)?t('Observer'):/orchestrator/.test(address)?'RelayCrew':address.slice(0,80)};};
  const publicKinds=new Set(['assignment','response','stream','tool','task','owner_reply','question','handoff']),events=(job.timeline??[]).filter(e=>publicKinds.has(e.kind)).slice(-30),latest=events.at(-1),handoffs=events.filter(e=>!['tool','stream'].includes(e.kind)).slice(-6);
  if(!latest)return `<div class="agent-exchange is-empty">${tr('No public exchanges recorded yet.')}</div>`;
  const kind=(value:string)=>t(value==='handoff'?'Handoff':value==='assignment'?'Assignment':value==='response'?'Result':value==='tool'?'Tool activity':value==='stream'?'Public output':value==='owner_reply'?'Owner reply':value==='question'?'Question for you':'Owner task');

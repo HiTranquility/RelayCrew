@@ -2,7 +2,7 @@ import type {Job,Step} from './domain';
 
 export interface NativeAgent {
  id:string;parentId?:string;stepIndex:number;profileId:string;name:string;
- status:'running'|'done'|'failed'|'interrupted';assignment:string;response?:string;
+ status:'running'|'waiting_owner'|'done'|'failed'|'interrupted';assignment:string;response?:string;
  model?:string;effort?:string;startedAt:string;updatedAt:string;
 }
 export interface NativeAgentEvent {tool:string;sender:string;receivers:string[];prompt?:string;model?:string;effort?:string;states:Record<string,{status:string;message?:string}>}
@@ -35,7 +35,7 @@ export function recordNativeAgents(job:Job,step:Step,text:string,at=new Date().t
   if(event.model)agent.model=event.model;if(event.effort)agent.effort=event.effort;
   const state=event.states[id];
   if(state?.message)agent.response=state.message.slice(0,6000);
-  if(state){const status=state.status.toLowerCase();agent.status=/completed|done/.test(status)?'done':/error|failed|not_?found/.test(status)?'failed':/shutdown|closed|interrupted/.test(status)?agent.status==='done'?'done':'interrupted':'running';}
+  if(state){const status=state.status.toLowerCase();agent.status=/completed|done/.test(status)?'done':/waiting_owner|awaiting_input/.test(status)?'waiting_owner':/error|failed|not_?found/.test(status)?'failed':/shutdown|closed|interrupted/.test(status)?agent.status==='done'?'done':'interrupted':'running';}
   agent.updatedAt=at;changed=true;
  }
  return changed;

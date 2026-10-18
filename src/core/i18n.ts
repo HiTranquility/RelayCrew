@@ -10,6 +10,8 @@ export function resolveLanguage(preference: unknown, displayLanguage = 'en'): La
 // English source messages are the fallback. Translate presentation, never stored
 // status codes, model IDs, account labels, prompts or provider responses.
 export const vietnamese: Record<string, string> = {
+  "Simulated child agents":"Nhánh con giả lập",
+  "Illustrative children only: no CLI call or code validation occurred.":"Đây là các nhánh minh họa; không gọi CLI, đọc code hay xác minh thật.",
   "Configure round limit":"Thiết lập trần số vòng",
   "Primary decision maker":"Manager quyết định chính",
   "Supporting manager":"Manager hỗ trợ",

@@ -2,7 +2,7 @@
   "name": "ai-team-workbench",
   "displayName": "RelayCrew",
   "description": "%description%",
-  "version": "1.0.2-preview.1",
+  "version": "1.0.2-preview.2",
   "publisher": "local-ai-team",
   "license": "MIT",
   "engines": {
@@ -30,6 +30,8 @@
     "vscode:prepublish": "npm run check && npm run build",
     "package": "node scripts/package.mjs",
     "preview": "tsx scripts/preview.ts",
+    "demo": "tsx scripts/demo-observer.ts",
+    "test:demo": "node scripts/demo-observer-smoke.mjs",
     "releases:verify": "node scripts/releases.mjs verify",
     "release:stage": "node scripts/releases.mjs stage",
     "test:interactions": "node scripts/interaction-smoke.mjs",

@@ -49,6 +49,7 @@ export class Engine {
       for (const job of this.jobs) {
         if (this.stopped || this.hooks.canRun?.() === false) break;
         if (job.status !== 'queued') continue;
+        if (job.simulation) continue;
         if (this.hooks.canRun?.(job) === false) continue;
         if(needsDecisionPolicy(job)){job.decisionPolicyPending=true;job.status='waiting_owner';job.ownerQuestion='Choose how this manager team makes its decision before any model call.';await this.hooks.save();this.hooks.changed();continue;}
         this.active = job;

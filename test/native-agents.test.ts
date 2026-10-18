@@ -23,3 +23,7 @@ test('failed or unreported child completion is not presented as successful',()=>
  const j=job();recordNativeAgents(j,j.steps[0],JSON.stringify({tool:'spawn_agent',sender:'root',receivers:['a'],states:{a:{status:'running'}}}));j.steps[0].status='done';assert.match(nativeAgentsPanel(j,'en'),/Final status not reported/);assert.equal(agentNodes(j).find(n=>n.native)?.status,'interrupted');
  assert.equal(nativeAgentEvent({type:'reasoning',text:'private'}),undefined);assert.equal(recordNativeAgents(j,j.steps[0],'broken'),false);
 });
+
+test('an explicitly reported child question remains waiting for the owner under its actual parent',()=>{
+ const j=job(),step=j.steps[0];recordNativeAgents(j,step,JSON.stringify({tool:'wait',sender:'root',receivers:['child-question'],states:{'child-question':{status:'awaiting_input',message:'Choose the bounded scope.'}}}));step.status='waiting_owner';j.status='waiting_owner';const child=agentNodes(j).find(n=>n.native)!;assert.equal(child.status,'waiting_owner');assert.equal(child.parentKey,'builder:primary:0');assert.match(nativeAgentsPanel(j,'en'),/Waiting for your reply/);assert.doesNotMatch(nativeAgentsPanel(j,'en'),/Final status not reported/);
+});

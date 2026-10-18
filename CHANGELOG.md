@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.2-preview.2 — Unreleased
+
+- Interactive, token-free browser walkthrough: 2–6 sequential Executors, bounded illustrative children, parent/child handoffs and a blocking owner question. Pause, step, stop, configure and reply from either input.
+- Layout the actual Executor ownership tree without overlapping nested children; preserve child identity in exchanges and isolate activity to its agent/step.
+- Responsive demo panes with a draggable/keyboard divider, separate views, working report/copy controls and explicit simulation versus finished CLI recording labels. VS Code-only actions are hidden or adapted in the browser.
+- Reject simulation jobs at the execution-engine boundary so a queued walkthrough cannot start providers.
+
 ## 1.0.2-preview.1 — Unreleased
 
 - Visible primary-manager promotion and supporting-manager votes in Setup and the map editor; keep provider defaults distinct from role assignments.
