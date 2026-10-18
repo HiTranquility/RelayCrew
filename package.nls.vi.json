@@ -75,5 +75,7 @@
   "setting.completionNotifications": "Thông báo hoàn tất: từng bước và flow, chỉ toàn bộ flow, hoặc chỉ lưu lịch sử không bật thông báo hoàn tất.",
   "command.changedFiles": "RelayCrew: Mở file thay đổi trong phiên",
   "profile.preferred": "Ưu tiên tài khoản này khi tạo đội theo nhà cung cấp. Không đổi phân công của task đã có.",
-  "command.liveSession": "RelayCrew: Mở Live session trong tab riêng"
+  "command.liveSession": "RelayCrew: Mở Live session trong tab riêng",
+  "profile.accountEmail": "Email tài khoản do bạn khai báo. Nhãn này chưa đăng nhập hoặc đổi phiên ở nhà cung cấp.",
+  "profile.fallbackEligible": "Xét profile này làm dự phòng tự động. Cần kho đăng nhập riêng và quota mới còn khả năng sử dụng."
 }

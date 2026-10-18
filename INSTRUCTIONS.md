@@ -2,13 +2,27 @@
 
 [Tiếng Việt](INSTRUCTIONS.vi.md) · [Overview](README.md)
 
-Instructions for RelayCrew 1.0. Older packages may not contain every control below.
+Instructions for RelayCrew 1.0.1. Older packages may not contain every control below.
+
+## prepare before Live
+
+Open **Prepare a run** and follow four steps: **Accounts & models → Roles & delegation → Prompts & Markdown → Review & open live**. Save changes in each editor. The review shows saved assignments and warns about unsaved drafts. Markdown is optional: use built-in prompts, attach a role guide, or import a team workflow. Opening the composer never starts a task; press Send when ready.
+
+In Live, **Conversation**, **Agents & flow**, **Changed files** and **Technical activity** have independent visibility buttons. **×** hides one section; **Show all** restores it. **Minimize content** keeps the session header visible. Preferences survive incoming output and reopening the workspace. **Open live session tab** gives the session its own VS Code tab; drag it to another group/window or use **Move to new window**. **Close view** closes only that tab. Stop the task with **Stop task**.
+
+See [real subagent demo and map shortcuts](docs/NATIVE-AGENT-DEMO.md). Some CLI versions omit child identifiers; the observer explicitly reports this limitation and keeps the dispatcher report available in Conversation.
 
 ## 1. Connect your accounts
 
 Open **Accounts & quota**, add or edit a profile, then use **Install CLI**, **Sign in** and **Check connection** as needed. Installation checks the machine first and asks before installing. Complete provider login yourself in the terminal/browser. A successful connection does not guarantee access to every model.
 
 Keep credentials in the extension's secret controls, not in a prompt, Markdown file or committed settings. Cloud/local describes where a model runs; CLI/HTTP describes the connection. HTTP review needs supplied context and has no repository tools.
+
+### Multiple accounts and recovery
+
+In **Accounts & quota → Add multiple accounts**, enter one email per line. The first becomes preferred for new provider presets. Codex and Claude profiles receive separate login folders: sign in to each one. An email label is not a verified login. Antigravity Google profiles currently share the native CLI login; use the manual account login controls. See [Antigravity account limitations](docs/ANTIGRAVITY.md#multiple-google-accounts).
+
+**Fallback & recovery plan** shows the current account, backup eligibility and why an account cannot take over. You can exclude an account from fallback in its profile, restrict role pools, enable independent backup switching, or wait for a fresh quota observation. Retrying a provider-limited step requires its separate toggle because files may already have changed. Recovery preserves completed stages and retries the unfinished step in the existing session, with the same model/effort and permissions. It neither creates parallel work nor replays completed steps. Retry history appears in Live; three provider-limit attempts per step remain the ceiling. Manager/reviewer/daily seats need an explicit account switch.
 
 ## 2. Choose the work and the team
 
@@ -98,3 +112,8 @@ An AI direction can also propose up to three independent follow-ups. **Automatic
 In **Daily quota tasklist → Useful quota work and Markdown stop gates**, choose maintenance categories or copy a template into your tasklist. Import/edit [the stop-gates guide](examples/maintenance/STOP-GATES.md). Each enabled account/folder/category runs once per day at most, within quota, agent-run and time limits. Unknown quota blocks dispatch. Architecture, product, security or publishing decisions wait for you; only unrelated useful work may continue. No finite backlog guarantees exhausting every token.
 
 New keyboard controls: **Alt+Shift+D** opens directions, **Alt+Shift+Q** focuses account capacity, **Alt+Shift+B** branches the selected session. **Ctrl+Enter** inside a direction chooses it; inside the branch editor it queues that branch. **Escape** closes those controls while preserving drafts. The ordinary composer retains its configurable Enter/Shift+Enter behavior. VS Code keybindings remain customizable.
+
+
+## account identity and native limits
+
+In **Accounts & quota**, the account list puts **Sign in**, **Check connection**, and **Usage & rate limits** beside each profile. The first board opening checks installed native CLIs in the background; Check connection retries on demand. Checking reads account metadata without sending a model prompt. Role assignments, secrets and manual quota are under Roles & advanced account settings. Codex exposes the signed-in email/plan and quota windows through its app-server; these live windows also refresh the quota bar. Claude exposes the signed-in email/plan through `auth status`; native limits remain available in Claude Code `/usage`. Antigravity exposes model-group quota through `/usage`, but not the signed-in email: Google profiles share that reading, not independent quotas. Declared email mismatches cannot borrow another Codex account's quota. Percentages are not exact token balances; unknown stays unknown. Manual/file quota observations remain separately labeled.

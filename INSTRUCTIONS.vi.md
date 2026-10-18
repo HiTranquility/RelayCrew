@@ -2,13 +2,27 @@
 
 [English](INSTRUCTIONS.md) · [Tổng quan](README.vi.md)
 
-Hướng dẫn cho RelayCrew 1.0. Gói cũ có thể chưa có đủ các nút bên dưới.
+Hướng dẫn cho RelayCrew 1.0.1. Gói cũ có thể chưa có đủ các nút bên dưới.
+
+## thiết lập trước khi mở Live
+
+Vào **Chuẩn bị chạy**, đi theo bốn bước: **Tài khoản và mô hình → Phân vai và giao việc → Prompt và Markdown → Kiểm tra và mở Live**. Lưu ở từng trình chỉnh sửa. Bước kiểm tra hiện nhóm đã lưu và nhắc nếu còn bản nháp. Markdown không bắt buộc: dùng prompt mẫu, thêm hướng dẫn từng vai trò hoặc nhập quy trình cả nhóm. Mở ô nhập chưa chạy nhiệm vụ; bạn bấm Gửi khi sẵn sàng.
+
+Trong Live, **Hội thoại**, **Agents và luồng chạy**, **File thay đổi**, **Nhật ký kỹ thuật** có nút bật/tắt riêng. **×** ẩn một phần; **Hiện tất cả** khôi phục. **Thu gọn nội dung** giữ lại tiêu đề phiên. Bố cục được giữ khi có dữ liệu mới hoặc mở lại workspace. **Mở tab phiên trực tiếp** tách phiên thành tab VS Code; kéo sang nhóm/cửa sổ khác hoặc dùng **Chuyển sang cửa sổ mới**. **Đóng cửa sổ** chỉ đóng tab quan sát; dùng **Dừng tác vụ** nếu muốn dừng agent.
+
+Xem [demo agent con thật và phím tắt sơ đồ](docs/NATIVE-AGENT-DEMO.md). Một số CLI không gửi mã agent con; giao diện ghi rõ giới hạn này và giữ báo cáo của Dispatcher trong Hội thoại.
 
 ## 1. Kết nối tài khoản
 
 Vào **Tài khoản & hạn mức**, thêm hoặc sửa profile rồi dùng **Cài CLI**, **Đăng nhập**, **Kiểm tra kết nối** khi cần. Extension kiểm tra CLI đã có trên máy và hỏi trước khi cài. Bạn tự hoàn tất đăng nhập ở terminal/trình duyệt. Kết nối thành công chưa đồng nghĩa tài khoản dùng được mọi model.
 
 Nhập khóa ở phần secret của extension; đừng bỏ vào prompt, file Markdown hoặc settings đem lên Git. Cloud/local là nơi model chạy; CLI/HTTP là cách kết nối. Review qua HTTP cần bạn cung cấp ngữ cảnh và không có công cụ đọc repo.
+
+### Nhiều tài khoản và khôi phục
+
+Vào **Tài khoản và quota → Thêm nhiều tài khoản**, mỗi dòng một email. Email đầu được ưu tiên cho mẫu mới. Profile Codex/Claude có thư mục đăng nhập riêng: đăng nhập từng profile. Email mới nhập chưa phải danh tính đã xác minh. Các profile Google Antigravity hiện dùng chung phiên CLI; tự đổi đăng nhập qua nút mở CLI. Xem [giới hạn tài khoản Antigravity](docs/ANTIGRAVITY.md#multiple-google-accounts).
+
+**Kế hoạch dự phòng và khôi phục** cho biết tài khoản hiện tại, ai được nhận bước tiếp theo và lý do tài khoản nào chưa đủ điều kiện. Có thể loại tài khoản khỏi dự phòng, chọn nhóm theo vai trò, bật tự chuyển sang đăng nhập độc lập hoặc chờ quota mới. Thử lại bước bị nhà cung cấp giới hạn cần bật riêng vì file có thể đã thay đổi. Khôi phục giữ các bước hoàn tất, chỉ chạy lại bước dang dở trong phiên cũ với cùng model/suy luận và quyền; không tạo nhánh chạy trùng. Lịch sử đổi tài khoản hiện trong Live, tối đa ba lượt bị giới hạn cho mỗi bước. Vai trò quản lý/kiểm định/daily cần đổi tài khoản chủ động.
 
 ## 2. Chọn việc và thiết lập đội
 
@@ -98,3 +112,8 @@ AI có thể đề xuất tối đa ba việc tiếp nối độc lập cho mộ
 Trong **Daily quota tasklist → Tận dụng quota hữu ích và chốt dừng Markdown**, chọn nhóm bảo trì hoặc đưa mẫu vào tasklist. Nhập/sửa [hướng dẫn chốt dừng](examples/maintenance/STOP-GATES.vi.md). Mỗi tổ hợp tài khoản/folder/nhóm việc chạy tối đa một lần trong ngày, trong trần quota, lượt gọi và thời gian. Thiếu quota sẽ chờ. Quyết định sản phẩm, kiến trúc, bảo mật hay đăng tải cần bạn trả lời; chỉ việc hữu ích độc lập mới tiếp tục. Backlog hữu hạn không bảo đảm dùng hết mọi token.
 
 Phím mới: **Alt+Shift+D** mở phương hướng; **Alt+Shift+Q** xem tài khoản/hạn mức; **Alt+Shift+B** rẽ phiên đang chọn. **Ctrl+Enter** trong trình sửa hướng dùng để chọn hướng, trong trình sửa nhánh dùng để tạo phiên. **Escape** đóng phần đó và giữ bản nháp. Ô nhập chính giữ lựa chọn Enter/Shift+Enter hiện có. Có thể tùy chỉnh phím ở VS Code.
+
+
+## danh tính và hạn mức thật
+
+Trong **Tài khoản & hạn mức**, danh sách có nút **Đăng nhập**, **Kiểm tra kết nối**, **Mức dùng và hạn mức** ngay cạnh từng profile. Lần mở bảng đầu tiên tự kiểm tra CLI nền; nút Kiểm tra kết nối cho phép thử lại. Đọc dữ liệu từ CLI, không gửi prompt gọi model. Phân vai, secret và quota thủ công nằm trong phần cài đặt tài khoản nâng cao. Codex trả email/gói và các kỳ quota qua app-server; số đo tự làm mới trên thanh hạn mức. Claude trả email/gói qua `auth status`; xem hạn mức bằng `/usage` trong Claude Code. Antigravity trả quota theo nhóm model qua `/usage`, chưa trả email đăng nhập: các profile Google dùng chung số đo, không có quota riêng đã xác minh. Nếu email tự khai báo khác email Codex đang đăng nhập thì không dùng quota đó để điều phối profile. Phần trăm chưa phải số token chính xác; chưa có dữ liệu vẫn ghi chưa rõ. Nguồn quota thủ công/file có nhãn riêng.

@@ -47,3 +47,5 @@ Read [user instructions](INSTRUCTIONS.md) first; keep the UI labels and guide co
 Model catalogs come from the connection, not a hard-coded latest-version list. Keep custom IDs optional and validate worker bounds before dispatch. Simulation must never call providers or produce real acceptance evidence. Persist new policy fields as optional for old jobs; snapshot them for new jobs. A Markdown guide supplies context, not extra permissions.
 
 Use fake transports for automated tests. Real CLI demos require explicit task scope and must be labelled as real quota-consuming runs. Keep preview captures, local CLI copies and demo results out of commits. Do not move an existing release tag to preview code.
+
+Native account metadata is allowlisted in `adapters/cli/account-data.ts`; Codex quota routing is composed in `adapters/quota/codex-source.ts`. Never copy auth files/keyring tokens or attribute one shared Google CLI login to several verified email accounts. CLI auth/usage reads must not start model turns. Theme polish belongs in `ui/release-styles.ts`; preserve keyboard focus, open sections and drafts during snapshots.

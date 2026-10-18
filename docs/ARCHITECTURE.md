@@ -80,7 +80,7 @@ VS Code references: [configuration scopes](https://code.visualstudio.com/api/ref
 
 ## 0.4 presentation and task policy
 
-`core/i18n.ts` translates presentation using English source keys and Vietnamese entries; stored status codes, prompts and model/profile IDs remain stable. Package NLS labels follow the VS Code display locale independently of the runtime preference. `ui/setup-panel.ts` emits a numeric allowlist validated in `core/settings.ts`; account setup uses native dialogs and SecretStorage.
+`core/i18n.ts` translates presentation using English source keys and Vietnamese entries; stored status codes, prompts and model/profile IDs remain stable. Package NLS labels follow the VS Code display locale independently of the runtime preference. `ui/setup-panel.ts` emits a numeric allowlist validated in `core/settings.ts`; account setup uses inline forms and SecretStorage.
 
 Management snapshots pin one primary account per task. Supporting coordinator steps carry their own account IDs and read-only roles; only the non-coordinator Lead step can finalize. Daily policy is pure in `core/daily-plan.ts`; `host/daily-controller.ts` supplies native dialogs and dispatch. Exclusions and fresh-quota gates apply before every daily call. Decision records persist with state. Maintenance is finite per account/category/day.
 
@@ -88,7 +88,7 @@ Management snapshots pin one primary account per task. Supporting coordinator st
 
 ## Real CLI setup, workflow documents and attachments (0.6)
 
-`local-cli.ts` discovers executables and checks versions without model calls. Native connection setup and inline Accounts forms save validated profiles. Role assignment changes future work; session switching retains completed account history. Login terminals use executable/argument arrays and per-profile environment rather than interpolated shell commands. Users complete authentication. Read-only connection trials run the normal engine with three bounded stages and no Repair.
+`local-cli.ts` discovers executables and checks versions without model calls. Guided preparation and inline Accounts forms save validated profiles. Read-only `codex-rpc.ts` connects briefly for catalogs, identity and rate limits; it never starts a model turn. `account-data.ts` normalizes only safe account fields and usage windows. Antigravity shared CLI quota is display-only until identity/model-group routing can be verified; aliases cannot supply separate independent fallback capacity. `codex-source.ts` rejects declared-email mismatches before quota enters routing. Role assignment changes future work; session switching retains completed account history. Login terminals use executable/argument arrays and per-profile environment rather than interpolated shell commands. Users complete authentication. Read-only connection trials run the normal engine with three bounded stages and no Repair.
 
 `core/workflow.ts` parses UTF-8 Markdown and an optional single version-1 relaycrew JSON block. It validates topology, existing profile references, model overrides and manager authority; it cannot import executable paths or secrets. The host previews and applies the configuration. New jobs snapshot guide text/hash, including daily work.
 

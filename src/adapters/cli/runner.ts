@@ -1,4 +1,5 @@
 import {secretEvents} from '../../core/stream-redaction';
+import {nativeAgentEvent} from '../../core/native-agents';
 import { assertAntigravityReadOnly } from './antigravity';
 import spawn from 'cross-spawn';
 import { execFile } from 'node:child_process';
@@ -64,6 +65,7 @@ export function providerLimited(stdout: string): boolean {
   });
 }
 export function liveEvent(e: any): { kind: string; text: string } | undefined {
+  const collaboration=nativeAgentEvent(e);if(collaboration)return collaboration;
   if(e.event==='step_update'){const s=e.step_update;if(s?.step_type==='agent_response'&&typeof s.text_delta==='string')return {kind:'assistant',text:s.text_delta};if(s?.step_type==='tool')return {kind:'tool',text:String(s.tool_name??'tool')+' · '+String(s.state??'')};}
   if (e.type === 'stream_event' && e.event?.delta?.type === 'text_delta') return { kind: 'assistant', text: String(e.event.delta.text) };
   if (e.type === 'message' && e.role === 'assistant' && typeof e.content === 'string') return { kind: 'assistant', text: e.content };
@@ -95,6 +97,7 @@ export function publicEventStream(): (event:any)=>ReturnType<typeof liveEvent> {
 }
 
 export interface ExecuteOptions {
+  nativeAgentLimit?:number;
   permission?:'read-only'|'auto'|'full';
   profile: Profile; prompt: string; cwd: string; edits: boolean; signal: AbortSignal;
   timeoutMs: number; secretValues: Record<string, string>; log: (s: string) => void;
@@ -138,6 +141,10 @@ export async function execute(o: ExecuteOptions): Promise<string> {
   const clean = (s: string) => redact(s, secretList);
   try {
     const command = await attachmentInvocation(o.profile,o.prompt,o.edits,output,temp,o.attachments??[],o.permission);
+    if(o.nativeAgentLimit!==undefined){
+      if(o.profile.provider!=='codex'||o.edits||!Number.isInteger(o.nativeAgentLimit)||o.nativeAgentLimit<1||o.nativeAgentLimit>4)throw new Error('Native agent demos require a read-only Codex CLI and 1–4 children.');
+      command.args.splice(1,0,'--enable','multi_agent','-c','agents.enabled=true','-c',`agents.max_concurrent_threads_per_session=${o.nativeAgentLimit}`);
+    }
     const stdout = await new Promise<string>((resolve, reject) => {
       const child = spawn(o.profile.executable, command.args, {
         cwd: o.cwd, env: { ...process.env, ...o.profile.env, ...o.secretValues },
@@ -145,7 +152,7 @@ export async function execute(o: ExecuteOptions): Promise<string> {
       });
       let out = '', err = '', stopReason = '', stopping: Promise<void> | undefined;
       let pendingLine = '';
-      const publicEvent=publicEventStream(),safeEvents=secretEvents(secretList,e=>o.onEvent?.({...e,text:e.text.slice(0,3000)}));
+      const publicEvent=publicEventStream(),safeEvents=secretEvents(secretList,e=>o.onEvent?.({...e,text:e.text.slice(0,e.kind==='native_agent'?100000:3000)}));
       const outDecoder = new StringDecoder('utf8'), errDecoder = new StringDecoder('utf8');
       const eventLine = (line: string) => {
         try {

@@ -26,6 +26,7 @@ function patchConsole(html){
  for(const d of document.querySelectorAll('#console-sessions details[data-detail]'))if(opened.has(d.dataset.detail))d.open=opened.get(d.dataset.detail);
  if(typeof patchAgentMap==='function')patchAgentMap(parsed);
  selectConsole(consoleSelected,consoleNew);
+ if(typeof applySessionViews==='function')applySessionViews();
  for(const item of sessionScroll){const panel=[...document.querySelectorAll('[data-session-panel]')].find(p=>p.dataset.sessionPanel===item.id);for(const position of item.panes){const el=panel?.querySelector(position.selector);if(el){el.scrollTop=position.top;el.scrollLeft=position.left;}}if(panel){panel.scrollTop=item.top;panel.scrollLeft=item.left;}}
  followConsole();for(const position of panes){const el=document.getElementById(position.id);el.scrollTop=position.top;el.scrollLeft=position.left;}window.scrollTo(0,outerScroll);
  consoleScrollFrame=requestAnimationFrame(()=>{consoleScrollRestoring=false;});

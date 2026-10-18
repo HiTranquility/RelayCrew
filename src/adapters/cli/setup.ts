@@ -2,8 +2,9 @@ import spawn from 'cross-spawn';
 import { homedir } from 'node:os';
 import type { Profile, Provider } from '../../core/domain';
 import { findLocalCli,cliVersion } from './local-cli';
+import {readAccountData,type AccountData} from './account-data';
 
-export interface CliStatus {models?:string[];installed:boolean;authenticated:'yes'|'no'|'unknown';executable?:string;version?:string;checkedAt:string;message:string}
+export interface CliStatus extends AccountData {models?:string[];installed:boolean;authenticated:'yes'|'no'|'unknown';executable?:string;version?:string;checkedAt:string;message:string}
 export function installPlan(provider:Provider,platform=process.platform):{command:string;docs:string} {
   if(provider==='compatible')throw new Error('HTTP profiles use an endpoint and optional API key, not a CLI installer.');
   if(provider==='antigravity')return {command:platform==='win32'?'irm https://antigravity.google/cli/install.ps1 | iex':'curl -fsSL https://antigravity.google/cli/install.sh | bash',docs:'https://www.antigravity.google/docs/install?tab=cli'};
@@ -25,5 +26,11 @@ export async function authStatus(profile:Profile,env:Record<string,string>):Prom
 export async function inspectCli(profile:Profile,env:Record<string,string>):Promise<CliStatus>{
   const checkedAt=new Date().toISOString(),executable=await findLocalCli(profile.provider,profile.executable);
   if(!executable)return {installed:false,authenticated:'unknown',checkedAt,message:'CLI not installed. Use Install CLI, then check again.'};
-  try{const version=await cliVersion(executable),authenticated=await authStatus({...profile,executable},env);return {installed:true,authenticated,executable,version,checkedAt,message:authenticated==='yes'?'CLI is installed and signed in.':authenticated==='no'?'CLI is installed. Sign in to continue.':'CLI is installed. Complete login, then run a read-only trial.'};}catch{return {installed:true,authenticated:'unknown',executable,checkedAt,message:'CLI check failed. Verify installation and executable path.'};}
+  // Version detection and account reads are independent; agy need not support --version.
+  const selected={...profile,executable};
+  const [versionResult,dataResult]=await Promise.allSettled([profile.provider==='antigravity'?Promise.resolve(undefined):cliVersion(executable),readAccountData(selected,env)]);
+  const version=versionResult.status==='fulfilled'?versionResult.value:undefined;
+  let data:AccountData=dataResult.status==='fulfilled'?dataResult.value:{authenticated:await authStatus(selected,env)};
+  const message=data.usage?.scope==='shared-cli'?'Native usage loaded. Signed-in email is not exposed by this CLI.':data.authenticated==='yes'?'CLI is installed and signed in.':data.authenticated==='no'?'CLI is installed. Sign in to continue.':'CLI is installed. Login identity and usage could not be verified.';
+  return {installed:true,...data,executable,version,checkedAt,message};
 }

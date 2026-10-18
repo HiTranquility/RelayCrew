@@ -1,0 +1,33 @@
+import assert from 'node:assert/strict';
+import {pathToFileURL} from 'node:url';
+import {resolve,isAbsolute} from 'node:path';
+const modulePath=process.env.RELAYCREW_PLAYWRIGHT_MODULE||'playwright';
+const {chromium}=await import(isAbsolute(modulePath)?pathToFileURL(modulePath).href:modulePath);
+const browser=await chromium.launch({headless:true,...(process.env.RELAYCREW_BROWSER_EXECUTABLE?{executablePath:process.env.RELAYCREW_BROWSER_EXECUTABLE}:{})});
+try{for(const language of ['en','vi']){
+ const context=await browser.newContext({viewport:{width:1440,height:1000}}),page=await context.newPage(),errors=[];
+ page.on('pageerror',e=>errors.push(e.message));
+ await page.goto(pathToFileURL(resolve('docs/previews',language==='en'?'board.html':'board.vi.html')).href);
+ await page.locator('[data-tab=console]').click();await page.locator('[data-tab=console]').click();await page.locator('[data-console-layout=sessions]').click();await page.locator('[data-console-view=map]').click();
+ const panel=page.locator('[data-map-session]:visible'),viewport=panel.locator('.agent-viewport'),stage=panel.locator('.agent-stage'),zoom=panel.locator('[data-canvas-zoom]');
+ await panel.locator('[data-canvas-mode=graph]').click();
+ await panel.locator('[data-canvas-action=expand]').click();await page.waitForTimeout(100);
+ assert.equal(await panel.evaluate(e=>e.classList.contains('is-map-expanded')),true);
+ const box=await panel.boundingBox();assert.ok(box.x<=1&&box.y<=1&&box.width>=1439&&box.height>=999,JSON.stringify(box));
+ assert.ok((await viewport.boundingBox()).height>450);
+ await viewport.focus();await page.keyboard.press('1');assert.equal(await zoom.textContent(),'100%');
+ await page.keyboard.press('+');assert.equal(await zoom.textContent(),'115%');
+ const before=await stage.evaluate(e=>e.style.transform);await page.keyboard.press('ArrowRight');assert.notEqual(await stage.evaluate(e=>e.style.transform),before);
+ await page.keyboard.press(']');assert.equal(await panel.locator('[data-map-node][aria-pressed=true]').count(),1);
+ const nodes=await panel.locator('[data-map-node]').count();assert.ok(nodes>1);
+ await page.evaluate(()=>window.dispatchEvent(new MessageEvent('message',{data:{type:'consoleSnapshot',html:document.documentElement.outerHTML}})));await page.waitForTimeout(80);
+ assert.equal(await panel.evaluate(e=>e.classList.contains('is-map-expanded')),true);assert.equal(await zoom.textContent(),'115%');
+ await viewport.focus();await page.keyboard.press('Escape');assert.equal(await panel.evaluate(e=>e.classList.contains('is-map-expanded')),false);
+ await viewport.focus();await page.keyboard.press('m');assert.equal(await panel.evaluate(e=>e.classList.contains('is-map-expanded')),true);
+ await page.keyboard.press('0');assert.ok(parseInt(await zoom.textContent())>=25);await page.keyboard.press('1');assert.equal(await zoom.textContent(),'100%');
+ const rect=await viewport.boundingBox();await page.mouse.move(rect.x+rect.width/2,rect.y+rect.height/2);await page.keyboard.down('Control');await page.mouse.wheel(0,-120);await page.keyboard.up('Control');await page.waitForTimeout(80);assert.ok(parseInt(await zoom.textContent())>100);
+ await viewport.focus();await page.keyboard.press('0');const card=panel.locator('[data-map-node="builder:primary:0"]');await card.dblclick();const popup=page.locator('dialog.agent-detail-popup');assert.equal(await popup.isVisible(),true);await popup.locator('[data-map-tab=request]').click();assert.equal(await popup.locator('[data-inspector-pane=request]').isVisible(),true);await page.keyboard.press('Escape');assert.equal(await popup.count(),0);
+ await panel.locator('[data-canvas-mode=table]').dblclick();assert.equal(await panel.evaluate(e=>e.classList.contains('is-map-expanded')),false);await panel.locator('[data-canvas-action=expand]').click();assert.equal(await panel.getAttribute('data-canvas-mode'),'table');assert.equal(await panel.locator('[data-alternate-view=table]').isVisible(),true);await page.keyboard.press('Escape');await panel.locator('[data-canvas-mode=graph]').click();await panel.locator('[data-canvas-action=expand]').click();
+ await page.screenshot({path:resolve('.ui-smoke',`canvas-navigation-${language}.png`)});
+ assert.deepEqual(errors,[]);console.log(language+': expanded viewport, zoom, pan, selection, live snapshot preservation, Escape and Ctrl+wheel passed');await context.close();
+}}finally{await browser.close();}

@@ -11,5 +11,5 @@ test('detached map keeps only window preferences and escapes provider/owner cont
 });
 test('detached canvas persists only bounded positions, view and inspector preferences',()=>{
  const raw={mode:'list',positions:{job:{dev:{x:Infinity,y:-100,env:{TOKEN:'secret'}}}},views:{job:{x:20000,y:-20000,scale:100}},tabs:{job:'request'},secret:'discard'};
- const clean=canvasPreferences(raw);assert.deepEqual(clean.positions.job.dev,{x:24,y:0});assert.deepEqual(clean.views.job,{x:10000,y:-10000,scale:1.75});assert.equal(clean.mode,'list');assert.equal(clean.tabs.job,'request');assert.ok(!JSON.stringify(clean).includes('secret'));assert.deepEqual(mapWindowState({selected:'job',canvas:raw}).canvas,clean);
+ const clean=canvasPreferences(raw);assert.deepEqual(clean.positions.job.dev,{x:24,y:0});assert.deepEqual(clean.views.job,{x:10000,y:-10000,scale:3});assert.equal(clean.mode,'list');assert.equal(clean.tabs.job,'request');assert.ok(!JSON.stringify(clean).includes('secret'));assert.deepEqual(mapWindowState({selected:'job',canvas:raw}).canvas,clean);
 });

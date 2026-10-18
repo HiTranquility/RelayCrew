@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.1 — 2026-10-18
+
+- Guided preparation before Live: connect accounts, assign roles, edit prompts/Markdown, review the saved team, then send.
+- Compact account list with adjacent login/test/usage controls; advanced roles, installation, secrets and manual quota expand on demand.
+- Theme-aware running/completed/attention/error accents, readable badge/warning text, responsive account rows and consistent detached Live/map surfaces.
+- Read native Codex identity/plan and quota/reset windows without a model turn; reject declared-email mismatches before routing. Claude reports verified identity/plan; Antigravity reports shared-login model-group quota without claiming verified Google emails or independent quotas.
+- Bulk account profiles, explicit preferred/fallback controls and bounded recovery using independent credential stores; preserve completed work, model policy and permissions.
+- Expand maps and all observation views; zoom to 300%, pan by keyboard, inspect agent details with double-click/Enter, retain view state during live updates, and group reported native Codex children under their actual parent.
+- Separate conversation, child-agent, file-change and technical sections in Live; movable/detached observers and preserved drafts/focus.
+- Validation: strict type checking, 175 automated tests, bilingual light/dark and narrow UI, preparation/live, account/recovery and expanded-canvas interaction checks. Account badge/warning text measured at least 4.5:1 in tested light/dark palettes. Real read-only account metadata/usage checks ran locally; no auth tokens or private preview artifacts are shipped.
+- Limits: Google CLI profiles still share one native login, Claude native quota is not collected headlessly, and child visibility depends on public CLI events. Worker dispatch remains sequential.
+
 ## 1.0.0 — 2026-10-17
 
 - AI proposes editable directions A/B/C with scope, implementation plan, file structure and acceptance; selection is snapshotted before execution.

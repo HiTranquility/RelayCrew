@@ -2,7 +2,7 @@
   "name": "ai-team-workbench",
   "displayName": "RelayCrew",
   "description": "%description%",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "publisher": "local-ai-team",
   "license": "MIT",
   "engines": {
@@ -420,6 +420,15 @@
               "preferred": {
                 "type": "boolean",
                 "description": "%profile.preferred%"
+              },
+              "accountEmail": {
+                "type": "string",
+                "description": "%profile.accountEmail%"
+              },
+              "fallbackEligible": {
+                "type": "boolean",
+                "default": true,
+                "description": "%profile.fallbackEligible%"
               }
             },
             "additionalProperties": false

@@ -25,7 +25,7 @@ test('provider flagship aliases update through the CLI and unresolved Codex cata
   const aborted=new AbortController();aborted.abort();await assert.rejects(resolveModel(profile,{},aborted.signal,load));
 });
 test('account quota ceilings bound manual routing, compatible fallback and explicit rotation pools',()=>{
-  const now=Date.now(),profiles=[{...profile,quotaCeiling:80},{...profile,id:'b',quotaCeiling:90}],quota=(usedPercent:number)=>({usedPercent,observedAt:new Date(now).toISOString(),source:'fixture'}),quotas={a:quota(81),b:quota(89)};
+  const now=Date.now(),profiles=[{...profile,quotaCeiling:80},{...profile,id:'b',quotaCeiling:90,env:{CODEX_HOME:'/accounts/b'}}],quota=(usedPercent:number)=>({usedPercent,observedAt:new Date(now).toISOString(),source:'fixture'}),quotas={a:quota(81),b:quota(89)};
   assert.throws(()=>routeProfile('a',profiles,quotas,false,95,now),QuotaWait);assert.equal(routeProfile('a',profiles,quotas,true,95,now).id,'b');assert.equal(rotateProfile(['a','b'],profiles,quotas,0,95,now).profile.id,'b');
   assert.throws(()=>rotateProfile(['a','b'],profiles,{...quotas,b:quota(90)},0,95,now),QuotaWait);
 });

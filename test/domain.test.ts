@@ -4,8 +4,8 @@ import { claimSchedule, fresh, nextCron, parseAudit, parseDecision, parseQuota, 
 import type { Profile, Schedule } from '../src/core/domain';
 const now = Date.parse('2026-10-16T00:00:00Z');
 const profiles: Profile[] = [
-  { id: 'a', label: 'A', provider: 'codex', executable: 'codex', model: 'requested-model' },
-  { id: 'b', label: 'B', provider: 'codex', executable: 'codex', model: 'requested-model' },
+  { id: 'a', label: 'A', provider: 'codex', executable: 'codex', env:{CODEX_HOME:'/accounts/a'}, model: 'requested-model' },
+  { id: 'b', label: 'B', provider: 'codex', executable: 'codex', env:{CODEX_HOME:'/accounts/b'}, model: 'requested-model' },
   { id: 'c', label: 'C', provider: 'claude', executable: 'claude' }
 ];
 const quota = (usedPercent: number) => ({ usedPercent, observedAt: new Date(now).toISOString(), source: 'test' });

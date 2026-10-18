@@ -11,14 +11,16 @@ Giao việc, chọn ai lập trình, lập kế hoạch, kiểm tra và quản l
 - **Giữ quyền điều khiển:** tạm dừng, trả lời câu hỏi, đổi tài khoản và đặt trần sử dụng. Theo dõi đầu việc và checklist nghiệm thu riêng.
 - **Sắp xếp công việc:** hẹn giờ, xử lý backlog hữu ích theo quota, chia thư mục dự án và kết nối nhắn tin khi cần.
 
+Bản **1.0.1** có hướng dẫn chuẩn bị trước khi chạy, danh sách tài khoản gọn với nút đăng nhập/kiểm tra/hạn mức ngay bên cạnh, màu trạng thái rõ hơn và sơ đồ agent có thể phóng lớn. Dữ liệu đăng nhập/quota được đọc từ CLI khi có hỗ trợ; các email Antigravity chưa phải những phiên đăng nhập độc lập đã xác minh.
+
 ## Dùng thử
 
 1. Cài file VSIX trong [Releases](https://github.com/HiTranquility/RelayCrew/releases), rồi mở project tin cậy trong VS Code.
-2. Vào **RelayCrew → Tài khoản & hạn mức**: thêm tài khoản, cài CLI còn thiếu, đăng nhập và kiểm tra kết nối.
-3. Vào **Console trực tiếp → Bản đồ agent → Chỉnh đội**: chọn mẫu, xem lại tài khoản và hướng dẫn, rồi lưu.
+2. Vào **RelayCrew → Chuẩn bị chạy**: kết nối tài khoản, phân vai, thêm Markdown nếu cần và kiểm tra kế hoạch đã lưu.
+3. Trong **Tài khoản & hạn mức**, dùng nút cạnh từng tài khoản để đăng nhập, kiểm tra kết nối và xem mức dùng/giờ reset khi CLI hỗ trợ.
 4. Gửi một nhiệm vụ nhỏ với tiêu chí hoàn thành rõ ràng. Bấm agent để xem công việc; dùng **Tạm dừng** khi cần.
 
-RelayCrew **1.0** có phương hướng AI để bạn sửa và chọn, thanh hạn mức thường trực, nhánh phiên có giới hạn, panel trực tiếp/bản đồ/file kéo được và chốt dừng Markdown cho việc hữu ích. **Giả lập luồng** không gọi model; đề xuất và demo thật có dùng quota.
+RelayCrew **1.0.1** có phương hướng AI để bạn sửa và chọn, thanh hạn mức thường trực, nhánh phiên có giới hạn, panel trực tiếp/bản đồ/file kéo được và chốt dừng Markdown cho việc hữu ích. **Giả lập luồng** không gọi model; đề xuất và demo thật có dùng quota.
 
 ## Tự thiết lập
 

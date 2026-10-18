@@ -1,3 +1,4 @@
+import {allowsFallback,independentLogin} from './account-identity';
 import type {DelegationPolicy} from './delegation';
 import type { PromptTemplateSnapshot } from './prompt-templates';
 import { CronExpressionParser } from 'cron-parser';
@@ -29,7 +30,7 @@ export function validateFlow(value: unknown): Role[] {
 }
 export interface Profile {
   id: string; label: string; provider: Provider; executable: string;
-  preferred?:boolean;
+  preferred?:boolean; accountEmail?:string; fallbackEligible?:boolean;
   hosting?: 'cloud' | 'local'; transport?: 'cli' | 'http'; endpoint?: string;
   modelPolicy?:'flagship'|'cli'|'custom'; quotaCeiling?:number;
   model?: string; effort?: string; env?: Record<string, string>; secretEnv?: string[]; quotaFile?: string;
@@ -68,6 +69,9 @@ export interface Step {
 }
 export interface ObservedFileChange {path:string;kind:'added'|'modified'|'deleted'|'renamed';at:string;stepIndex:number;reverted?:boolean;previousPath?:string;fingerprint?:string}
 export interface Job {
+  recoveryHistory?:{at:string;stepIndex:number;from:string;to:string;reason:string}[];
+  nativeAgents?:{maxAgents:number};
+  nativeAgentRuns?:import('./native-agents').NativeAgent[];
   direction?:import('./directions').TaskDirection;
   directionRequest?:{brief:string;folders?:string[]};
   parentSessionId?:string;branchOrigin?:'manual'|'direction';branchContext?:{prompt:string;status:string;summary:string;question?:string};
@@ -142,6 +146,8 @@ export function validateProfiles(value: unknown): Profile[] {
       throw new Error('Each profile needs a unique id, label, provider and executable.');
     }
     ids.add(p.id);
+    if(p.accountEmail!==undefined&&(typeof p.accountEmail!=='string'||p.accountEmail.length>254||!/^\S+@[^\s@]+\.[^\s@]+$/.test(p.accountEmail)))throw new Error('Enter a valid account email.');
+    if(p.fallbackEligible!==undefined&&typeof p.fallbackEligible!=='boolean')throw new Error('Invalid fallback preference.');
     if(p.preferred!==undefined&&typeof p.preferred!=='boolean')throw new Error('Invalid account preference.');
     if(p.hosting!==undefined&&!['cloud','local'].includes(p.hosting))throw new Error('Invalid hosting location.');
     if(p.transport!==undefined&&!['cli','http'].includes(p.transport))throw new Error('Invalid transport.');
@@ -224,12 +230,12 @@ export function routeProfile(id: string, profiles: Profile[], quotas: Record<str
   const selected = profiles.find(p => p.id === id);
   if (!selected) throw new Error(`Missing profile ${id}. Configure role assignments.`);
   const q = quotas[id];
-  if (!fresh(q, now) || q.usedPercent < Math.min(threshold,selected.quotaCeiling??100)) return selected;
+  if (!fresh(q, now) || q.usedPercent < Math.min(threshold,selected.quotaCeiling??100)&&q.remainingTokens!==0) return selected;
   if (auto) {
-    const fallback = profiles.find(p => p.id !== id && p.provider === selected.provider
+    const fallback = profiles.find(p => p.id !== id && allowsFallback(selected,p) && p.provider === selected.provider
       && (p.transport??'cli')===(selected.transport??'cli') && (p.hosting??'cloud')===(selected.hosting??'cloud') && p.endpoint===selected.endpoint
-      && p.modelPolicy === selected.modelPolicy && p.model === selected.model && p.effort === selected.effort
-      && fresh(quotas[p.id], now) && quotas[p.id].usedPercent < Math.min(threshold,p.quotaCeiling??100));
+      && profileModelPolicy(p) === profileModelPolicy(selected) && (profileModelPolicy(p)!=='custom'||p.model === selected.model) && p.effort === selected.effort
+      && fresh(quotas[p.id], now) && quotas[p.id].remainingTokens!==0 && quotas[p.id].usedPercent < Math.min(threshold,p.quotaCeiling??100));
     if (fallback) return fallback;
   }
   throw new QuotaWait(`${selected.label}: quota at ${q.usedPercent}%. Select another account or wait for a fresh quota refresh.`);
@@ -238,11 +244,12 @@ export function routeProfile(id: string, profiles: Profile[], quotas: Record<str
 export class QuotaWait extends Error {}
 export function rotateProfile(pool: string[], profiles: Profile[], quotas: Record<string, Quota>, cursor: number, threshold: number, now = Date.now()): { profile: Profile; cursor: number } {
   if (!pool.length) throw new Error('Configure the rotation pool for this role before enabling round robin.');
+  const members=pool.map(id=>profiles.find(p=>p.id===id)).filter((p):p is Profile=>!!p);if(members.some((p,i)=>members.slice(i+1).some(other=>!independentLogin(p,other))))throw new Error('Rotation profiles share one login. Configure independent login stores before rotating accounts.');
   for (let offset = 0; offset < pool.length; offset++) {
     const index = (cursor + offset) % pool.length;
     const p = profiles.find(p => p.id === pool[index]);
     if (!p) throw new Error(`Rotation profile missing: ${pool[index]}`);
-    if (fresh(quotas[p.id], now) && quotas[p.id].usedPercent < Math.min(threshold,p.quotaCeiling??100)) return { profile: p, cursor: (index + 1) % pool.length };
+    if (fresh(quotas[p.id], now) && quotas[p.id].remainingTokens!==0 && quotas[p.id].usedPercent < Math.min(threshold,p.quotaCeiling??100)) return { profile: p, cursor: (index + 1) % pool.length };
   }
   throw new QuotaWait('Rotation pool has no account with fresh available quota. Refresh quota data to continue.');
 }
