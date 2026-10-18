@@ -54,6 +54,7 @@ export interface Issue { title: string; body: string; severity: 'bug' | 'improve
 export interface ChildTask { title: string; instructions: string }
 export interface Audit { summary: string; issues: Issue[]; tasks: ChildTask[] }
 export interface Step {
+  reviewRound?:number;postImplementationReview?:boolean;
   dailyBudgetModel?:string; dailyAttempts?:{profileId:string;modelKey:string;at:string}[]; quotaBefore?:Quota; quotaAfter?:Quota;
   transport?:'cli'|'http';hosting?:'cloud'|'local';endpoint?:string;
   role: Role; title: string; prompt: string; profileId?: string; model?: string; effort?: string; response?: string;
@@ -69,6 +70,7 @@ export interface Step {
 }
 export interface ObservedFileChange {path:string;kind:'added'|'modified'|'deleted'|'renamed';at:string;stepIndex:number;reverted?:boolean;previousPath?:string;fingerprint?:string}
 export interface Job {
+  reviewPolicy?:import('./review-budget').ReviewPolicy;reviewStop?:{round:number;at:string;reason:string};
   recoveryHistory?:{at:string;stepIndex:number;from:string;to:string;reason:string}[];
   nativeAgents?:{maxAgents:number};
   nativeAgentRuns?:import('./native-agents').NativeAgent[];

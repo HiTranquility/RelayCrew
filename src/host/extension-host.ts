@@ -1,3 +1,5 @@
+import {reviewPolicy} from '../core/review-budget';
+import {switchPrimaryManager} from '../core/team-selection';
 import {accountReadout} from '../ui/account-list';
 import {identityMatches} from '../adapters/cli/account-data';
 import {CodexQuotaSource} from '../adapters/quota/codex-source';
@@ -148,7 +150,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   const dailyRoots=()=>[...new Set([...projectRoots().map(r=>r.path),...(daily.workspaces??[]).map(w=>w.path)])];
   const projectRoots = () => {const roots=[...(vscode.workspace.workspaceFolders??[]).map(root=>({name:root.name,path:root.uri.fsPath})),...(state.taskRoots??[])].filter(root=>root&&typeof root.path==='string'&&isAbsolute(root.path));const key=(path:string)=>process.platform==='win32'?resolve(path).toLowerCase():resolve(path);return roots.filter((root,index)=>roots.findIndex(r=>key(r.path)===key(root.path))===index);};
   const createJob = (...args: Parameters<typeof newJob>) => {
-    const job=newJob(...args);job.isolationMode=cfg().get('isolateTasks',false)?'worktree':'shared';job.openInCodex=cfg().get('openTasksInCodex',false);job.auditors=state.auditors?structuredClone(state.auditors):undefined;job.delegation=state.delegation?structuredClone(state.delegation):undefined;job.promptTemplates=jobPromptTemplates(state.promptTemplates,job.delegation);if(state.workflow)job.workflow=structuredClone(state.workflow);return job;
+    const job=newJob(...args);job.reviewPolicy=reviewPolicy(cfg().get('maxReviewRounds',3));job.isolationMode=cfg().get('isolateTasks',false)?'worktree':'shared';job.openInCodex=cfg().get('openTasksInCodex',false);job.auditors=state.auditors?structuredClone(state.auditors):undefined;job.delegation=state.delegation?structuredClone(state.delegation):undefined;job.promptTemplates=jobPromptTemplates(state.promptTemplates,job.delegation);if(state.workflow)job.workflow=structuredClone(state.workflow);return job;
   };
   const eventKey = (j: Job) => `${j.id}:${j.status}:${j.ownerReplies?.length ?? 0}:${j.limitDetectedAt ?? ''}`;
   const announced = new Set(state.jobs.filter(j => !['running', 'queued'].includes(j.status)).map(eventKey));
@@ -167,6 +169,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     if(message.action==='liveMap'){await mapPanel.open(job.id);return;}
     if(message.action==='liveReturn'){boardState={...boardState,consoleSelected:job.id,consoleNew:false};await vscode.commands.executeCommand('aiTeam.board','console');await board?.webview.postMessage({type:'consoleSelect',id:job.id});return;}
     if(message.action==='liveBranch'){pendingBranch=job.id;await vscode.commands.executeCommand('aiTeam.board','console');if(boardReady){await board?.webview.postMessage({type:'openBranch',id:job.id});pendingBranch=undefined;}return;}
+    if(message.action==='liveSendReply'){if(typeof message.text!=='string'||!message.text.trim()||message.text.length>8000)throw new Error('Invalid owner reply.');return consoleController.submit({requestId:message.requestId,text:'/reply '+message.text,sessionId:job.id,replyVersion:message.replyVersion,cwd:job.cwd,attachments:[]});}
     if(message.action==='liveReply'){await vscode.commands.executeCommand('aiTeam.reply',job.id);return;}
     if(message.action==='openChangedFile'){await filesPanel.openFile(job.id,message.path);return;}
     if(message.action==='openFilesPanel'){await filesPanel.open(job.id);return;}
@@ -377,7 +380,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     if (draining || closing) return;
     draining = guard(() => engine.drain()).finally(() => { draining = undefined; });
   };
-  const dailyController = new DailyController({promptTemplates:()=>snapshotPromptTemplates(state.promptTemplates),workflow:()=>state.workflow,plan:daily,jobs:state.jobs,profiles,quotas:()=>state.quotas,management:()=>state.management!,isolation:()=>cfg().get('isolateTasks',false),openInCodex:()=>cfg().get('openTasksInCodex',false),language,timezone:()=>cfg().get('timezone',''),paused:()=>!!state.queuePaused,save,changed,cwd:pickCwd,start,pauseActive:id=>{
+  const dailyController = new DailyController({maxReviewRounds:()=>cfg().get('maxReviewRounds',3),promptTemplates:()=>snapshotPromptTemplates(state.promptTemplates),workflow:()=>state.workflow,plan:daily,jobs:state.jobs,profiles,quotas:()=>state.quotas,management:()=>state.management!,isolation:()=>cfg().get('isolateTasks',false),openInCodex:()=>cfg().get('openTasksInCodex',false),language,timezone:()=>cfg().get('timezone',''),paused:()=>!!state.queuePaused,save,changed,cwd:pickCwd,start,pauseActive:id=>{
     const active=state.jobs.find(job=>job.status==='running'&&job.dailyItemId);
     if(active&&(!id||active.steps.some(step=>step.status==='running'&&step.profileId===id)||daily.items.some(item=>item.jobId===active.id&&item.profileId===id)))engine.pause();
   }});
@@ -464,6 +467,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
           const picked=await vscode.window.showOpenDialog({canSelectFiles:false,canSelectFolders:true,canSelectMany:true,title:t('Choose folders for team tasks')});if(!picked)return;if(picked.length>20)throw new Error('Choose 1–20 approved folders for the task group.');const imported=[];for(const uri of picked){if(uri.scheme!=='file')throw new Error('Choose existing local folders.');const path=await realpath(uri.fsPath);if(!(await stat(path)).isDirectory())throw new Error('Choose existing local folders.');imported.push({path,name:basename(path)||path});}state.taskRoots=[...new Map([...(state.taskRoots??[]),...imported].map(root=>[process.platform==='win32'?root.path.toLowerCase():root.path,root])).values()].slice(-40);await save();changed();await board?.webview.postMessage({type:'taskFolders',roots:projectRoots(),selected:imported.map(r=>projectRoots().find(p=>resolve(p.path).toLowerCase()===resolve(r.path).toLowerCase())?.path??r.path)});return;
         }
         if(message?.action==='cancelTaskGroup'){const group=state.jobs.filter(j=>j.batch?.id===message.id);for(const job of group)engine.cancel(job.id);await save();changed();return;}
+        if(message?.action==='openLiveSessions'){if(!Array.isArray(message.ids)||!message.ids.length||message.ids.length>4||new Set(message.ids).size!==message.ids.length||message.ids.some((id:unknown)=>typeof id!=='string'||!state.jobs.some(j=>j.id===id)))throw new Error('Choose up to four existing sessions.');for(const [index,id]of message.ids.entries())await livePanel.open(id,false,index===0);await board?.webview.postMessage({type:'liveTabsResult',message:t('Live tabs opened. Each tab keeps its own session.')});return;}
         if(message?.action==='openLiveSession'){await livePanel.open(message.id,message.newWindow===true);return;}
         if(message?.action==='openFilesPanel'){await filesPanel.open(message.id);return;}
         if(message?.action==='openChangedFile'){await filesPanel.openFile(message.id,message.path);return;}
@@ -505,7 +509,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
               const coordinator=/^coordinator:(\d+)$/.exec(message.role),reviewer=/^reviewer:(\d+)$/.exec(message.role);
               if(!coordinator&&!reviewer&&!roles.includes(message.role as Role))throw new Error('Choose an existing profile for every node.');
               if(job){if(job.status==='running'){state.queuePaused=true;engine.pause();await save();await draining;}if(reviewer)assignReviewerProfile(job,Number(reviewer[1]),message.profileId,profiles());else if(coordinator)assignCoordinatorProfile(job,Number(coordinator[1]),message.profileId,profiles());else assignTaskProfile(job,message.role as Role,message.profileId,profiles());}
-              else {const role=message.role as Role;if(coordinator||reviewer)throw new Error('Invalid flow configuration.');state.roles[role]=message.profileId;if(role==='lead')state.management={primaryProfileId:message.profileId,coordinatorIds:state.management!.coordinatorIds.filter(id=>id!==message.profileId)};}
+              else {const role=message.role as Role;if(coordinator||reviewer)throw new Error('Invalid flow configuration.');state.roles[role]=message.profileId;if(role==='lead')state.management=switchPrimaryManager(state.management!,message.profileId,profiles().map(p=>p.id));}
               await save();result.message=t(job?'Pinned for this task; queue remains paused if it was running.':'Applies to future tasks; rotation policy still applies.');
             }
             if(message.action==='tryCliInline'){const profile=profiles().find(p=>p.id===message.profileId);if(!profile)throw new Error('Choose an existing account profile.');await runTrial(profile,message.cwd);}
@@ -556,7 +560,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
           try{const job=state.jobs.find(j=>j.id===message.id);if(!job)throw new Error('Task no longer exists.');if(message.action==='chooseDecisionPolicy'){chooseDecisionPolicy(job,message.policy);if(message.remember===true)rememberDecisionPolicy(job,state.management,state.jobs);}else {resolveReviewDecision(job,message.resolution);queueDirectionBranches(job,state.jobs);}await save();changed();if(job.status==='queued')start();await board?.webview.postMessage({type:'reviewActionResult',id:job.id,ok:true});}catch(error){await board?.webview.postMessage({type:'reviewActionResult',id:message.id,ok:false,message:t(error instanceof Error?error.message:String(error))});}return;
         }
         if(message?.action==='preferAccount'){
-          try{const next=preferAccount(validateProfiles(cfg().get('profiles')),message.id,message.enabled);validateProfiles(next);await cfg().update('profiles',next,vscode.ConfigurationTarget.Global);changed();await board?.webview.postMessage({type:'accountPreferenceResult',ok:true,message:t('Account preference saved. Existing role assignments stay as configured.')});}catch(error){await board?.webview.postMessage({type:'accountPreferenceResult',ok:false,message:t(error instanceof Error?error.message:String(error))});}return;
+          try{const next=preferAccount(validateProfiles(cfg().get('profiles')),message.id,message.enabled);validateProfiles(next);await cfg().update('profiles',next,vscode.ConfigurationTarget.Global);changed();await board?.webview.postMessage({type:'accountPreferenceResult',ok:true,preferredIds:next.filter(p=>p.preferred).map(p=>p.id),message:t('Account preference saved. Existing role assignments stay as configured.')});}catch(error){await board?.webview.postMessage({type:'accountPreferenceResult',ok:false,message:t(error instanceof Error?error.message:String(error))});}return;
         }
         if(message?.action==='addEmailAccounts'){
           try{const next=addEmailAccounts(message.provider,message.emails,profiles(),join(context.globalStorageUri.fsPath,'accounts'));await cfg().update('profiles',next,vscode.ConfigurationTarget.Global);changed();await board?.webview.postMessage({type:'multipleAccountsResult',ok:true,message:t('Accounts added. Email labels are not verified logins; sign in to each supported login store.')} );}catch(error){await board?.webview.postMessage({type:'multipleAccountsResult',ok:false,message:t(error instanceof Error?error.message:String(error))});}return;
@@ -565,13 +569,14 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
           try{const profile=accountFromForm(message.profile,profiles()),next=profiles().some(p=>p.id===profile.id)?profiles().map(p=>p.id===profile.id?profile:p):[...profiles(),profile];await cfg().update('profiles',next,vscode.ConfigurationTarget.Global);await board?.webview.postMessage({type:'accountSaved',ok:true,message:t('Account saved. Assign its role, then run a trial or open CLI login.')});changed();}
           catch(error){await board?.webview.postMessage({type:'accountSaved',ok:false,message:t(error instanceof Error?error.message:String(error))});}return;
         }
+        if(message?.action==='loadConventionsGuide'){const name=language()==='vi'?'conventions-auditor.vi.md':'conventions-auditor.md';const markdown=await readFile(join(context.extensionPath,'examples','roles',name),'utf8');await board?.webview.postMessage({type:'roleGuideLoaded',role:'auditor',name,markdown,preset:'conventions',roleName:t('Conventions auditor')});return;}
         if(message?.action==='detectCli'&&['codex','claude','gemini','antigravity'].includes(message.provider)){
           const path=await findLocalCli(message.provider);await board?.webview.postMessage({type:'accountDetected',provider:message.provider,path,message:path?t('CLI found. Save this account to use it.'):t('CLI not found. Install it or enter its absolute executable path.')});return;
         }
         if(message?.action==='assignRole'){
           if(!roles.includes(message.role)||!profiles().some(p=>p.id===message.id))throw new Error(t('Choose an existing profile for every node.'));
           await cfg().update('routingMode','selected',vscode.ConfigurationTarget.Global);state.roles[message.role as Role]=message.checked===false&&message.role!=='lead'?'':message.id;
-          if(message.role==='lead')state.management={primaryProfileId:message.id,coordinatorIds:(state.management?.coordinatorIds??[]).filter(id=>id!==message.id)};
+          if(message.role==='lead')state.management=switchPrimaryManager(state.management??{primaryProfileId:state.roles.lead,coordinatorIds:[]},message.id,profiles().map(p=>p.id));
           delete state.overrides?.[message.role as Role];await save();changed();return;
         }
         if(['consoleAttach','consolePickFiles','consoleRestoreAttachments'].includes(message?.action)){

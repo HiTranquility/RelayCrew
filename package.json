@@ -2,7 +2,7 @@
   "name": "ai-team-workbench",
   "displayName": "RelayCrew",
   "description": "%description%",
-  "version": "1.0.1",
+  "version": "1.0.2-preview.1",
   "publisher": "local-ai-team",
   "license": "MIT",
   "engines": {
@@ -583,6 +583,13 @@
           ],
           "default": "steps-and-flow",
           "description": "%setting.completionNotifications%"
+        },
+        "aiTeam.maxReviewRounds": {
+          "type": "integer",
+          "default": 3,
+          "minimum": 1,
+          "maximum": 10,
+          "description": "%setting.maxReviewRounds%"
         }
       }
     },

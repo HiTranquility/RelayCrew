@@ -8,6 +8,7 @@ Local preview: [plan-and-execute workflow](workflows/plan-execute.md) includes o
 |---|---|
 | `roles/developer.md` | Setup → Input and response templates → Dev → Attach role .md |
 | `roles/auditor.md` | Same editor → Audit |
+| `roles/conventions-auditor.md` / `.vi.md` | Audit → Starting template → Conventions auditor, or Attach role .md |
 | `roles/repair-worker.md` | Same editor → Repair |
 | `roles/primary-manager.md` | Same editor → Lead / Primary manager |
 | `roles/coordinator.md` | Same editor → Coordinator |
@@ -35,3 +36,9 @@ Nút **Mẫu Markdown** mở thư mục mẫu đi kèm extension. Không có m�
 ## Daily maintenance stop gates
 
 Import [STOP-GATES.md](maintenance/STOP-GATES.md) or [STOP-GATES.vi.md](maintenance/STOP-GATES.vi.md) in the Daily quota panel. These editable guides require owner decisions before consequential changes and never increase permissions or quota limits.
+
+## Independent conventions gate
+
+Choose **Conventions auditor** in the input/response template editor, then **Save all templates**. It reviews the actual changed hunks and related callers against the target repo’s own guidance; it does not import another project’s naming/stack rules. Record coverage, applicable rule, file:line evidence, checks and unreviewed scope. Passing tests never replace code review. New coding tasks default to three code/review rounds, configurable under Setup → Advanced settings → Maximum code/review rounds. At the limit, unresolved findings stop for owner action; no automatic debate or follow-up loop. Existing tasks keep their saved policy.
+
+Tiếng Việt: chọn mẫu **Auditor conventions** rồi lưu. Phải đọc diff, đối chiếu luật của đúng repo, ghi phạm vi/bằng chứng và chỗ chưa kiểm. Không lấy test pass thay cho đọc code; mặc định tối đa ba vòng code/review, hết lượt còn lỗi thì dừng.

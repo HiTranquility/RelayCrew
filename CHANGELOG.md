@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.2-preview.1 — Unreleased
+
+- Visible primary-manager promotion and supporting-manager votes in Setup and the map editor; keep provider defaults distinct from role assignments.
+- Open several independent Live tabs, each with its own owner-reply draft and stale-question checks.
+- Bundled English/Vietnamese conventions-auditor guides and an editable starting template, with independent repair rechecks before manager approval.
+- Configurable code/review budget: default three rounds, range one to ten, saved per new task and Daily job and inherited by approved follow-up branches. Remaining findings stop for attention; requeue or account rotation cannot reset the limit.
+- A round can include several bounded workers. The limit applies to workbench iterations and repeated code-step attempts, not individual native CLI tool calls.
+
 ## 1.0.1 — 2026-10-18
 
 - Guided preparation before Live: connect accounts, assign roles, edit prompts/Markdown, review the saved team, then send.

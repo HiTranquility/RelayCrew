@@ -1,3 +1,4 @@
+import {reviewPolicy} from '../core/review-budget';
 import { acceptanceFromText } from '../core/task-insights';
 import { dailyWorkspaces } from '../core/daily-workspaces';
 import type { PromptTemplateSnapshot } from '../core/prompt-templates';
@@ -13,6 +14,7 @@ import type { WorkflowDocument } from '../core/workflow';
 interface Hooks {
   plan: DailyPlan; jobs: Job[]; profiles: () => Profile[]; quotas: () => Record<string, Quota>;
   management: () => Management; language: () => Language; timezone: () => string;
+  maxReviewRounds?:()=>number;
   isolation: () => boolean;
   workflow?:()=>WorkflowDocument|undefined;
   promptTemplates?:()=>PromptTemplateSnapshot;
@@ -74,7 +76,7 @@ export class DailyController {
     const item = decision.item;
     item.day = p.day;
     if (decision.generated) p.items.push(item);
-    const job = makeDailyJob(p, item, h.management());
+    const job = makeDailyJob(p, item, h.management());job.reviewPolicy=reviewPolicy(h.maxReviewRounds?.()??3);
     job.isolationMode=h.isolation()?'worktree':'shared';
     job.openInCodex=h.openInCodex();
     const templates=h.promptTemplates?.();if(templates)job.promptTemplates=structuredClone(templates);

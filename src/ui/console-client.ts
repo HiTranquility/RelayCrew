@@ -21,7 +21,7 @@ function patchConsole(html){
  const outerScroll=window.scrollY,panes=['console-session-list','console-sessions'].map(id=>({id,top:document.getElementById(id).scrollTop,left:document.getElementById(id).scrollLeft}));
  const sessionScroll=[...document.querySelectorAll('[data-session-panel]')].map(panel=>({id:panel.dataset.sessionPanel,top:panel.scrollTop,left:panel.scrollLeft,panes:['.team-conversation','.console-output','.friendly-answer'].map(selector=>({selector,top:panel.querySelector(selector)?.scrollTop||0,left:panel.querySelector(selector)?.scrollLeft||0}))}));
  const parsed=new DOMParser().parseFromString(html,'text/html');const incomingForm=parsed.getElementById('console-form');if(incomingForm)document.getElementById('console-form').dataset.team=incomingForm.dataset.team;consoleScrollRestoring=true;cancelAnimationFrame(consoleScrollFrame);
- for(const id of ['console-session-list','console-sessions']){const incoming=parsed.getElementById(id);if(incoming)document.getElementById(id).innerHTML=incoming.innerHTML;}
+ for(const id of ['console-session-list','console-sessions','live-launcher-rows']){const incoming=parsed.getElementById(id);if(incoming)document.getElementById(id).innerHTML=incoming.innerHTML;}
  for(const d of document.querySelectorAll('[data-console-activity]'))if(activity.has(d.dataset.consoleActivity))d.open=activity.get(d.dataset.consoleActivity);
  for(const d of document.querySelectorAll('#console-sessions details[data-detail]'))if(opened.has(d.dataset.detail))d.open=opened.get(d.dataset.detail);
  if(typeof patchAgentMap==='function')patchAgentMap(parsed);

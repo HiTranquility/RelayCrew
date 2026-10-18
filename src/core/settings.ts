@@ -1,4 +1,5 @@
 export const numericSettings = {
+  maxReviewRounds: { min: 1, max: 10, integer: true, label: 'Maximum code/review rounds', default: 3 },
   quotaThreshold: { min: 1, max: 100, integer: false, label: 'Quota threshold (%)', default: 95 },
   timeoutMinutes: { min: 1, max: 180, integer: true, label: 'CLI timeout (minutes)', default: 30 },
   maxChildTasks: { min: 0, max: 20, integer: true, label: 'Maximum repair tasks', default: 4 },
