@@ -134,3 +134,11 @@ Trong Console, **Mở các phiên Live riêng** cho mở từng task ở tab/c�
 Từ thư mục source, chạy `npm run demo`, mở địa chỉ localhost được in ra. Kịch bản tiếng Việt này không cần tài khoản, không gọi model và không tiêu quota. Chọn 2–6 Executor, mỗi Executor 1–2 nhánh con minh họa, tối đa 12 nhánh con. Worker chạy tuần tự; nhánh con minh họa xử lý song song. Executor đầu tiên hỏi phạm vi và chờ bạn trả lời. Có Tạm dừng, Đi một bước, Dừng, kéo tỷ lệ hai pane, đổi kiểu map và tải báo cáo. Đây không phải bằng chứng subagents CLI thật đã chạy hay code đã được kiểm chứng. Quan sát con thật vẫn phụ thuộc sự kiện công khai do CLI cung cấp trong task thật đã được phép. Tùy chọn `--recording path.json` chỉ mở một bản ghi cục bộ đã kết thúc để xem; giữ file đó riêng trên máy.
 
 Trong demo browser, **Thêm → Giao diện** chọn tối, sáng hoặc theo hệ thống, đồng bộ cho cả hai pane. Bản nhúng chỉ có một ô trả lời ở trên; cửa sổ Live riêng dùng ô nhập riêng trong luồng trang. Map nhiều agent ưu tiên thẻ đọc rõ; dùng Vừa khung khi muốn nhìn toàn cảnh. Menu Thêm còn có mở riêng và tải báo cáo. Tùy chọn `--live-recording path.json` theo dõi file kết quả của một runner CLI chỉ đọc đang chạy; đây là màn hình quan sát, không dừng hay trả lời thay runner, không thực thi hay sửa file nguồn đó.
+
+### Tách khung xem và kiểm soát thư mục (preview.4)
+
+Trong phòng demo trên trình duyệt, nút **Tách Live** / **Tách Map** nằm ngay đầu từng khung. Nút mở đúng phiên ở cửa sổ hoặc tab riêng tùy trình duyệt; nếu popup bị chặn, bấm liên kết dự phòng. **× Ẩn** chỉ ẩn khung, dùng **Cả hai pane / Map / Live** để hiện lại. Đóng khung xem không dừng tác vụ và không xóa bản nháp ở màn hình chính.
+
+Nút **Thư mục** cho xem đường dẫn thực thi, thư mục gốc, nhánh worktree và chính sách quyền đã giao; có thể chuyển phiên theo folder. Trang trình duyệt chỉ quan sát, không cấp quyền truy cập file.
+
+Trong VS Code, mở **Thư mục & quyền** ngay trong Live. **Mở thư mục trong Explorer** mở đường dẫn thực thi của phiên. **Task mới / chọn thư mục** mở composer và bung sẵn phần nhiều folder; chọn **Chọn thêm thư mục**, đánh dấu folder và quyền trước khi gửi. Việc này chuẩn bị task mới, giữ nguyên phạm vi của phiên đang chạy và bản nháp đang soạn.

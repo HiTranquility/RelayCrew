@@ -34,6 +34,7 @@ try{for(const language of ['en','vi']){
  await page.locator('[data-console-layout=sessions]').click();
  await page.locator('[data-session]').first().click();
  const session=page.locator('[data-session-panel]:visible');
+ await session.locator('.session-scope summary').click();await session.locator('[data-session-scope=prepare]').click();assert.equal((await page.evaluate(()=>window.__messages)).at(-1).action,'sessionFolder');await page.locator('[data-console-view=map]').click();await page.evaluate(()=>window.dispatchEvent(new MessageEvent('message',{data:{type:'consoleCompose',mode:'task',folders:true}})));assert.equal(await page.locator('.console-folders').isVisible(),true);assert.equal(await page.locator('.console-folders').evaluate(el=>el.open),true);assert.equal(await page.locator('#console-add-folders').evaluate(el=>el===document.activeElement),true);assert.equal(await page.locator('#console-mode').inputValue(),'task');await page.locator('[data-session]').first().click();
  await session.locator('.session-view-toolbar [data-session-view=compact]').click();
  assert.equal(await session.locator('[data-session-part]:visible').count(),0);
  await session.locator('.session-view-toolbar [data-session-view=conversation]').click();
@@ -50,6 +51,8 @@ try{for(const language of ['en','vi']){
  for(const width of [550,900,1440]){await page.setViewportSize({width,height:950});assert.equal(await page.locator('.preparation-steps').evaluate(el=>el.scrollWidth<=el.clientWidth+1),true);}
  await page.screenshot({path:resolve('.ui-smoke','preparation-'+language+'.png')});
  await page.goto(pathToFileURL(resolve('docs/previews','live-session'+suffix+'.html')).href);
+
+ await page.locator('.session-scope summary').click();await page.locator('[data-session-scope=prepare]').click();assert.equal((await page.evaluate(()=>window.__messages)).at(-1).action,'sessionFolder');assert.equal((await page.evaluate(()=>window.__messages)).at(-1).kind,'prepare');
  await page.locator('[data-session-view=compact]').click();
  await page.locator('.session-view-toolbar [data-session-view=conversation]').click();
  const html=await page.locator('#live-content').innerHTML();

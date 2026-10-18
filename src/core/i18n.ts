@@ -10,6 +10,17 @@ export function resolveLanguage(preference: unknown, displayLanguage = 'en'): La
 // English source messages are the fallback. Translate presentation, never stored
 // status codes, model IDs, account labels, prompts or provider responses.
 export const vietnamese: Record<string, string> = {
+  "Folders & permissions":"Thư mục & quyền",
+  "Assigned workspace":"Thư mục thực thi",
+  "Original folder":"Thư mục gốc",
+  "Worktree branch":"Nhánh worktree",
+  "Execution policy":"Chính sách thực thi",
+  "Team CLI policy":"Theo chính sách CLI của đội",
+  "Full CLI permissions":"Quyền CLI đầy đủ",
+  "Simulation · no file access":"Giả lập · không truy cập file",
+  "Folder and permissions belong to this task. Choose folders for a new task without changing this assignment.":"Thư mục và quyền được giữ theo tác vụ này. Chọn thư mục cho tác vụ mới sẽ không thay đổi phân công đang chạy.",
+  "Show folder in Explorer":"Mở thư mục trong Explorer",
+  "New task / folders":"Task mới / chọn thư mục",
   "Simulated child agents":"Nhánh con giả lập",
   "Illustrative children only: no CLI call or code validation occurred.":"Đây là các nhánh minh họa; không gọi CLI, đọc code hay xác minh thật.",
   "Configure round limit":"Thiết lập trần số vòng",

@@ -1,3 +1,4 @@
+import {sessionScopeStyles} from './session-scope';
 import {liveTabsClient,liveTabsStyles} from './live-tabs';
 import {teamControlClient,teamControlStyles} from './team-control';
 import {releaseStyles} from './release-styles';
@@ -103,7 +104,7 @@ export function renderBoard(jobs: Job[], profiles: Profile[], quotas: Record<str
     ${delegationControlStyles}
 ${reviewTeamStyles}
 ${fileChangesStyles}
-${taskBatchStyles}
+${taskBatchStyles}${sessionScopeStyles}
     ${nativeAgentsStyles}${preparationStyles}${sessionViewsStyles}${accountSessionsStyles}${accountListStyles}${releaseStyles}${teamControlStyles}${liveTabsStyles}</style></head><body>
     ${headerChrome(language)}${quotaWatch(profiles,quotas,jobs,options?.settings?.quotaThreshold??95,language)}<header class="toolbar"><div class="brand-lockup"><span class="brand-mark" aria-hidden="true">R<span>↗</span></span><div><h1>RelayCrew <small class="build-version">${h(extensionVersion)}</small> <span class="workspace-label">${tr('Assignment board')}</span></h1><span class="brand-subtitle">${tr('Your AI team workspace')}</span></div></div><div class="toolbar-actions"><button class="primary" data-action="newTask">${tr('New task')}</button>${button('pause',t(options?.queuePaused?'Resume queue':'Pause immediately'))}${renderCompletionCenter(options?.completionNotices??[],jobs,profiles,language,options?.completionNotificationLevel)}<select class="language-select" data-language aria-label="${tr('Language')}"><option value="en" ${language==='en'?'selected':''}>EN</option><option value="vi" ${language==='vi'?'selected':''}>VI</option></select><details class="layout-menu" data-detail="layout-menu"><summary title="${tr('Controls')}">⋯</summary><div><button type="button" data-layout-open>${tr('Layout and shortcuts')}</button>${button('toggleSidebar',t('Toggle VS Code sidebar'))}${button('togglePanel',t('Toggle VS Code panel'))}${button('closeBoard',t('Close RelayCrew board'))}</div></details></div></header>
     <nav class="tabs" role="tablist" aria-label="RelayCrew">${[['setup','Prepare a run'],['console','Live console'],['tasks','Tasks'],['accounts','Accounts & quota'],['overview','Overview'],['daily','Daily quota tasklist'],['schedules','Schedules'],['projects','Projects']].map(([id,label])=>`<button id="tab-${id}" role="tab" aria-controls="page-${id}" aria-selected="${page===id}" tabindex="${page===id?'0':'-1'}" data-tab="${id}">${tr(label)}</button>`).join('')}</nav>

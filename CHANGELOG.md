@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.2-preview.4 — Unreleased
+
+- Put detach/hide controls directly on both browser observer panes, with a session-bound separate window and a fallback link when popups are blocked. Closing an observer preserves execution and other drafts.
+- Show each session’s effective/original folder, worktree branch and saved execution policy. From VS Code, reveal the assigned folder or open multi-folder preparation for a new task without retargeting the current job.
+- The browser exposes folder scope and session navigation as observation only; filesystem selection and permissions remain in VS Code. Stale detached observer IDs return an error instead of silently following a different task.
+- Keep the More menu within narrow screens and surface native window-move errors.
+
 ## 1.0.2-preview.3 — Unreleased
 
 - Apply a shared control/card/dialog radius scale, clearer semantic states, larger map controls and visible keyboard focus while respecting the VS Code theme.
