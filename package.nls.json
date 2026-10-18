@@ -78,5 +78,6 @@
   "command.liveSession": "RelayCrew: Open Live Session in Separate Tab",
   "profile.accountEmail": "Declared account email. This label does not authenticate or switch the provider login.",
   "profile.fallbackEligible": "Consider this profile for automatic fallback. A separate login binding and fresh available quota are required.",
-  "setting.maxReviewRounds": "Maximum implementation/audit rounds for new tasks (1–10, default 3). Repairs are independently rechecked; unresolved findings stop at the limit. Each round may contain several bounded repair tasks. Internal provider tool calls are not counted as workbench rounds."
+  "setting.maxReviewRounds": "Maximum implementation/audit rounds for new tasks (1–10, default 3). Repairs are independently rechecked; unresolved findings stop at the limit. Each round may contain several bounded repair tasks. Internal provider tool calls are not counted as workbench rounds.",
+  "command.exportSession": "RelayCrew: Export Session Evidence"
 }

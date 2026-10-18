@@ -1,5 +1,7 @@
 # Product roadmap
 
+For current supported behavior and limits, read [RelayCrew 1.1](CURRENT-BEHAVIOR.md). Version-labelled sections below describe historical changes and are not a complete current support matrix.
+
 ## 0.9 · Implemented
 
 Public agent conversations and readable results; multi-task observation, per-task flows/context and separate owner acceptance; actionable overview; inline schedule Timeline/Board/Table; daily dispatch explanations/priorities; Local/Cloud compatible HTTP profiles with read-only explicit-context streaming. CLI remains the editing path. See [operations](OPERATIONS.md).

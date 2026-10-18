@@ -1,3 +1,6 @@
+import {storageClient} from './storage-panel';
+import {runReviewStyles} from './run-review';
+import {runStatusClient,runStatusStyles} from './run-status';
 import {responseFormatStyles,responseFormatClient} from './response-format';
 import {executionTraceStyles} from './execution-trace';
 import {sessionScopeStyles} from './session-scope';
@@ -107,7 +110,7 @@ export function renderBoard(jobs: Job[], profiles: Profile[], quotas: Record<str
 ${reviewTeamStyles}
 ${fileChangesStyles}
 ${taskBatchStyles}${sessionScopeStyles}
-    ${nativeAgentsStyles}${preparationStyles}${sessionViewsStyles}${accountSessionsStyles}${accountListStyles}${releaseStyles}${responseFormatStyles}${executionTraceStyles}${teamControlStyles}${liveTabsStyles}</style></head><body>
+    ${nativeAgentsStyles}${preparationStyles}${runReviewStyles}${sessionViewsStyles}${accountSessionsStyles}${accountListStyles}${releaseStyles}${responseFormatStyles}${executionTraceStyles}${runStatusStyles}${teamControlStyles}${liveTabsStyles}</style></head><body>
     ${headerChrome(language)}${quotaWatch(profiles,quotas,jobs,options?.settings?.quotaThreshold??95,language)}<header class="toolbar"><div class="brand-lockup"><span class="brand-mark" aria-hidden="true">R<span>↗</span></span><div><h1>RelayCrew <small class="build-version">${h(extensionVersion)}</small> <span class="workspace-label">${tr('Assignment board')}</span></h1><span class="brand-subtitle">${tr('Your AI team workspace')}</span></div></div><div class="toolbar-actions"><button class="primary" data-action="newTask">${tr('New task')}</button>${button('pause',t(options?.queuePaused?'Resume queue':'Pause immediately'))}${renderCompletionCenter(options?.completionNotices??[],jobs,profiles,language,options?.completionNotificationLevel)}<select class="language-select" data-language aria-label="${tr('Language')}"><option value="en" ${language==='en'?'selected':''}>EN</option><option value="vi" ${language==='vi'?'selected':''}>VI</option></select><details class="layout-menu" data-detail="layout-menu"><summary title="${tr('Controls')}">⋯</summary><div><button type="button" data-layout-open>${tr('Layout and shortcuts')}</button>${button('toggleSidebar',t('Toggle VS Code sidebar'))}${button('togglePanel',t('Toggle VS Code panel'))}${button('closeBoard',t('Close RelayCrew board'))}</div></details></div></header>
     <nav class="tabs" role="tablist" aria-label="RelayCrew">${[['setup','Prepare a run'],['console','Live console'],['tasks','Tasks'],['accounts','Accounts & quota'],['overview','Overview'],['daily','Daily quota tasklist'],['schedules','Schedules'],['projects','Projects']].map(([id,label])=>`<button id="tab-${id}" role="tab" aria-controls="page-${id}" aria-selected="${page===id}" tabindex="${page===id?'0':'-1'}" data-tab="${id}">${tr(label)}</button>`).join('')}</nav>
     <main>${interactionPanel(language)}${renderInlineTools(jobs,profiles,{...options,quotaSnapshots:quotas} as BoardOptions,language)}<div class="metrics" id="task-metrics"><span><b>${jobs.filter(j=>['running','queued'].includes(j.status)).length}</b> ${tr('Running / queued')}</span><span><b>${jobs.filter(j=>['waiting_owner','waiting_quota','needs_attention'].includes(j.status)).length}</b> ${tr('Needs attention / waiting')}</span><span><b>${jobs.filter(j=>j.status==='completed').length}</b> ${tr('Completed')}</span><span>${tr(options?.queuePaused?'Queue paused':'Queue active')}</span></div>
@@ -124,6 +127,7 @@ ${taskBatchStyles}${sessionScopeStyles}
     <div id="page-daily" data-page="daily" role="tabpanel" aria-labelledby="tab-daily" ${page!=='daily'?'hidden':''}>${renderDailyPanel(options?.dailyPlan,profiles,quotas,jobs,language,options?.management,options?.projectRoots,options?.queuePaused)}</div><div id="page-schedules" data-page="schedules" role="tabpanel" aria-labelledby="tab-schedules" ${page!=='schedules'?'hidden':''}>${renderSchedulePanel(options?.schedules??[],jobs,options?.projectRoots??[],language)}</div><div id="page-projects" data-page="projects" role="tabpanel" aria-labelledby="tab-projects" ${page!=='projects'?'hidden':''}>${renderProjectsPanel(options?.projectRoots??[],jobs,profiles,language,options?.isolateTasks,options?.openTasksInCodex)}</div></main>
     <script nonce="${nonce}">
 ${responseFormatClient}
+${runStatusClient}
     const vscode=acquireVsCodeApi(),saved=vscode.getState()||${JSON.stringify(options?.initialState??{}).replace(/</g,'\\u003c')};let request=${pageRequest};const pages=['setup','console','tasks','accounts','overview','daily','schedules','projects'];let tab=saved.pageRequest===request&&pages.includes(saved.tab)?saved.tab:${JSON.stringify(page)},drafts=saved.drafts||{},taskFilter=['all','active','attention','finished'].includes(saved.taskFilter)?saved.taskFilter:'all',taskQuery=typeof saved.taskQuery==='string'?saved.taskQuery:'',teamDraft=saved.teamDraft||null,routingDraft=saved.routingDraft||null,workflowDraft=saved.workflowDraft||null,assignmentDraft=saved.assignmentDraft||null,quotaDraft=saved.quotaDraft||null,trialDraft=saved.trialDraft||null,templatesDraft=saved.templatesDraft||null,workflowPreviewValue=null;
     var taskExclude=typeof saved.taskExclude==='string'?saved.taskExclude:'',taskPage=Number(saved.taskPage)||1,taskPageSize=[10,20,50,100].includes(saved.taskPageSize)?saved.taskPageSize:20;
     for(const input of document.querySelectorAll('[data-number-setting]'))if(typeof drafts[input.dataset.numberSetting]==='string')input.value=drafts[input.dataset.numberSetting];
@@ -132,6 +136,7 @@ ${responseFormatClient}
     function showPage(next,focus=false){if(!pages.includes(next))return;tab=next;document.getElementById('task-metrics').hidden=['overview','console','setup'].includes(tab);for(const p of document.querySelectorAll('[data-page]'))p.hidden=p.dataset.page!==tab;for(const b of document.querySelectorAll('[data-tab]')){const active=b.dataset.tab===tab;b.setAttribute('aria-selected',String(active));b.tabIndex=active?0:-1;if(active&&focus){b.focus();b.scrollIntoView({block:'nearest',inline:'nearest'});}}if(typeof updateHeaderChrome==='function')updateHeaderChrome();queueWorkbenchLayout();}
     ${planningClient}
     ${consoleClient}
+${storageClient}
     ${attachmentClient}
     ${accountClient}
     ${accountSessionsClient}

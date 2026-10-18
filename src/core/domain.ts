@@ -70,6 +70,7 @@ export interface Step {
 }
 export interface ObservedFileChange {path:string;kind:'added'|'modified'|'deleted'|'renamed';at:string;stepIndex:number;reverted?:boolean;previousPath?:string;fingerprint?:string}
 export interface Job {
+  restartRecovery?:{at:string;fromBackup:boolean;stepIndex:number;reviewedAt?:string};
   reviewPolicy?:import('./review-budget').ReviewPolicy;reviewStop?:{round:number;at:string;reason:string};
   recoveryHistory?:{at:string;stepIndex:number;from:string;to:string;reason:string}[];
   nativeAgents?:{maxAgents:number};
@@ -94,7 +95,7 @@ export interface Job {
   ownerReplies?: string[];
   flow?: Role[]; overrides?: RoleOverrides;
   limitDetectedAt?: string; blockedProfileId?: string;
-  timeline?: { at: string; from: string; to: string; kind: string; text: string }[];
+  timeline?: { at: string; from: string; to: string; kind: string; text: string;stepIndex?:number;profileId?:string;provider?:Provider }[];
   profilePins?: Partial<Record<Role,string>>;
   management?: Management;
   dailyItemId?: string;

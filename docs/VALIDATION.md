@@ -1,5 +1,7 @@
 # Validation · 16/10/2026
 
+For current supported behavior and limits, read [RelayCrew 1.1](CURRENT-BEHAVIOR.md). Version-labelled sections below describe historical changes and are not a complete current support matrix.
+
 ## 0.9.1 — 2026-10-17
 
 113 automated tests and strict TypeScript/noUnusedLocals checks pass. Each shipped workflow imports without changing arbitrary existing account/model configuration; all five role Markdown guides survive validated snapshots. Native isolated VS Code host passes version 0.9.1, command registration and one local HTTP chat. Browser QA passes both languages/themes including the Markdown examples action.
@@ -79,3 +81,10 @@ Giữ riêng VSIX gốc 0.1.0/0.2.0/0.3.0 cùng source khôi phục từ source 
 - `npm audit --audit-level=high`: no reported vulnerabilities at the local check time.
 
 Provider authentication, real paid model calls, live Telegram/Zalo delivery and desktop deep-link handoff into the installed app have not been exercised. Deep-link construction follows official documentation; it is not evidence of automatic desktop sidebar project creation. No such public API was identified. Browser QA tests rendering and messages, not the real VS Code webview sandbox. Native smoke checks the extension host separately. Remote CI status is reported only after push/run completion.
+
+## 1.1.0 validation
+
+- Type checking, bundle/package build, 212 automated tests and immutable archive checks. New coverage exercises host-bound review invalidation, current quota checks, normalized public progress, identical observer status, crash recovery, budget preservation, portable evidence privacy and protected retention candidates.
+- Browser fixture checks cover English/Vietnamese, dark/light, narrow layouts, inline review and keyboard confirmation, changed drafts, direct Chat, setup, native-style child views, canvas movement, directions, session groups and storage preview/confirmation. These checks make no paid model calls.
+- Native isolated VS Code activation verifies every contributed command, bilingual board navigation, detached Map/Live/files views, one local fake HTTP chat, completion notices and queued cancellation. The user profile and real login sessions are not used by this test.
+- CI now runs browser readiness checks as well as Windows/Linux unit/package checks. Remote run success must be verified for the final release commit; a workflow file alone is not completion evidence.

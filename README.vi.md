@@ -31,3 +31,5 @@ Chi tiết: [Console và panel](docs/CONSOLE.md) · [Đầu việc và lịch ch
 RelayCrew đang ở giai đoạn đầu, ưu tiên chạy cục bộ. Model và thông tin quota phụ thuộc nhà cung cấp. Các nhiệm vụ worker hiện chạy lần lượt, một cấp; màn hình chỉ hiển thị trao đổi công khai. Kết nối nhắn tin cần cấu hình riêng.
 
 [Giấy phép MIT](LICENSE)
+
+[Hành vi thực tế, hỗ trợ tài khoản và phục hồi](docs/CURRENT-BEHAVIOR.md). Thiết lập → xem lại kế hoạch → xác nhận → quan sát → kiểm chứng kết quả.

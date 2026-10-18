@@ -26,7 +26,7 @@ export class AgentMapPanel implements vscode.Disposable {
   if(message?.action==='mapState'){if(JSON.stringify(message.state??{}).length>384000)return;const next=mapWindowState(message.state);if(next.selected&&!this.services.jobs().some(j=>j.id===next.selected))return;this.state=next;await this.context.workspaceState.update('agentMapWindowState',next);this.refresh();return;}
   if(message?.action==='mapReturn'){await this.services.openConsole(typeof message.id==='string'&&this.services.jobs().some(j=>j.id===message.id)?message.id:'',false);this.dispose();return;}
   if(typeof message?.id!=='string'||!this.services.jobs().some(j=>j.id===message.id))return;
-  if(['chooseDecisionPolicy','resolveReviewDecision'].includes(message.action)){await this.services.reviewAction?.(message);return;}
+  if(['chooseDecisionPolicy','resolveReviewDecision','retryInterrupted'].includes(message.action)){await this.services.reviewAction?.(message);return;}
   if(['mapOpenConsole','mapReply'].includes(message.action))await this.services.openConsole(message.id,message.action==='mapReply');
   if(message.action==='mapStop')await this.services.stop(message.id);
  }

@@ -29,3 +29,5 @@ For more detail: [Console and panels](docs/CONSOLE.md) · [Tasks and schedules](
 RelayCrew is an early, local-first extension. Accounts, available models and quota information depend on your provider. Worker assignments run sequentially, one level deep; Codex native children appear only when its CLI reports public collaboration events. Codex can report its signed-in identity and quota; Claude reports identity/plan; Antigravity reports shared-login quota without verifying the Google email. Only public agent output is shown. Messaging needs your own connection setup; this is not a hosted team service.
 
 [MIT License](LICENSE)
+
+[Current behavior, account support and recovery](docs/CURRENT-BEHAVIOR.md). Prepare → review the plan → confirm → observe → verify acceptance.

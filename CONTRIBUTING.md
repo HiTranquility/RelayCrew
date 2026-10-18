@@ -52,3 +52,9 @@ Model catalogs come from the connection, not a hard-coded latest-version list. K
 Use fake transports for automated tests. Real CLI demos require explicit task scope and must be labelled as real quota-consuming runs. Keep preview captures, local CLI copies and demo results out of commits. Do not move an existing release tag to preview code.
 
 Native account metadata is allowlisted in `adapters/cli/account-data.ts`; Codex quota routing is composed in `adapters/quota/codex-source.ts`. Never copy auth files/keyring tokens or attribute one shared Google CLI login to several verified email accounts. CLI auth/usage reads must not start model turns. Theme polish belongs in `ui/release-styles.ts`; preserve keyboard focus, open sections and drafts during snapshots.
+
+## 1.1 regression boundaries
+
+`core/run-preview.ts` owns host-bound review receipts; `core/account-health.ts` labels observed readiness, not guessed capacity. `core/run-observation.ts` supplies shared status, and `core/public-progress.ts` accepts only public adapter events. `core/restart-recovery.ts` preserves completed work and saved budgets. `storage/maintenance.ts` can only remove previewed disposable workspace-storage files; protect active and newly referenced data. `core/session-export.ts` allowlists public evidence.
+
+Run `npm run preview`, `npx playwright install chromium`, `npm run test:readiness` and `npm run test:ui` for changed preparation/interaction behavior. CI pins Playwright and checks English/Vietnamese, dark/light, keyboard confirmation, observer details and narrow layouts using fixtures. Native `scripts/smoke.mjs` uses an isolated VS Code profile and a local fake API. Never use real provider credentials or paid model calls in CI.

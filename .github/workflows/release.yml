@@ -37,6 +37,13 @@ jobs:
       - run: npm run check
       - run: npm test
       - run: npm run releases:verify
+      - run: npx playwright install --with-deps chromium
+      - run: npm run preview
+      - name: Verify release interaction paths
+        run: |
+          npm run test:readiness
+          node scripts/live-detail-smoke.mjs
+          npm run test:ui
       - run: npm run package
       - name: Match version and prepare assets
         run: npm run release:stage -- "$RELEASE_TAG"

@@ -28,3 +28,21 @@ jobs:
         with:
           name: relaycrew-${{ matrix.os }}
           path: '*.vsix'
+  browser-readiness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run preview
+      - name: Check first run, live details and keyboard workflows
+        run: |
+          npm run test:readiness
+          node scripts/live-detail-smoke.mjs
+          node scripts/preparation-live-smoke.mjs
+          node scripts/canvas-navigation-smoke.mjs
+          npm run test:ui

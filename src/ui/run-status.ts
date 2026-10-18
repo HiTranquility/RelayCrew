@@ -1,0 +1,19 @@
+import type {Job,Profile} from '../core/domain';
+import {observeRun} from '../core/run-observation';
+import {translator,statusLabel,type Language} from '../core/i18n';
+import {escapeHtml as h} from './html';
+
+/** Same observation model for Tasks, Live and Map; no inferred completion or ETA. */
+export function runStatusPanel(job:Job,profiles:Profile[],language:Language):string {
+  const info=observeRun(job),t=translator(language),tr=(s:string)=>h(t(s));
+  const profile=profiles.find(p=>p.id===(info.step?.profileId??(info.step?job.roles[info.step.role]:undefined)));
+  return `<details class="run-status" data-detail="${h(job.id)}:run-status" data-observed-status="${h(info.status)}"><summary><span class="status-pill" data-status="${h(info.status)}">${h(statusLabel(info.status,language))}</span><strong>${tr(info.next)}</strong>${info.active?`<span>${h(profile?.label??info.active.profileId??'')} · ${h(info.active.title)}</span>`:''}<small>${info.children} ${tr('active child agents')} · ${info.changedFiles} ${tr('observed changed files')}</small></summary><dl><dt>${tr('Execution folder')}</dt><dd><code>${h(info.folder)}</code></dd><dt>${tr('Latest public event')}</dt><dd>${info.latestAt?`<time datetime="${h(info.latestAt)}">${h(new Date(info.latestAt).toLocaleString(language==='vi'?'vi-VN':'en-GB'))}</time>`:tr('No public event received yet')}</dd><dt>${tr('File tracking')}</dt><dd>${tr(info.tracking)}</dd><dt>${tr('Step attempts')}</dt><dd>${info.attempts} · ${tr('Provider-limit retries')}: ${info.retries} / 3</dd></dl>${info.tool?`<details data-detail="${h(job.id)}:latest-command"><summary>${tr('Latest public command')}</summary><pre>${h(info.tool.slice(-3000))}</pre></details>`:''}${job.restartRecovery?`<p class="warning">${tr('Recovered after interruption. Inspect existing changes before an explicit retry; completed work and saved budgets remain intact.')}</p>`:''}${job.status==='interrupted'?`<label class="check-row"><input type="checkbox" data-recovery-inspected>${tr('I inspected existing file changes and want to retry unfinished work.')}</label><button type="button" data-recovery-retry="${h(job.id)}" disabled>${tr('Queue unfinished step again')}</button>`:''}<p class="muted">${tr('One task per workspace runner; Live tabs are observers.')} ${tr('No new public event does not prove a process is stuck.')}</p></details>`;
+}
+export const runStatusStyles=String.raw`
+.agent-map-session.is-map-expanded>.run-status{display:none}.run-status{margin:10px 12px;padding:10px;border:1px solid var(--rc-border);border-radius:7px;background:var(--rc-soft);min-width:0}.run-status>summary{display:flex;align-items:center;gap:9px;flex-wrap:wrap;cursor:pointer;font-size:12px}.run-status>summary>strong{font-weight:600}.run-status>summary>span:not(.status-pill){overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:45ch}.run-status summary small{color:var(--rc-muted);margin-left:auto}.run-status dl{display:grid;grid-template-columns:160px minmax(0,1fr);gap:8px;font-size:12px}.run-status dd{margin:0;overflow-wrap:anywhere}.run-status dt,.run-status .muted{color:var(--rc-muted)}.run-status pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:180px;overflow:auto}.run-status>p{font-size:12px;line-height:1.6}@media(max-width:600px){.run-status dl{grid-template-columns:1fr}.run-status summary small{margin-left:0}}
+`;
+
+export const runStatusClient=String.raw`
+document.addEventListener('change',e=>{if(!e.target.matches('[data-recovery-inspected]'))return;const section=e.target.closest('.run-status');section.querySelector('[data-recovery-retry]').disabled=!e.target.checked;});
+document.addEventListener('click',e=>{const button=e.target.closest('[data-recovery-retry]');if(!button)return;const inspected=button.closest('.run-status').querySelector('[data-recovery-inspected]').checked;if(!inspected)return;vscode.postMessage({action:'retryInterrupted',id:button.dataset.recoveryRetry,inspected:true});});
+`;

@@ -156,3 +156,7 @@ Một số CLI Codex lưu hoạt động con trong phiên nhưng không gửi co
 Popup giữ tab, vị trí cuộn và báo cáo đang mở khi có snapshot mới. **Tạm dừng xem** chỉ giữ khung quan sát, tác vụ vẫn chạy. **Tiếp tục xem** nhận dữ liệu mới nhất. **Kết quả / Đầu vào / Hoạt động** tách câu trả lời, giao việc chính xác và tiến trình/công cụ công khai. Độ chi tiết nhánh con tùy dữ liệu CLI ghi nhận; không hiển thị suy luận riêng.
 
 Code có nhãn ngôn ngữ/file, số dòng và nút sao chép nguyên code, không kèm số dòng. Báo cáo dài có nút **Đọc toàn bộ báo cáo**; quyết định và vấn đề audit được trình bày riêng. Bản phản hồi CLI gốc và báo cáo tải xuống được giữ nguyên.
+
+## Phiên bản 1.1: xem lại và phục hồi
+
+Gửi Team task từ ô nhập sẽ mở bản xem lại ngay tại đó. Kiểm tra thư mục/quyền, tài khoản, tiêu chí và ngân sách rồi Xác nhận và đưa vào hàng đợi. Nếu nội dung hoặc cấu hình thực thi đổi, phải xem lại. Chat và trả lời câu hỏi vẫn gửi trực tiếp. Sau khi host gián đoạn, kiểm tra file, chủ động đưa bước chưa xong vào hàng đợi và tiếp tục hàng đợi đã tạm dừng. Setup → Cài đặt nâng cao có phần xem trước dữ liệu dọn; chỉ xác nhận sau khi đọc danh sách. Xem [hành vi thực tế](docs/CURRENT-BEHAVIOR.md) để biết kết nối và giới hạn đang hỗ trợ.

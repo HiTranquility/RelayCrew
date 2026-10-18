@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.1.0 — 2026-10-18
+
+- Inline host-bound review before composer team tasks: saved account/model policy, folders/permissions, Definition of Done, workers, branch scope and review/time budgets. A changed draft or execution configuration requires a fresh confirmation.
+- Shared recorded status across Tasks, Live and Map, adapter-neutral public progress with step/account correlation, and separate mentioned files versus observed changes.
+- Account cards distinguish configuration, installed connection, fresh verification and unknown/stale quota; native shared-login limitations remain explicit.
+- Interrupted hosts pause queue, daily and backlog dispatch. Explicit inspected retry preserves completed work, permissions and saved review/provider retry budgets.
+- Portable public session JSON export and richer Markdown evidence reports; exclude account configuration, internal fingerprints and private reasoning.
+- Workspace-local storage inspection and expiring confirmed retention previews; preserve referenced data, current state, source snapshots, secrets and repository files.
+- Updated current-behavior/support matrix, bilingual guides and release-readiness regression checks. Includes the previously unreleased interactive observer, layout, child metadata and report-formatting improvements below.
+
+
 ## 1.0.2-preview.5 — Unreleased
 
 - Live execution journey and per-agent public activity show the recorded stage, workspace, mentioned files, latest progress and commands without attributing unobserved file edits.

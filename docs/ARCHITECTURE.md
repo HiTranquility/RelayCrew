@@ -1,5 +1,7 @@
 # RelayCrew architecture
 
+For current supported behavior and limits, read [RelayCrew 1.1](CURRENT-BEHAVIOR.md). Version-labelled sections below describe historical changes and are not a complete current support matrix.
+
 ## Live console boundary (0.5)
 
 `core/console-input.ts` parses bounded application commands, never shell commands. `host/console-controller.ts` validates workspace/session scope, persists task/reply IDs, checks owner-question versions, and calls the existing job factory and engine. Pause/resume set explicit states.

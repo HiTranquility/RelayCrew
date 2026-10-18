@@ -150,3 +150,7 @@ Some Codex CLI versions persist child activity without emitting collaboration it
 The popup keeps your tab, scroll and expanded reports during snapshots. **Pause view** freezes this observer only; the task continues. **Resume view** loads the latest data. **Result / Input / Activity** separate the answer, exact assignment and public progress/tools. Native child detail availability depends on what the CLI records. Private reasoning is never displayed.
 
 Code blocks have language/file captions, line numbers and a copy button that excludes line numbers. Long reports expand with **Read the full report**; audit findings and decisions have their own presentation. Original CLI responses and downloaded reports remain unchanged.
+
+## Version 1.1: review and recovery
+
+A composer Team task opens an inline run review first. Check folders/permissions, accounts, criteria and budgets, then Confirm and queue task. A changed draft or execution configuration requires another review. Chat and owner replies keep their direct flow. After host interruption, inspect changes, queue the unfinished step explicitly, and resume the paused queue. In Setup → Advanced settings, inspect saved data before confirming retention cleanup. See [current behavior](docs/CURRENT-BEHAVIOR.md) for supported connections and actual limits.
