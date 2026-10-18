@@ -1,0 +1,11 @@
+/** Browser-only palette. VS Code continues to supply its own theme tokens. */
+export const demoPalette=String.raw`
+[hidden]{display:none!important}
+:root{--demo-bg:#121923;--demo-surface:#1b2533;--demo-layer:#243246;--demo-border:#465970;--demo-text:#edf3fc;--demo-muted:#b4c4db;--demo-accent:#80c6ff;--demo-button:#14649e;--demo-warn-bg:#302b20;--demo-warn:#f5cf7d;--demo-good:#8bd8b4;--demo-danger:#ff9ba9;--demo-shadow:0 8px 28px #0003}
+:root[data-demo-theme=light]{color-scheme:light;--demo-bg:#f4f7fb;--demo-surface:#ffffff;--demo-layer:#eaf0f7;--demo-border:#b3c2d5;--demo-text:#203047;--demo-muted:#4b5d76;--demo-accent:#095f99;--demo-button:#0e6199;--demo-warn-bg:#fff5dd;--demo-warn:#7a5100;--demo-good:#236d4e;--demo-danger:#ad2740;--demo-shadow:0 8px 28px #2341661a}
+:root{--vscode-editor-background:var(--demo-bg);--vscode-sideBar-background:var(--demo-surface);--vscode-foreground:var(--demo-text);--vscode-descriptionForeground:var(--demo-muted);--vscode-input-background:var(--demo-layer);--vscode-input-foreground:var(--demo-text);--vscode-input-border:var(--demo-border);--vscode-panel-border:var(--demo-border);--vscode-focusBorder:var(--demo-accent);--vscode-textLink-foreground:var(--demo-accent);--vscode-button-background:var(--demo-button);--vscode-button-foreground:#fff;--vscode-button-secondaryBackground:var(--demo-layer);--vscode-button-secondaryForeground:var(--demo-text);--vscode-badge-background:var(--demo-layer);--vscode-badge-foreground:var(--demo-text);--vscode-editorWarning-foreground:var(--demo-warn);--vscode-testing-iconPassed:var(--demo-good);--vscode-errorForeground:var(--demo-danger)}
+`;
+export const demoThemeClient=String.raw`
+function applyDemoTheme(){const selected=localStorage.getItem('relaycrew-demo-theme')||'dark',value=selected==='system'?(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'):selected;document.documentElement.dataset.demoTheme=value==='light'?'light':'dark';const field=document.getElementById('theme');if(field)field.value=['dark','light','system'].includes(selected)?selected:'dark';}
+window.addEventListener('storage',e=>{if(e.key==='relaycrew-demo-theme')applyDemoTheme();});matchMedia('(prefers-color-scheme:dark)').addEventListener('change',applyDemoTheme);applyDemoTheme();
+`;

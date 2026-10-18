@@ -2,7 +2,7 @@
   "name": "ai-team-workbench",
   "displayName": "RelayCrew",
   "description": "%description%",
-  "version": "1.0.2-preview.2",
+  "version": "1.0.2-preview.3",
   "publisher": "local-ai-team",
   "license": "MIT",
   "engines": {

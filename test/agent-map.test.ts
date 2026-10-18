@@ -43,3 +43,7 @@ test('public stream observer is distinct from a role named Dispatcher; relayed h
  let html=mapCommunication(job,agentNodes(job),'en');assert.match(html,/<b>Dispatcher<\/b><i aria-hidden="true">→<\/i><b>Observer<\/b>/);
  job.timeline.push({at:new Date().toISOString(),from:'builder:dev',to:'auditor:audit',kind:'handoff',text:'Relayed assignment'});html=mapCommunication(job,agentNodes(job),'en');assert.match(html,/<b>Dispatcher<\/b><i aria-hidden="true">→<\/i><b>Planner<\/b>/);assert.match(html,/Handoff/);
 });
+
+test('a later manager recheck depends on the previous manager report rather than reversing their order',()=>{
+ const job=newJob('Review and recheck','.',roles,['builder','auditor','lead']);job.steps.push({role:'auditor',title:'Initial audit',prompt:'Review',status:'done'},{role:'lead',title:'Plan approval',prompt:'Assess plan',status:'done',profileId:'manager'},{role:'lead',title:'Post-change recheck',prompt:'Verify changed UI',status:'pending',profileId:'dev'});const deps=mapDependencies(agentNodes(job));assert.deepEqual(deps['lead:primary:0'],['auditor:primary:0']);assert.deepEqual(deps['lead:primary:1'],['lead:primary:0']);
+});

@@ -6,7 +6,7 @@ import {statusLabel,translator,type Language} from '../core/i18n';
 import {escapeHtml as h} from './html';
 
 export function mapDependencies(nodes:AgentNode[]):Record<string,string[]>{
- const main=nodes.filter(n=>!n.coordinator&&!n.native),lead=main.find(n=>n.role==='lead'),support=nodes.filter(n=>n.coordinator),sequence=[...main.filter(n=>n!==lead),...support,...(lead?[lead]:[])],result:Record<string,string[]>={};
+ const main=nodes.filter(n=>!n.coordinator&&!n.native),lead=main.filter(n=>n.role==='lead').at(-1),support=nodes.filter(n=>n.coordinator),sequence=[...main.filter(n=>n!==lead),...support,...(lead?[lead]:[])],result:Record<string,string[]>={};
  sequence.forEach((node,i)=>{result[node.key]=i?[sequence[i-1].key]:[];if(node===lead&&support.length)result[node.key]=[...new Set([...result[node.key],...support.map(n=>n.key)])];});for(const child of nodes.filter(n=>n.native))result[child.key]=child.parentKey?[child.parentKey]:[];
  for(const node of sequence){const prior=result[node.key]?.[0];if(prior)result[node.key]=[...new Set([...result[node.key],...nodes.filter(n=>n.native&&n.parentKey===prior).map(n=>n.key)])];}
  return result;

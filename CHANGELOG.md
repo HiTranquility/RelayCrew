@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.2-preview.3 — Unreleased
+
+- Apply a shared control/card/dialog radius scale, clearer semantic states, larger map controls and visible keyboard focus while respecting the VS Code theme.
+- Keep large maps readable at 90% around the selected agent; explicit Fit remains available for an overview.
+- One owner composer in the embedded browser view; standalone Live keeps its own form without a sticky overlay. Secondary view/report actions move to More.
+- Browser dark/light/system palettes synchronize across map and Live panes; simulation labels use neutral color and owner questions retain the attention accent.
+- Read live local CLI recordings as an observer, retain the last complete snapshot during writes and hide unsupported real-run controls. No provider calls are launched by the observer.
+- Keep later manager rechecks after earlier reports in dependency order.
+
 ## 1.0.2-preview.2 — Unreleased
 
 - Interactive, token-free browser walkthrough: 2–6 sequential Executors, bounded illustrative children, parent/child handoffs and a blocking owner question. Pause, step, stop, configure and reply from either input.

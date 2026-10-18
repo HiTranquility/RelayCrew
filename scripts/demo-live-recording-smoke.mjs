@@ -1,0 +1,19 @@
+import assert from 'node:assert/strict';
+import {spawn} from 'node:child_process';
+import {mkdtemp,writeFile,readFile,rm} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import {join,isAbsolute,dirname,resolve,basename} from 'node:path';
+import {pathToFileURL} from 'node:url';
+const modulePath=process.env.RELAYCREW_PLAYWRIGHT_MODULE||'playwright';const {chromium}=await import(isAbsolute(modulePath)?pathToFileURL(modulePath).href:modulePath);
+const directory=await mkdtemp(join(tmpdir(),'relaycrew-recording-')),path=join(directory,'recording.json'),id='recording-fixture';
+const fixture={id,prompt:'FAKE TRANSPORT · observer regression only',cwd:process.cwd(),createdAt:new Date().toISOString(),readOnly:true,status:'running',flow:['builder','auditor','lead'],roles:{builder:'codex-main',auditor:'claude-main',worker:'antigravity-main',lead:'antigravity-main'},steps:[{role:'builder',title:'Recorded progress',prompt:'No provider call',status:'running',profileId:'codex-main',model:'test-only'}]};await writeFile(path,JSON.stringify(fixture));
+const child=spawn(process.execPath,['--import','tsx','scripts/demo-observer.ts','--port','0','--live-recording',path],{stdio:['ignore','pipe','pipe'],windowsHide:true});let logs='';child.stderr.on('data',chunk=>logs+=chunk);
+const url=await new Promise((accept,reject)=>{const timeout=setTimeout(()=>reject(new Error(logs||'Observer did not start')),12000);child.stdout.on('data',chunk=>{const m=String(chunk).match(/DEMO (http:\/\/127\.0\.0\.1:\d+)/);if(m){clearTimeout(timeout);accept(m[1]);}});child.on('exit',code=>{clearTimeout(timeout);reject(new Error('Observer exit '+code+' '+logs));});});
+const browser=await chromium.launch({headless:true,...(process.env.RELAYCREW_BROWSER_EXECUTABLE?{executablePath:process.env.RELAYCREW_BROWSER_EXECUTABLE}:{})});
+try{
+ const context=await browser.newContext(),page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto(url);await page.locator('#kind').filter({hasText:'CLI THẬT · đang theo dõi'}).waitFor();assert.equal(await page.locator('#stop').isDisabled(),true);assert.equal((await(await page.request.get(url+'/state')).json()).activeId,id);
+ const html=await(await page.request.get(url)).text(),key=html.match(/const key="([a-f0-9]+)"/)[1],denied=await page.request.post(url+'/action',{headers:{'X-Demo-Key':key},data:{action:'stop',id}});assert.equal(denied.status(),400);assert.equal(JSON.parse(await readFile(path,'utf8')).status,'running');
+ await writeFile(path,'{"partial":');await page.waitForTimeout(1400);assert.equal((await(await page.request.get(url+'/state')).json()).jobs.find(j=>j.id===id).status,'running');
+ fixture.status='waiting_owner';fixture.ownerQuestion='Question from the recorded runner';fixture.steps[0].status='waiting_owner';await writeFile(path,JSON.stringify(fixture));await page.locator('#question-text').filter({hasText:fixture.ownerQuestion}).waitFor();assert.equal(await page.locator('#reply-form').isVisible(),false);assert.equal(await page.frameLocator('#live').locator('#live-reply-form').isVisible(),false);assert.equal(await page.frameLocator('#live').locator('[data-live-reply]').isVisible(),false);
+ fixture.status='completed';fixture.ownerQuestion=undefined;fixture.steps[0].status='done';fixture.steps[0].response='Recorded final evidence';await writeFile(path,JSON.stringify(fixture));await page.locator('#status').filter({hasText:'Đã hoàn tất'}).waitFor();assert.deepEqual(errors,[]);console.log('Live recording: current snapshots, partial-file recovery, real owner gate displayed read-only, no fake stop/reply controls and completion passed.');
+}finally{await browser.close();child.kill();if(dirname(resolve(directory))!==resolve(tmpdir())||!basename(directory).startsWith('relaycrew-recording-'))throw new Error('Refusing unexpected cleanup path.');await rm(directory,{recursive:true,force:true});}
