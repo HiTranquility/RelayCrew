@@ -1,0 +1,23 @@
+{
+  "version": "1.0.1",
+  "extensionId": "local-ai-team.ai-team-workbench",
+  "displayName": "RelayCrew",
+  "artifact": {
+    "file": "relaycrew-1.0.1.vsix",
+    "sha256": "e810450aaafb8a0486cc7359513e24b0dad393349b315a28e00c9afdb7ba3cf7",
+    "bytes": 961681
+  },
+  "source": {
+    "file": "relaycrew-1.0.1-source.zip",
+    "sha256": "b6009fd6a8a77eb81ae5e250582ddd24c0e5361a710ffa1f099a730ff4a4aad7",
+    "bytes": 608958,
+    "kind": "repository-source-snapshot",
+    "commit": "c8e372bdf8ef1adbb3fa694adcea50394c4da851",
+    "includesTests": true,
+    "includesLockfile": true,
+    "includesGitHistory": false,
+    "includesReleaseCatalog": false,
+    "files": 226
+  },
+  "provenance": "VSIX and tracked source snapshot from c8e372bdf8ef1adbb3fa694adcea50394c4da851. Type checking, 175 tests, bilingual light/dark/narrow UI, account/recovery/preparation/live/canvas interactions and native read-only account probes validated. Personal state, auth data, CLI copies and local previews excluded."
+}
