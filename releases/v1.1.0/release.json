@@ -1,0 +1,23 @@
+{
+  "version": "1.1.0",
+  "extensionId": "local-ai-team.ai-team-workbench",
+  "displayName": "RelayCrew",
+  "artifact": {
+    "file": "relaycrew-1.1.0.vsix",
+    "sha256": "daab89dd9cecbe413dda66f72bb3769186694a1655fbce4ddb57916efb3f6e87",
+    "bytes": 1059428
+  },
+  "source": {
+    "file": "relaycrew-1.1.0-source.zip",
+    "sha256": "19b05bb0a68d764911eda49da564cd786788e887777a813cc087451e44ce2b19",
+    "bytes": 715133,
+    "kind": "repository-source-snapshot",
+    "commit": "701ed02519fe3b63166a7dfc238a008894aeb004",
+    "includesTests": true,
+    "includesLockfile": true,
+    "includesGitHistory": false,
+    "includesReleaseCatalog": false,
+    "files": 271
+  },
+  "provenance": "Approved source 701ed02519fe3b63166a7dfc238a008894aeb004; CI https://github.com/HiTranquility/RelayCrew/actions/runs/39131940156 passed Windows/Linux unit/package checks and Chromium browser readiness. 212 automated tests, local bilingual dark/light/narrow observer workflows and isolated native VS Code smoke with a local fake API passed. Windows canonical path handling corrected before tagging. Initial untagged candidate retained separately without replacing bytes. Personal data and credentials excluded."
+}
